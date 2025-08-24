@@ -1,0 +1,155 @@
+{
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build",
+    "devPath": "http://localhost:1420",
+    "distDir": "../dist",
+    "withGlobalTauri": false
+  },
+  "package": {
+    "productName": "Agies Password Manager",
+    "version": "1.0.0"
+  },
+  "tauri": {
+    "allowlist": {
+      "all": false,
+      "shell": {
+        "all": false,
+        "open": true
+      },
+      "dialog": {
+        "all": true
+      },
+      "fs": {
+        "all": true,
+        "scope": ["$APPDATA/*", "$APPDATA/agies/*", "$APPDATA/agies/**/*"]
+      },
+      "store": {
+        "all": true
+      },
+      "notification": {
+        "all": true
+      },
+      "globalShortcut": {
+        "all": true
+      },
+      "window": {
+        "all": true
+      },
+      "app": {
+        "all": true
+      },
+      "path": {
+        "all": true
+      },
+      "os": {
+        "all": true
+      },
+      "crypto": {
+        "all": true
+      }
+    },
+    "bundle": {
+      "active": true,
+      "targets": "all",
+      "identifier": "com.agies.passwordmanager",
+      "icon": [
+        "icons/32x32.png",
+        "icons/128x128.png",
+        "icons/128x128@2x.png",
+        "icons/icon.icns",
+        "icons/icon.ico"
+      ],
+      "resources": [],
+      "externalBin": [],
+      "copyright": "",
+      "category": "Security",
+      "shortDescription": "Enterprise-grade password manager with advanced security features",
+      "longDescription": "Agies Password Manager provides military-grade encryption, vault sharing, team management, and cross-platform synchronization for enterprise security needs.",
+      "deb": {
+        "depends": [],
+        "useBootstrapper": false
+      },
+      "macOS": {
+        "depends": [],
+        "exceptionDomain": "",
+        "frameworks": [],
+        "providerShortName": "",
+        "signingIdentity": null,
+        "hardenedRuntime": true,
+        "entitlements": null,
+        "extendInfo": {
+          "NSAppTransportSecurity": {
+            "NSAllowsArbitraryLoads": true
+          }
+        }
+      },
+      "windows": {
+        "certificateThumbprint": null,
+        "digestAlgorithm": "sha256",
+        "timestampUrl": "",
+        "wix": {
+          "language": ["en-US"],
+          "template": "installer.wxs",
+          "componentRefs": [],
+          "license": "LICENSE.rtf",
+          "bannerPath": "banner.png",
+          "dialogImagePath": "dialog.png"
+        }
+      },
+      "updater": {
+        "active": true,
+        "endpoints": [
+          "https://updates.agies.com/desktop/{{target}}/{{current_version}}"
+        ],
+        "dialog": true,
+        "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDhGRDg4QjY4N0Y3NjcyNzQKUlhZSDg4QjY4N0Y3NjcyNzQ6IHVudHJ1c3RlZCBjb21tZW50OiBtaW5pc2lnbiBwdWJsaWMga2V5OiA4RkQ4OEI2ODdGNzY3Mjc0Cg=="
+      }
+    },
+    "security": {
+      "csp": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https:; font-src 'self' data:; object-src 'none'; media-src 'self'; frame-src 'none';"
+    },
+    "windows": [
+      {
+        "fullscreen": false,
+        "resizable": true,
+        "title": "Agies Password Manager",
+        "width": 1200,
+        "height": 800,
+        "minWidth": 800,
+        "minHeight": 600,
+        "center": true,
+        "decorations": true,
+        "transparent": false,
+        "alwaysOnTop": false,
+        "visible": true,
+        "closable": true,
+        "minimizable": true,
+        "maximizable": true,
+        "skipTaskbar": false,
+        "fileDropEnabled": false,
+        "label": "main"
+      }
+    ],
+    "plugins": {
+      "shell": {
+        "open": true
+      },
+      "dialog": {
+        "all": true
+      },
+      "fs": {
+        "scope": ["$APPDATA/*", "$APPDATA/agies/*", "$APPDATA/agies/**/*"]
+      },
+      "store": {
+        "all": true
+      },
+      "notification": {
+        "all": true
+      },
+      "globalShortcut": {
+        "all": true
+      }
+    }
+  }
+}

@@ -1,0 +1,309 @@
+/* 🎨 Agies Password Manager - Overlay Styles */
+/* Beautiful, modern overlays that integrate seamlessly with any website */
+
+.agies-autofill-btn {
+    position: absolute !important;
+    z-index: 2147483647 !important;
+    pointer-events: auto !important;
+}
+
+.agies-fill-btn {
+    width: 32px !important;
+    height: 32px !important;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border: none !important;
+    border-radius: 50% !important;
+    color: white !important;
+    font-size: 16px !important;
+    cursor: pointer !important;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    backdrop-filter: blur(10px) !important;
+    border: 2px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.agies-fill-btn:hover {
+    transform: translateY(-2px) scale(1.05) !important;
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+    background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%) !important;
+}
+
+.agies-fill-btn:active {
+    transform: translateY(0) scale(0.95) !important;
+    transition: all 0.1s !important;
+}
+
+.agies-password-dropdown {
+    position: fixed !important;
+    z-index: 2147483647 !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+    line-height: 1.5 !important;
+    color: #1a202c !important;
+    animation: agies-fadeInUp 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.agies-smart-overlay {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+    line-height: 1.5 !important;
+    color: #1a202c !important;
+}
+
+.agies-notification {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    z-index: 2147483647 !important;
+    background: white !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+    padding: 16px 20px !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+    font-size: 14px !important;
+    color: #1a202c !important;
+    animation: agies-slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    max-width: 320px !important;
+    backdrop-filter: blur(10px) !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+}
+
+.agies-notification.success {
+    border-left: 4px solid #10b981 !important;
+    background: linear-gradient(90deg, rgba(16, 185, 129, 0.05), rgba(255, 255, 255, 0.95)) !important;
+}
+
+.agies-notification.error {
+    border-left: 4px solid #ef4444 !important;
+    background: linear-gradient(90deg, rgba(239, 68, 68, 0.05), rgba(255, 255, 255, 0.95)) !important;
+}
+
+.agies-notification.info {
+    border-left: 4px solid #3b82f6 !important;
+    background: linear-gradient(90deg, rgba(59, 130, 246, 0.05), rgba(255, 255, 255, 0.95)) !important;
+}
+
+.agies-save-prompt {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    z-index: 2147483647 !important;
+    background: white !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15) !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+    width: 340px !important;
+    animation: agies-slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    backdrop-filter: blur(10px) !important;
+    background: rgba(255, 255, 255, 0.98) !important;
+}
+
+.agies-input-indicator {
+    position: absolute !important;
+    top: 50% !important;
+    right: 8px !important;
+    transform: translateY(-50%) !important;
+    width: 20px !important;
+    height: 20px !important;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 12px !important;
+    color: white !important;
+    pointer-events: none !important;
+    z-index: 2147483646 !important;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3) !important;
+}
+
+/* Animations */
+@keyframes agies-fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes agies-slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes agies-slideOutRight {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+}
+
+@keyframes agies-pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.05);
+    }
+}
+
+@keyframes agies-bounce {
+    0%, 20%, 53%, 80%, 100% {
+        transform: translate3d(0, 0, 0);
+    }
+    40%, 43% {
+        transform: translate3d(0, -8px, 0);
+    }
+    70% {
+        transform: translate3d(0, -4px, 0);
+    }
+    90% {
+        transform: translate3d(0, -2px, 0);
+    }
+}
+
+/* Form field highlighting */
+input:focus.agies-detected-field {
+    outline: 2px solid #667eea !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+}
+
+/* Password strength indicator */
+.agies-strength-indicator {
+    position: absolute !important;
+    bottom: -25px !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 3px !important;
+    background: #e2e8f0 !important;
+    border-radius: 2px !important;
+    overflow: hidden !important;
+}
+
+.agies-strength-bar {
+    height: 100% !important;
+    border-radius: 2px !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.agies-strength-weak {
+    background: linear-gradient(90deg, #ef4444, #f87171) !important;
+    width: 25% !important;
+}
+
+.agies-strength-fair {
+    background: linear-gradient(90deg, #f59e0b, #fbbf24) !important;
+    width: 50% !important;
+}
+
+.agies-strength-good {
+    background: linear-gradient(90deg, #3b82f6, #60a5fa) !important;
+    width: 75% !important;
+}
+
+.agies-strength-strong {
+    background: linear-gradient(90deg, #10b981, #34d399) !important;
+    width: 100% !important;
+}
+
+/* Tooltip styles */
+.agies-tooltip {
+    position: absolute !important;
+    z-index: 2147483647 !important;
+    background: rgba(0, 0, 0, 0.9) !important;
+    color: white !important;
+    padding: 8px 12px !important;
+    border-radius: 6px !important;
+    font-size: 12px !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    white-space: nowrap !important;
+    pointer-events: none !important;
+    animation: agies-fadeInUp 0.2s ease !important;
+}
+
+.agies-tooltip::after {
+    content: '' !important;
+    position: absolute !important;
+    top: 100% !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 0 !important;
+    height: 0 !important;
+    border: 5px solid transparent !important;
+    border-top-color: rgba(0, 0, 0, 0.9) !important;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .agies-password-dropdown,
+    .agies-save-prompt {
+        background: rgba(31, 41, 55, 0.98) !important;
+        border-color: #374151 !important;
+        color: #f9fafb !important;
+    }
+    
+    .agies-notification {
+        background: rgba(31, 41, 55, 0.95) !important;
+        border-color: #374151 !important;
+        color: #f9fafb !important;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .agies-fill-btn {
+        border: 3px solid #000 !important;
+        background: #0066cc !important;
+    }
+    
+    .agies-password-dropdown,
+    .agies-save-prompt {
+        border: 2px solid #000 !important;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .agies-fill-btn,
+    .agies-password-dropdown,
+    .agies-notification,
+    .agies-save-prompt {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* Focus indicators for accessibility */
+.agies-fill-btn:focus-visible {
+    outline: 2px solid #667eea !important;
+    outline-offset: 2px !important;
+}
+
+/* Ensure buttons work with keyboard navigation */
+.agies-password-option:focus,
+.agies-save-yes:focus,
+.agies-save-not-now:focus,
+.agies-save-never:focus {
+    outline: 2px solid #667eea !important;
+    outline-offset: 2px !important;
+    background: rgba(102, 126, 234, 0.1) !important;
+}

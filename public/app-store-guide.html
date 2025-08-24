@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Store Submission Guide - Agies Password Manager</title>
+    <meta name="description" content="Complete guide for submitting Agies Password Manager to iOS App Store and Google Play Store. Step-by-step instructions, requirements, and best practices.">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .watermark {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 8px 16px;
+            border-radius: 20px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 12px;
+            font-weight: 500;
+            z-index: 1000;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.3rem;
+            opacity: 0.9;
+        }
+
+        .guide-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .section-content {
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+
+        .step-list {
+            list-style: none;
+            margin: 20px 0;
+        }
+
+        .step-list li {
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .step-list li:last-child {
+            border-bottom: none;
+        }
+
+        .step-number {
+            background: #6366F1;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .step-content h4 {
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            color: #FFD700;
+        }
+
+        .step-content p {
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .step-content ul {
+            list-style: disc;
+            margin-left: 20px;
+            opacity: 0.8;
+        }
+
+        .checklist {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .checklist h4 {
+            color: #10B981;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .checklist ul {
+            list-style: none;
+        }
+
+        .checklist li {
+            padding: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .checklist li::before {
+            content: '✅';
+            color: #10B981;
+        }
+
+        .warning-box {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .warning-box h4 {
+            color: #FCA5A5;
+            margin-bottom: 10px;
+        }
+
+        .warning-box p {
+            opacity: 0.9;
+        }
+
+        .info-box {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .info-box h4 {
+            color: #93C5FD;
+            margin-bottom: 10px;
+        }
+
+        .info-box p {
+            opacity: 0.9;
+        }
+
+        .store-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .store-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 30px;
+        }
+
+        .store-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .store-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #FFD700;
+        }
+
+        .store-requirements {
+            list-style: none;
+            margin: 20px 0;
+        }
+
+        .store-requirements li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .store-requirements li:last-child {
+            border-bottom: none;
+        }
+
+        .requirement-icon {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .download-section {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .download-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #10B981;
+        }
+
+        .download-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .download-btn {
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .download-btn-primary {
+            background: linear-gradient(45deg, #FF6B35, #F7931E);
+            color: white;
+            box-shadow: 0 10px 25px rgba(255, 107, 53, 0.3);
+        }
+
+        .download-btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        .timeline {
+            margin: 30px 0;
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            border-left: 4px solid #10B981;
+        }
+
+        .timeline-date {
+            font-weight: 700;
+            color: #10B981;
+            min-width: 120px;
+            flex-shrink: 0;
+        }
+
+        .timeline-content h4 {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .timeline-content p {
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .store-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .download-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="watermark">
+        Monish Reddy
+    </div>
+
+    <a href="/" class="back-btn" style="position: fixed; top: 20px; left: 20px; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); color: white; padding: 12px 20px; border-radius: 25px; cursor: pointer; transition: all 0.3s ease; font-weight: 500; text-decoration: none; z-index: 1000;">← Back to Home</a>
+
+    <div class="container">
+        <header class="header">
+            <h1>📱 App Store Submission Guide</h1>
+            <p>Complete guide for submitting Agies Password Manager to iOS App Store and Google Play Store</p>
+        </header>
+
+        <!-- Overview Section -->
+        <div class="guide-section">
+            <h2 class="section-title">
+                <span>🎯</span>
+                Overview
+            </h2>
+            <div class="section-content">
+                <p>Agies Password Manager mobile apps are ready for submission to both iOS App Store and Google Play Store. This guide provides step-by-step instructions for successful app store submissions.</p>
+                
+                <div class="checklist">
+                    <h4>✅ Apps Ready for Submission</h4>
+                    <ul>
+                        <li>iOS App (React Native) - Built and tested</li>
+                        <li>Android App (React Native) - Built and tested</li>
+                        <li>App icons and screenshots prepared</li>
+                        <li>App descriptions and metadata ready</li>
+                        <li>Privacy policy and terms of service</li>
+                        <li>App store developer accounts configured</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- iOS App Store Submission -->
+        <div class="guide-section">
+            <h2 class="section-title">
+                <span>🍎</span>
+                iOS App Store Submission
+            </h2>
+            <div class="section-content">
+                <p>Submit Agies Password Manager to the iOS App Store for iPhone and iPad users.</p>
+                
+                <ol class="step-list">
+                    <li>
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>Apple Developer Account Setup</h4>
+                            <p>Ensure your Apple Developer account is active and configured for app distribution.</p>
+                            <ul>
+                                <li>Annual fee: $99/year</li>
+                                <li>App Store Connect access enabled</li>
+                                <li>Development and distribution certificates</li>
+                                <li>Provisioning profiles configured</li>
+                            </ul>
+                        </div>
+                    </li>
+                    
+                    <li>
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>App Store Connect Configuration</h4>
+                            <p>Create and configure your app in App Store Connect.</p>
+                            <ul>
+                                <li>Create new app with bundle ID</li>
+                                <li>Set app name: "Agies Password Manager"</li>
+                                <li>Select category: "Productivity" or "Utilities"</li>
+                                <li>Set content rating: 4+ (No objectionable content)</li>
+                            </ul>
+                        </div>
+                    </li>
+                    
+                    <li>
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>App Metadata & Assets</h4>
+                            <p>Prepare all required app store assets and information.</p>
+                            <ul>
+                                <li>App icon (1024x1024 PNG)</li>
+                                <li>Screenshots for different device sizes</li>
+                                <li>App description and keywords</li>
+                                <li>Privacy policy URL</li>
+                                <li>Support URL</li>
+                            </ul>
+                        </div>
+                    </li>
+                    
+                    <li>
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h4>Build & Upload</h4>
+                            <p>Build the production app and upload to App Store Connect.</p>
+                            <ul>
+                                <li>Archive app in Xcode</li>
+                                <li>Upload to App Store Connect</li>
+                                <li>Set build version and build number</li>
+                                <li>Configure app capabilities and entitlements</li>
+                            </ul>
+                        </div>
+                    </li>
+                    
+                    <li>
+                        <div class="step-number">5</div>
+                        <div class="step-content">
+                            <h4>App Review Submission</h4>
+                            <p>Submit your app for Apple's review process.</p>
+                            <ul>
+                                <li>Complete app information</li>
+                                <li>Set pricing and availability</li>
+                                <li>Submit for review</li>
+                                <li>Typical review time: 1-7 days</li>
+                            </ul>
+                        </div>
+                    </li>
+                </ol>
+
+                <div class="warning-box">
+                    <h4>⚠️ Important iOS Requirements</h4>
+                    <p>Ensure your app complies with Apple's App Store Review Guidelines, especially regarding data privacy, security, and user experience standards.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Google Play Store Submission -->
+        <div class="guide-section">
+            <h2 class="section-title">
+                <span>🤖</span>
+                Google Play Store Submission
+            </h2>
+            <div class="section-content">
+                <p>Submit Agies Password Manager to the Google Play Store for Android users worldwide.</p>
+                
+                <ol class="step-list">
+                    <li>
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>Google Play Console Setup</h4>
+                            <p>Set up your Google Play Console account for app distribution.</p>
+                            <ul>
+                                <li>One-time fee: $25</li>
+                                <li>Developer account verification</li>
+                                <li>App signing key configured</li>
+                                <li>Content rating questionnaire completed</li>
+                            </ul>
+                        </div>
+                    </li>
+                    
+                    <li>
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>App Creation & Configuration</h4>
+                            <p>Create your app in Google Play Console with proper configuration.</p>
+                            <ul>
+                                <li>Create new app with package name</li>
+                                <li>Set app name: "Agies Password Manager"</li>
+                                <li>Select category: "Productivity" or "Tools"</li>
+                                <li>Set content rating: Everyone</li>
+                            </ul>
+                        </div>
+                    </li>
+                    
+                    <li>
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>App Bundle & Assets</h4>
+                            <p>Prepare and upload your Android App Bundle (AAB) and store assets.</p>
+                            <ul>
+                                <li>Generate signed AAB file</li>
+                                <li>App icon (512x512 PNG)</li>
+                                <li>Feature graphic (1024x500 PNG)</li>
+                                <li>Screenshots for different device sizes</li>
+                                <li>App description and keywords</li>
+                            </ul>
+                        </div>
+                    </li>
+                    
+                    <li>
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h4>Store Listing & Content</h4>
+                            <p>Complete your app's store listing with compelling content.</p>
+                            <ul>
+                                <li>App description (4000 characters max)</li>
+                                <li>Short description (80 characters max)</li>
+                                <li>Keywords and search terms</li>
+                                <li>Privacy policy URL</li>
+                                <li>Support contact information</li>
+                            </ul>
+                        </div>
+                    </li>
+                    
+                    <li>
+                        <div class="step-number">5</div>
+                        <div class="step-content">
+                            <h4>Release & Distribution</h4>
+                            <p>Release your app to users through Google Play Store.</p>
+                            <ul>
+                                <li>Set release track (production)</li>
+                                <li>Configure country availability</li>
+                                <li>Set pricing and distribution</li>
+                                <li>Publish to production</li>
+                            </ul>
+                        </div>
+                    </li>
+                </ol>
+
+                <div class="info-box">
+                    <h4>ℹ️ Google Play Benefits</h4>
+                    <p>Google Play Store offers faster review times (typically 1-3 days) and more flexible update policies compared to iOS App Store.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Store Requirements Comparison -->
+        <div class="guide-section">
+            <h2 class="section-title">
+                <span>📊</span>
+                Store Requirements Comparison
+            </h2>
+            <div class="section-content">
+                <p>Compare the requirements and processes for both app stores.</p>
+                
+                <div class="store-grid">
+                    <div class="store-card">
+                        <span class="store-icon">🍎</span>
+                        <h3 class="store-name">iOS App Store</h3>
+                        <ul class="store-requirements">
+                            <li><span class="requirement-icon">💰</span> Annual fee: $99</li>
+                            <li><span class="requirement-icon">⏰</span> Review time: 1-7 days</li>
+                            <li><span class="requirement-icon">📱</span> Devices: iPhone, iPad</li>
+                            <li><span class="requirement-icon">🔒</span> Strict review guidelines</li>
+                            <li><span class="requirement-icon">📈</span> Higher user spending</li>
+                            <li><span class="requirement-icon">🌍</span> 175+ countries</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="store-card">
+                        <span class="store-icon">🤖</span>
+                        <h3 class="store-name">Google Play Store</h3>
+                        <ul class="store-requirements">
+                            <li><span class="requirement-icon">💰</span> One-time fee: $25</li>
+                            <li><span class="requirement-icon">⏰</span> Review time: 1-3 days</li>
+                            <li><span class="requirement-icon">📱</span> Devices: Android phones/tablets</li>
+                            <li><span class="requirement-icon">🔓</span> More flexible guidelines</li>
+                            <li><span class="requirement-icon">👥</span> Larger user base</li>
+                            <li><span class="requirement-icon">🌍</span> 190+ countries</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submission Timeline -->
+        <div class="guide-section">
+            <h2 class="section-title">
+                <span>⏰</span>
+                Submission Timeline
+            </h2>
+            <div class="section-content">
+                <p>Typical timeline for app store submissions and approvals.</p>
+                
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-date">Day 1-2</div>
+                        <div class="timeline-content">
+                            <h4>Preparation & Setup</h4>
+                            <p>Configure developer accounts, prepare assets, and set up app store listings.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-date">Day 3-4</div>
+                        <div class="timeline-content">
+                            <h4>Build & Upload</h4>
+                            <p>Build production apps, generate app bundles, and upload to app stores.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-date">Day 5-7</div>
+                        <div class="timeline-content">
+                            <h4>App Review Process</h4>
+                            <p>Apple and Google review your apps for compliance and quality standards.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-date">Day 8-10</div>
+                        <div class="timeline-content">
+                            <h4>Approval & Publication</h4>
+                            <p>Apps approved and published to respective app stores for user download.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <h4>ℹ️ Timeline Notes</h4>
+                    <p>Actual timeline may vary based on app complexity, review queue, and any required changes. Plan for 2-3 weeks total from submission to publication.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Post-Submission Strategy -->
+        <div class="guide-section">
+            <h2 class="section-title">
+                <span>🚀</span>
+                Post-Submission Strategy
+            </h2>
+            <div class="section-content">
+                <p>Maximize your app's success after app store approval and publication.</p>
+                
+                <div class="checklist">
+                    <h4>✅ Launch Strategy Checklist</h4>
+                    <ul>
+                        <li>App store optimization (ASO) for better discoverability</li>
+                        <li>Social media marketing and announcements</li>
+                        <li>Press release and media outreach</li>
+                        <li>User feedback collection and monitoring</li>
+                        <li>Performance analytics and crash reporting</li>
+                        <li>Regular app updates and feature releases</li>
+                        <li>User support and community building</li>
+                        <li>Cross-promotion with web platform</li>
+                    </ul>
+                </div>
+
+                <div class="warning-box">
+                    <h4>⚠️ Important Considerations</h4>
+                    <p>Monitor app store reviews, respond to user feedback promptly, and maintain regular updates to keep users engaged and improve app store rankings.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Download Section -->
+        <div class="download-section">
+            <h3 class="download-title">📱 Ready to Submit Your Apps?</h3>
+            <p>Agies Password Manager mobile apps are fully built, tested, and ready for app store submission. Follow this guide for successful deployment.</p>
+            
+            <div class="download-buttons">
+                <a href="mobile-app/README.md" class="download-btn download-btn-primary" target="_blank">View Mobile App README</a>
+                <a href="mobile-app/package.json" class="download-btn download-btn-secondary" target="_blank">Check Dependencies</a>
+                <a href="mobile-app/App.js" class="download-btn download-btn-secondary" target="_blank">Review App Code</a>
+            </div>
+        </div>
+
+        <!-- Next Steps -->
+        <div class="guide-section">
+            <h2 class="section-title">
+                <span>🎯</span>
+                Next Steps
+            </h2>
+            <div class="section-content">
+                <ol class="step-list">
+                    <li>
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>Review App Store Guidelines</h4>
+                            <p>Familiarize yourself with Apple's App Store Review Guidelines and Google Play Developer Program Policies.</p>
+                        </div>
+                    </li>
+                    
+                    <li>
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>Prepare Developer Accounts</h4>
+                            <p>Set up and verify your Apple Developer and Google Play Console accounts.</p>
+                        </div>
+                    </li>
+                    
+                    <li>
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>Gather Required Assets</h4>
+                            <p>Prepare app icons, screenshots, descriptions, and other required assets.</p>
+                        </div>
+                    </li>
+                    
+                    <li>
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h4>Submit for Review</h4>
+                            <p>Follow the submission process for both app stores and monitor review progress.</p>
+                        </div>
+                    </li>
+                    
+                    <li>
+                        <div class="step-number">5</div>
+                        <div class="step-content">
+                            <h4>Launch & Market</h4>
+                            <p>After approval, implement your launch strategy and begin marketing your mobile apps.</p>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        console.log('📱 Agies App Store Submission Guide Ready');
+        console.log('🍎 iOS App Store submission instructions loaded');
+        console.log('🤖 Google Play Store submission instructions loaded');
+        console.log('🚀 Ready for mobile app deployment');
+    </script>
+</body>
+</html>

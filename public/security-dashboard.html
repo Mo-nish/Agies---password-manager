@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agies Security Dashboard - Chakravyuham Maze Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'agies-purple': '#6366f1',
+                        'agies-dark': '#1e1b4b',
+                        'agies-gold': '#fbbf24'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 min-h-screen text-white">
+    <!-- Header -->
+    <header class="bg-black/20 backdrop-blur-sm border-b border-purple-500/30">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                    <span class="text-white font-bold text-sm">A</span>
+                </div>
+                <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                    Agies Security Center
+                </h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <span class="text-purple-300">Welcome, User!</span>
+                <button onclick="window.location.href='/dashboard-working.html'" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg transition-colors">
+                    Back to Dashboard
+                </button>
+                <button onclick="window.location.href='/'" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors">
+                    Back to Home
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-8">
+        <!-- Security Status Overview -->
+        <div class="mb-8">
+            <h2 class="text-3xl font-bold mb-6 text-center">🛡️ Chakravyuham Maze Engine Status</h2>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-black/30 backdrop-blur-sm rounded-xl p-6 border border-purple-500/30">
+                    <div class="text-center">
+                        <div class="text-4xl mb-2">🔄</div>
+                        <div class="text-2xl font-bold text-green-400" id="maze-status">ACTIVE</div>
+                        <div class="text-purple-300">Maze Status</div>
+                    </div>
+                </div>
+                <div class="bg-black/30 backdrop-blur-sm rounded-xl p-6 border border-purple-500/30">
+                    <div class="text-center">
+                        <div class="text-4xl mb-2">🔒</div>
+                        <div class="text-2xl font-bold text-blue-400" id="security-level">FORTRESS</div>
+                        <div class="text-purple-300">Security Level</div>
+                    </div>
+                </div>
+                <div class="bg-black/30 backdrop-blur-sm rounded-xl p-6 border border-purple-500/30">
+                    <div class="text-center">
+                        <div class="text-4xl mb-2">🚨</div>
+                        <div class="text-2xl font-bold text-red-400" id="threats-detected">0</div>
+                        <div class="text-purple-300">Threats Detected</div>
+                    </div>
+                </div>
+                <div class="bg-black/30 backdrop-blur-sm rounded-xl p-6 border border-purple-500/30">
+                    <div class="text-center">
+                        <div class="text-4xl mb-2">🎭</div>
+                        <div class="text-2xl font-bold text-yellow-400" id="honeypots-active">5</div>
+                        <div class="text-purple-300">Honeypots Active</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Layers -->
+        <div class="mb-8">
+            <h3 class="text-2xl font-bold mb-6">🏗️ Security Layers</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="security-layers">
+                <!-- Layers will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- AI Guardians -->
+        <div class="mb-8">
+            <h3 class="text-2xl font-bold mb-6">🤖 AI Guardian System</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="ai-guardians">
+                <!-- Guardians will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Honeypot System -->
+        <div class="mb-8">
+            <h3 class="text-2xl font-bold mb-6">🍯 Honeypot System</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="honeypot-system">
+                <!-- Honeypots will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Decoy Vaults -->
+        <div class="mb-8">
+            <h3 class="text-2xl font-bold mb-6">🎭 Decoy Vault System</h3>
+            <div class="mb-4">
+                <button onclick="toggleDecoyVaults()" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg transition-colors">
+                    <span id="decoy-toggle-text">Show Decoy Vaults</span>
+                </button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden" id="decoy-vaults">
+                <!-- Decoy vaults will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Threat Monitoring -->
+        <div class="mb-8">
+            <h3 class="text-2xl font-bold mb-6">🚨 Threat Monitoring</h3>
+            <div class="bg-black/30 backdrop-blur-sm rounded-xl p-6 border border-purple-500/30">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-green-400" id="dark-web-status">ACTIVE</div>
+                        <div class="text-purple-300">Dark Web Monitor</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-blue-400" id="behavioral-status">ACTIVE</div>
+                        <div class="text-purple-300">Behavioral Analysis</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-purple-400" id="ai-sentinel-status">ACTIVE</div>
+                        <div class="text-purple-300">AI Sentinel</div>
+                    </div>
+                </div>
+                <div id="threat-log" class="max-h-64 overflow-y-auto bg-black/20 rounded-lg p-4">
+                    <!-- Threat log will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Metrics -->
+        <div class="mb-8">
+            <h3 class="text-2xl font-bold mb-6">📊 Security Metrics</h3>
+            <div class="bg-black/30 backdrop-blur-sm rounded-xl p-6 border border-purple-500/30">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="text-lg font-semibold mb-4">System Health</h4>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span>Uptime:</span>
+                                <span id="uptime">Calculating...</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Last Update:</span>
+                                <span id="last-update">Calculating...</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Security Events:</span>
+                                <span id="security-events">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-semibold mb-4">Recommendations</h4>
+                        <div id="recommendations" class="space-y-2">
+                            <!-- Recommendations will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Demo Controls -->
+        <div class="mb-8">
+            <h3 class="text-2xl font-bold mb-6">🧪 Security Demo Controls</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                <button onclick="startSecurityDemo()" class="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 p-6 rounded-xl transition-all transform hover:scale-105">
+                    <div class="text-3xl mb-2">▶️</div>
+                    <div class="font-semibold">Start Demo</div>
+                    <div class="text-sm text-green-200">Begin security system demonstration</div>
+                </button>
+                <button onclick="stopSecurityDemo()" class="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 p-6 rounded-xl transition-all transform hover:scale-105">
+                    <div class="text-3xl mb-2">⏹️</div>
+                    <div class="font-semibold">Stop Demo</div>
+                    <div class="text-sm text-red-200">Stop security demonstration</div>
+                </button>
+                <button onclick="simulateAttack()" class="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 p-6 rounded-xl transition-all transform hover:scale-105">
+                    <div class="text-3xl mb-2">⚔️</div>
+                    <div class="font-semibold">Simulate Attack</div>
+                    <div class="text-sm text-orange-200">Test threat response system</div>
+                </button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <button onclick="testZeroKnowledge()" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 p-6 rounded-xl transition-all transform hover:scale-105">
+                    <div class="text-3xl mb-2">🔐</div>
+                    <div class="font-semibold">Test Zero Knowledge++</div>
+                    <div class="text-sm text-blue-200">Verify encryption architecture</div>
+                </button>
+                <button onclick="testOneWayEntry()" class="bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 p-6 rounded-xl transition-all transform hover:scale-105">
+                    <div class="text-3xl mb-2">🚪</div>
+                    <div class="font-semibold">Test One-Way Entry</div>
+                    <div class="text-sm text-purple-200">Verify entry/exit security</div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Advanced Controls -->
+        <div class="mb-8">
+            <h3 class="text-2xl font-bold mb-6">🎛️ Advanced Controls</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <button onclick="reconfigureMaze()" class="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 p-6 rounded-xl transition-all transform hover:scale-105">
+                    <div class="text-3xl mb-2">🔄</div>
+                    <div class="font-semibold">Reconfigure Maze</div>
+                    <div class="text-sm text-purple-200">Randomly reorganize security layers</div>
+                </button>
+                <button onclick="generateSecurityReport()" class="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 p-6 rounded-xl transition-all transform hover:scale-105">
+                    <div class="text-3xl mb-2">📋</div>
+                    <div class="font-semibold">Generate Report</div>
+                    <div class="text-sm text-green-200">Create detailed security report</div>
+                </button>
+                <button onclick="testSecuritySystem()" class="bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 p-6 rounded-xl transition-all transform hover:scale-105">
+                    <div class="text-3xl mb-2">🧪</div>
+                    <div class="font-semibold">Test System</div>
+                    <div class="text-sm text-red-200">Run security tests</div>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <!-- Note: Use security-dashboard-working.html for the fully functional security dashboard -->
+</body>
+</html>

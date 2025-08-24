@@ -1,0 +1,132 @@
+version: '3.8'
+
+services:
+  # Main Agies Application
+  agies:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: agies-vault
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=production
+      - PORT=3002
+      - DATABASE_URL=postgresql://agies:secure_password@postgres:5432/agies
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=your-super-secure-jwt-secret-here
+      - ENCRYPTION_KEY=your-256-bit-encryption-key-here
+      - HIBP_API_KEY=${HIBP_API_KEY}
+      - LEAKCHECK_API_KEY=${LEAKCHECK_API_KEY}
+      - DEHASHED_API_KEY=${DEHASHED_API_KEY}
+      - CHAKRAVYUHAM_ENABLED=true
+      - AI_GUARDIAN_ENABLED=true
+      - DARK_WEB_MONITORING=true
+      - ZERO_KNOWLEDGE=true
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./backups:/app/backups
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - agies-network
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: agies-postgres
+    environment:
+      - POSTGRES_DB=agies
+      - POSTGRES_USER=agies
+      - POSTGRES_PASSWORD=secure_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agies -d agies"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - agies-network
+
+  # Redis for Session Management and Caching
+  redis:
+    image: redis:7-alpine
+    container_name: agies-redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    networks:
+      - agies-network
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: agies-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - agies
+    restart: unless-stopped
+    networks:
+      - agies-network
+
+  # Monitoring with Prometheus
+  prometheus:
+    image: prom/prometheus
+    container_name: agies-prometheus
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    networks:
+      - agies-network
+
+  # Grafana for Monitoring Dashboard
+  grafana:
+    image: grafana/grafana
+    container_name: agies-grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - agies-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  grafana_data:
+
+networks:
+  agies-network:
+    driver: bridge

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Dashboard Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white p-8">
+    <h1 class="text-3xl font-bold mb-8">Security Dashboard Test</h1>
+    
+    <div class="space-y-4">
+        <button onclick="testButton('Start Demo')" class="bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg">
+            Test Start Demo Button
+        </button>
+        
+        <button onclick="testButton('Stop Demo')" class="bg-red-600 hover:bg-red-700 px-6 py-3 rounded-lg">
+            Test Stop Demo Button
+        </button>
+        
+        <button onclick="testButton('Simulate Attack')" class="bg-orange-600 hover:bg-orange-700 px-6 py-3 rounded-lg">
+            Test Simulate Attack Button
+        </button>
+        
+        <button onclick="testButton('Test Zero Knowledge++')" class="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg">
+            Test Zero Knowledge++ Button
+        </button>
+        
+        <button onclick="testButton('Test One-Way Entry')" class="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg">
+            Test One-Way Entry Button
+        </button>
+        
+        <button onclick="testButton('Reconfigure Maze')" class="bg-indigo-600 hover:bg-indigo-700 px-6 py-3 rounded-lg">
+            Test Reconfigure Maze Button
+        </button>
+        
+        <button onclick="testButton('Generate Report')" class="bg-teal-600 hover:bg-teal-700 px-6 py-3 rounded-lg">
+            Test Generate Report Button
+        </button>
+        
+        <button onclick="testButton('Test System')" class="bg-pink-600 hover:bg-pink-700 px-6 py-3 rounded-lg">
+            Test System Button
+        </button>
+    </div>
+    
+    <div id="results" class="mt-8 p-4 bg-gray-800 rounded-lg">
+        <h2 class="text-xl font-semibold mb-4">Test Results:</h2>
+        <div id="testOutput"></div>
+    </div>
+    
+    <script>
+        function testButton(buttonName) {
+            console.log(`Testing ${buttonName} button...`);
+            
+            const output = document.getElementById('testOutput');
+            const result = document.createElement('div');
+            result.className = 'mb-2 p-2 bg-gray-700 rounded';
+            result.innerHTML = `<span class="text-green-400">✅</span> ${buttonName} button clicked successfully`;
+            output.appendChild(result);
+            
+            // Test if the function exists
+            const functionName = buttonName.toLowerCase().replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
+            if (typeof window[functionName] === 'function') {
+                console.log(`Function ${functionName} exists`);
+                try {
+                    window[functionName]();
+                } catch (error) {
+                    console.error(`Error calling ${functionName}:`, error);
+                    result.innerHTML = `<span class="text-red-400">❌</span> ${buttonName} function error: ${error.message}`;
+                }
+            } else {
+                console.log(`Function ${functionName} does not exist`);
+                result.innerHTML = `<span class="text-yellow-400">⚠️</span> ${buttonName} function not found`;
+            }
+        }
+        
+        // Test if functions are available
+        window.addEventListener('load', () => {
+            const functions = [
+                'startSecurityDemo',
+                'stopSecurityDemo', 
+                'simulateAttack',
+                'testZeroKnowledge',
+                'testOneWayEntry',
+                'reconfigureMaze',
+                'generateSecurityReport',
+                'testSecuritySystem'
+            ];
+            
+            const output = document.getElementById('testOutput');
+            output.innerHTML = '<div class="text-blue-400 mb-4">Checking available functions...</div>';
+            
+            functions.forEach(funcName => {
+                const result = document.createElement('div');
+                result.className = 'mb-2 p-2 bg-gray-700 rounded';
+                
+                if (typeof window[funcName] === 'function') {
+                    result.innerHTML = `<span class="text-green-400">✅</span> ${funcName} function available`;
+                } else {
+                    result.innerHTML = `<span class="text-red-400">❌</span> ${funcName} function not available`;
+                }
+                
+                output.appendChild(result);
+            });
+        });
+    </script>
+</body>
+</html>

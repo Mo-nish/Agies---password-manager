@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agies File Loading Test</title>
+</head>
+<body>
+    <h1>🌀 Agies File Loading Test</h1>
+    <div id="status">Testing file loading...</div>
+    <div id="results"></div>
+
+    <script>
+        const requiredFiles = [
+            '/dist/js/security/enhanced-chakravyuham-engine.js',
+            '/dist/js/ai/enhanced-ai-guardian.js',
+            '/dist/js/services/vault-management-service.js',
+            '/dist/js/services/enhanced-encryption.js',
+            '/dist/js/services/honeytoken-service.js',
+            '/dist/js/services/one-way-entry-service.js',
+            '/dist/js/services/dark-web-monitor.js',
+            '/dist/js/config/database.js'
+        ];
+
+        let loadedCount = 0;
+        let failedCount = 0;
+
+        function updateStatus() {
+            document.getElementById('status').innerHTML = `
+                <h2>Status: ${loadedCount + failedCount}/${requiredFiles.length} files tested</h2>
+                <p>✅ Loaded: ${loadedCount} | ❌ Failed: ${failedCount}</p>
+            `;
+        }
+
+        function testFileLoad(filePath) {
+            return new Promise((resolve) => {
+                const script = document.createElement('script');
+                script.src = filePath;
+                script.onload = () => {
+                    loadedCount++;
+                    updateStatus();
+                    document.getElementById('results').innerHTML += `<div style="color: green;">✅ ${filePath}</div>`;
+                    resolve(true);
+                };
+                script.onerror = () => {
+                    failedCount++;
+                    updateStatus();
+                    document.getElementById('results').innerHTML += `<div style="color: red;">❌ ${filePath}</div>`;
+                    resolve(false);
+                };
+                document.head.appendChild(script);
+            });
+        }
+
+        async function testAllFiles() {
+            for (const file of requiredFiles) {
+                await testFileLoad(file);
+            }
+
+            if (failedCount === 0) {
+                document.getElementById('status').innerHTML += '<h2 style="color: green;">🎉 All files loaded successfully! MIME type errors resolved!</h2>';
+            } else {
+                document.getElementById('status').innerHTML += '<h2 style="color: red;">⚠️ Some files failed to load</h2>';
+            }
+        }
+
+        testAllFiles();
+    </script>
+</body>
+</html>

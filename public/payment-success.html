@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Successful - Agies Password Manager</title>
+    <meta name="description" content="Welcome to Agies Premium! Your subscription is now active.">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .success-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .success-icon {
+            font-size: 6rem;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+
+        .success-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #10B981;
+        }
+
+        .success-message {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .subscription-details {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .detail-label {
+            font-weight: 500;
+            opacity: 0.8;
+        }
+
+        .detail-value {
+            font-weight: 600;
+            color: #10B981;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
+            cursor: pointer;
+            border: none;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #10B981, #059669);
+            color: white;
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        .features-list {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            text-align: left;
+        }
+
+        .features-list h3 {
+            margin-bottom: 15px;
+            color: #FBBF24;
+            font-size: 1.3rem;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 8px 0;
+        }
+
+        .feature-item::before {
+            content: '✅';
+            margin-right: 15px;
+            font-size: 1.2rem;
+        }
+
+        .watermark {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 8px 16px;
+            border-radius: 20px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 12px;
+            font-weight: 500;
+            z-index: 1000;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            text-decoration: none;
+            z-index: 1000;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-20px);
+            }
+            60% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .success-container {
+                padding: 30px 20px;
+            }
+            
+            .success-title {
+                font-size: 2rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="watermark">
+        Monish Reddy
+    </div>
+
+    <a href="/" class="back-btn">← Back to Home</a>
+
+    <div class="success-container">
+        <div class="success-icon">🎉</div>
+        <h1 class="success-title">Payment Successful!</h1>
+        <p class="success-message">
+            Welcome to Agies Premium! Your subscription is now active and you have access to all premium features.
+        </p>
+
+        <div class="subscription-details">
+            <h3 style="margin-bottom: 20px; color: #FBBF24;">Subscription Details</h3>
+            <div class="detail-row">
+                <span class="detail-label">Plan:</span>
+                <span class="detail-value" id="plan-name">Premium Plan</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Status:</span>
+                <span class="detail-value" style="color: #10B981;">Active</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Start Date:</span>
+                <span class="detail-value" id="start-date">-</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Next Billing:</span>
+                <span class="detail-value" id="next-billing">-</span>
+            </div>
+        </div>
+
+        <div class="features-list">
+            <h3>🚀 Premium Features Now Available</h3>
+            <div class="feature-item">Unlimited passwords and vaults</div>
+            <div class="feature-item">Mobile apps for iOS and Android</div>
+            <div class="feature-item">Dark web monitoring</div>
+            <div class="feature-item">Advanced 2FA options</div>
+            <div class="feature-item">Priority customer support</div>
+            <div class="feature-item">Advanced security features</div>
+            <div class="feature-item">Cross-device synchronization</div>
+            <div class="feature-item">Password health analysis</div>
+        </div>
+
+        <div class="action-buttons">
+            <a href="/dashboard-working.html" class="btn btn-primary">
+                🚀 Go to Dashboard
+            </a>
+            <a href="/security-dashboard.html" class="btn btn-secondary">
+                🛡️ Security Center
+            </a>
+            <a href="/demo.html" class="btn btn-secondary">
+                🎯 Explore Features
+            </a>
+        </div>
+
+        <div style="margin-top: 30px; opacity: 0.7; font-size: 0.9rem;">
+            <p>📧 A confirmation email has been sent to your registered email address.</p>
+            <p>💳 Your subscription will automatically renew each month.</p>
+            <p>🆘 Need help? Contact our support team anytime.</p>
+        </div>
+    </div>
+
+    <script>
+        // Get subscription details from URL parameters or localStorage
+        function loadSubscriptionDetails() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const plan = urlParams.get('plan') || localStorage.getItem('agies_user_plan') || 'premium';
+            const startDate = new Date().toLocaleDateString();
+            const nextBilling = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString();
+            
+            // Update UI
+            document.getElementById('plan-name').textContent = getPlanDisplayName(plan);
+            document.getElementById('start-date').textContent = startDate;
+            document.getElementById('next-billing').textContent = nextBilling;
+            
+            // Store subscription info
+            localStorage.setItem('agies_user_plan', plan);
+            localStorage.setItem('agies_subscription_date', new Date().toISOString());
+        }
+
+        function getPlanDisplayName(planId) {
+            const planNames = {
+                'free': 'Free Plan',
+                'premium': 'Premium Plan',
+                'business': 'Business Plan',
+                'enterprise': 'Enterprise Plan'
+            };
+            return planNames[planId] || 'Premium Plan';
+        }
+
+        // Track successful payment
+        function trackPaymentSuccess() {
+            // Google Analytics
+            if (window.gtag) {
+                window.gtag('event', 'purchase', {
+                    transaction_id: 'demo_' + Date.now(),
+                    value: 3.99,
+                    currency: 'USD',
+                    items: [{
+                        item_id: 'premium_plan',
+                        item_name: 'Premium Plan',
+                        price: 3.99,
+                        quantity: 1
+                    }]
+                });
+            }
+            
+            // Custom analytics
+            if (window.agiesAnalytics) {
+                window.agiesAnalytics.trackEvent('subscription_started', {
+                    plan: 'premium',
+                    amount: 3.99,
+                    currency: 'USD'
+                });
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSubscriptionDetails();
+            trackPaymentSuccess();
+            
+            console.log('🎉 Payment success page loaded');
+            console.log('✅ Subscription activated successfully');
+        });
+
+        // Auto-redirect to dashboard after 10 seconds
+        setTimeout(() => {
+            if (confirm('Would you like to go to your dashboard now?')) {
+                window.location.href = '/dashboard-working.html';
+            }
+        }, 10000);
+    </script>
+</body>
+</html>

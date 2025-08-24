@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vault Details - Agies Password Manager</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'agies-purple': '#8B5CF6',
+                        'agies-blue': '#3B82F6',
+                        'agies-green': '#10B981',
+                        'agies-dark': '#1E1B4B'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .password-item {
+            transition: all 0.3s ease;
+        }
+        .password-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        .search-box {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Header -->
+    <nav class="bg-white/10 backdrop-blur-sm border-b border-white/20 p-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <button id="backBtn" class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition-colors">
+                    ← Back to Dashboard
+                </button>
+                <div class="text-white">
+                    <h1 id="vaultTitle" class="text-2xl font-bold">Loading...</h1>
+                    <p id="vaultDescription" class="text-white/80">Loading vault details...</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div id="vaultStats" class="text-white text-sm">
+                    <span id="passwordCount">0</span> passwords
+                </div>
+                <button id="editVaultBtn" class="bg-agies-green hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors">
+                    ✏️ Edit Vault
+                </button>
+                <button id="addPasswordBtn" class="bg-agies-purple hover:bg-purple-600 text-white px-4 py-2 rounded-lg transition-colors">
+                    + Add Password
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto p-6">
+        <!-- Search and Filter Bar -->
+        <div class="mb-6">
+            <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
+                <div class="flex-1 max-w-md">
+                    <div class="relative">
+                        <input 
+                            type="text" 
+                            id="searchInput" 
+                            placeholder="Search passwords..." 
+                            class="w-full pl-10 pr-4 py-3 search-box border border-white/20 rounded-lg text-white placeholder-white/60 focus:outline-none focus:border-agies-purple"
+                        >
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <span class="text-white/60">🔍</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex space-x-2">
+                    <select id="sortSelect" class="bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-agies-purple">
+                        <option value="title">Sort by Title</option>
+                        <option value="username">Sort by Username</option>
+                        <option value="created">Sort by Date Added</option>
+                        <option value="lastUsed">Sort by Last Used</option>
+                    </select>
+                    <button id="viewModeBtn" class="bg-white/10 hover:bg-white/20 border border-white/20 text-white px-4 py-3 rounded-lg transition-colors">
+                        📋 List View
+                    </button>
+                    <button id="exportBtn" class="bg-white/10 hover:bg-white/20 border border-white/20 text-white px-4 py-3 rounded-lg transition-colors">
+                        📤 Export
+                    </button>
+                                    <button id="securityCheckBtn" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-3 rounded-lg transition-colors">
+                    🛡️ Security Check
+                </button>
+                <button id="refreshBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg transition-colors">
+                    🔄 Refresh
+                </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Passwords Grid/List -->
+        <div id="passwordsContainer" class="space-y-4">
+            <!-- Passwords will be populated here -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="text-center py-16 hidden">
+            <div class="text-8xl mb-4">🔐</div>
+            <h3 class="text-2xl font-bold text-white mb-2">No passwords in this vault</h3>
+            <p class="text-white/80 mb-6">Start by adding your first password to this vault</p>
+            <button id="addFirstPasswordBtn" class="bg-agies-purple hover:bg-purple-600 text-white px-8 py-3 rounded-lg font-semibold transition-colors">
+                + Add Your First Password
+            </button>
+        </div>
+    </main>
+
+    <!-- Add Password Modal -->
+    <div id="addPasswordModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-slate-800 rounded-2xl p-8 max-w-md w-full border border-white/10">
+                <div class="text-center mb-6">
+                    <div class="text-4xl mb-2">🔐</div>
+                    <h2 class="text-2xl font-bold text-white">Add New Password</h2>
+                    <p class="text-gray-400">Store your credentials securely</p>
+                </div>
+                <form id="addPasswordForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Title</label>
+                        <input type="text" id="passwordTitle" required class="w-full px-4 py-3 bg-slate-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-agies-purple" placeholder="e.g., Gmail, Facebook, Bank">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Username/Email</label>
+                        <input type="text" id="passwordUsername" required class="w-full px-4 py-3 bg-slate-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-agies-purple" placeholder="username or email">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                        <div class="relative">
+                            <input type="password" id="passwordValue" required class="w-full px-4 py-3 pr-12 bg-slate-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-agies-purple" placeholder="Enter password">
+                            <button type="button" id="togglePassword" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-white">
+                                👁️
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Website URL (Optional)</label>
+                        <input type="url" id="passwordUrl" class="w-full px-4 py-3 bg-slate-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-agies-purple" placeholder="https://example.com">
+                    </div>
+                    <div class="flex space-x-4">
+                        <button type="submit" class="flex-1 bg-agies-purple hover:bg-purple-600 text-white py-3 rounded-lg font-semibold transition-colors">
+                            Add Password
+                        </button>
+                        <button type="button" id="closeAddPasswordModal" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-3 rounded-lg font-semibold transition-colors">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Vault Modal -->
+    <div id="editVaultModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-slate-800 rounded-2xl p-8 max-w-md w-full border border-white/10">
+                <div class="text-center mb-6">
+                    <div class="text-4xl mb-2">🏛️</div>
+                    <h2 class="text-2xl font-bold text-white">Edit Vault</h2>
+                    <p class="text-gray-400">Update vault information</p>
+                </div>
+                <form id="editVaultForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Vault Name</label>
+                        <input type="text" id="editVaultName" required class="w-full px-4 py-3 bg-slate-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-agies-purple">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Description</label>
+                        <textarea id="editVaultDescription" rows="3" class="w-full px-4 py-3 bg-slate-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-agies-purple" placeholder="Optional description"></textarea>
+                    </div>
+                    <div class="flex space-x-4">
+                        <button type="submit" class="flex-1 bg-agies-green hover:bg-green-600 text-white py-3 rounded-lg font-semibold transition-colors">
+                            Save Changes
+                        </button>
+                        <button type="button" id="closeEditVaultModal" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-3 rounded-lg font-semibold transition-colors">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // App state
+        let currentVault = null;
+        let passwords = [];
+        let allVaults = [];
+        let isGridView = false;
+
+        // Get vault ID from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const vaultId = urlParams.get('id');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!vaultId) {
+                alert('No vault ID provided');
+                window.location.href = '/dashboard';
+                return;
+            }
+            
+            loadVaultData();
+            setupEventListeners();
+        });
+
+        // Load vault data (simulate from localStorage or parent window)
+        function loadVaultData() {
+            try {
+                // Try to get data from opener window if available
+                if (window.opener && window.opener.vaults) {
+                    allVaults = [...window.opener.vaults]; // Create a copy
+                    passwords = [...(window.opener.passwords || [])]; // Create a copy
+                } else {
+                    // Fallback to localStorage
+                    allVaults = JSON.parse(localStorage.getItem('agies_vaults') || '[]');
+                    passwords = JSON.parse(localStorage.getItem('agies_passwords') || '[]');
+                }
+
+                // If no data, create default data
+                if (allVaults.length === 0) {
+                    allVaults = [{
+                        id: 'default',
+                        name: 'Personal Vault',
+                        description: 'Your personal passwords and secure notes',
+                        passwordCount: 0,
+                        created: new Date().toISOString()
+                    }];
+                }
+
+                currentVault = allVaults.find(v => v.id === vaultId);
+                
+                if (!currentVault) {
+                    alert('Vault not found');
+                    window.location.href = '/dashboard';
+                    return;
+                }
+
+                // Update page title
+                document.title = `${currentVault.name} - Agies Password Manager`;
+                
+                updateVaultInfo();
+                renderPasswords();
+                
+                console.log('✅ Vault data loaded:', currentVault);
+                console.log('✅ Total vaults:', allVaults.length);
+                console.log('✅ Total passwords:', passwords.length);
+            } catch (error) {
+                console.error('Error loading vault data:', error);
+                // Create minimal data to prevent crashes
+                currentVault = {
+                    id: vaultId,
+                    name: 'Unknown Vault',
+                    description: 'Vault details could not be loaded',
+                    passwordCount: 0
+                };
+                updateVaultInfo();
+            }
+        }
+
+        // Update vault information in the UI
+        function updateVaultInfo() {
+            document.getElementById('vaultTitle').textContent = currentVault.name;
+            document.getElementById('vaultDescription').textContent = currentVault.description;
+            
+            const vaultPasswords = passwords.filter(p => p.vaultId === currentVault.id);
+            document.getElementById('passwordCount').textContent = vaultPasswords.length;
+        }
+
+        // Render passwords
+        function renderPasswords() {
+            const container = document.getElementById('passwordsContainer');
+            const emptyState = document.getElementById('emptyState');
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const sortBy = document.getElementById('sortSelect').value;
+            
+            let vaultPasswords = passwords.filter(p => p.vaultId === currentVault.id);
+            
+            // Filter by search term
+            if (searchTerm) {
+                vaultPasswords = vaultPasswords.filter(p => 
+                    p.title.toLowerCase().includes(searchTerm) ||
+                    p.username.toLowerCase().includes(searchTerm) ||
+                    (p.url && p.url.toLowerCase().includes(searchTerm))
+                );
+            }
+            
+            // Sort passwords
+            vaultPasswords.sort((a, b) => {
+                switch(sortBy) {
+                    case 'username':
+                        return a.username.localeCompare(b.username);
+                    case 'created':
+                        return new Date(b.created) - new Date(a.created);
+                    case 'lastUsed':
+                        return (b.lastUsed || 0) - (a.lastUsed || 0);
+                    default: // title
+                        return a.title.localeCompare(b.title);
+                }
+            });
+            
+            if (vaultPasswords.length === 0) {
+                container.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+            } else {
+                container.classList.remove('hidden');
+                emptyState.classList.add('hidden');
+                
+                container.innerHTML = vaultPasswords.map(password => `
+                    <div class="password-item bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-16 h-16 bg-agies-purple rounded-xl flex items-center justify-center">
+                                    <span class="text-white font-bold text-xl">${password.title.charAt(0).toUpperCase()}</span>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-semibold text-white">${password.title}</h3>
+                                    <p class="text-white/80">${password.username}</p>
+                                    ${password.url ? `<p class="text-sm text-white/60">${password.url}</p>` : ''}
+                                    <p class="text-xs text-white/50">Added: ${new Date(password.created).toLocaleDateString()}</p>
+                                </div>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="copy-password-btn bg-agies-blue hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm transition-colors" data-password-id="${password.id}">
+                                    📋 Copy
+                                </button>
+                                <button class="edit-password-btn bg-agies-green hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm transition-colors" data-password-id="${password.id}">
+                                    ✏️ Edit
+                                </button>
+                                <button class="delete-password-btn bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm transition-colors" data-password-id="${password.id}">
+                                    🗑️ Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Back button
+            document.getElementById('backBtn').addEventListener('click', () => {
+                window.close();
+                // Fallback if window.close() doesn't work
+                setTimeout(() => {
+                    window.location.href = '/dashboard';
+                }, 100);
+            });
+
+            // Search
+            document.getElementById('searchInput').addEventListener('input', renderPasswords);
+            
+            // Sort
+            document.getElementById('sortSelect').addEventListener('change', renderPasswords);
+            
+            // View mode toggle
+            document.getElementById('viewModeBtn').addEventListener('click', () => {
+                isGridView = !isGridView;
+                document.getElementById('viewModeBtn').textContent = isGridView ? '📋 List View' : '📊 Grid View';
+                // Add grid view implementation here
+            });
+
+            // Export functionality
+            document.getElementById('exportBtn').addEventListener('click', exportVaultData);
+            
+            // Security check
+            document.getElementById('securityCheckBtn').addEventListener('click', runSecurityCheck);
+            
+            // Refresh data
+            document.getElementById('refreshBtn').addEventListener('click', refreshDataFromParent);
+
+            // Add password buttons
+            document.getElementById('addPasswordBtn').addEventListener('click', showAddPasswordModal);
+            document.getElementById('addFirstPasswordBtn').addEventListener('click', showAddPasswordModal);
+            
+            // Edit vault button
+            document.getElementById('editVaultBtn').addEventListener('click', showEditVaultModal);
+
+            // Modal close buttons
+            document.getElementById('closeAddPasswordModal').addEventListener('click', hideAddPasswordModal);
+            document.getElementById('closeEditVaultModal').addEventListener('click', hideEditVaultModal);
+
+            // Form submissions
+            document.getElementById('addPasswordForm').addEventListener('submit', handleAddPassword);
+            document.getElementById('editVaultForm').addEventListener('submit', handleEditVault);
+
+            // Password toggle
+            document.getElementById('togglePassword').addEventListener('click', togglePasswordVisibility);
+
+            // Delegated event listeners for password buttons
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('copy-password-btn')) {
+                    const passwordId = e.target.getAttribute('data-password-id');
+                    copyPassword(passwordId);
+                } else if (e.target.classList.contains('edit-password-btn')) {
+                    const passwordId = e.target.getAttribute('data-password-id');
+                    editPassword(passwordId);
+                } else if (e.target.classList.contains('delete-password-btn')) {
+                    const passwordId = e.target.getAttribute('data-password-id');
+                    deletePassword(passwordId);
+                }
+            });
+        }
+
+        // Modal functions
+        function showAddPasswordModal() {
+            document.getElementById('addPasswordModal').classList.remove('hidden');
+        }
+
+        function hideAddPasswordModal() {
+            document.getElementById('addPasswordModal').classList.add('hidden');
+            document.getElementById('addPasswordForm').reset();
+        }
+
+        function showEditVaultModal() {
+            document.getElementById('editVaultName').value = currentVault.name;
+            document.getElementById('editVaultDescription').value = currentVault.description;
+            document.getElementById('editVaultModal').classList.remove('hidden');
+        }
+
+        function hideEditVaultModal() {
+            document.getElementById('editVaultModal').classList.add('hidden');
+        }
+
+        // Form handlers
+        function handleAddPassword(e) {
+            e.preventDefault();
+            
+            const newPassword = {
+                id: Date.now().toString(),
+                title: document.getElementById('passwordTitle').value,
+                username: document.getElementById('passwordUsername').value,
+                password: document.getElementById('passwordValue').value,
+                url: document.getElementById('passwordUrl').value || null,
+                vaultId: currentVault.id,
+                created: new Date().toISOString(),
+                lastUsed: null
+            };
+
+            passwords.push(newPassword);
+            
+            // Update vault password count
+            currentVault.passwordCount++;
+            
+            // Update parent window if available
+            if (window.opener && window.opener.passwords) {
+                window.opener.passwords.push(newPassword);
+                
+                // Update parent vault password count
+                if (window.opener.vaults) {
+                    const parentVault = window.opener.vaults.find(v => v.id === currentVault.id);
+                    if (parentVault) {
+                        parentVault.passwordCount++;
+                    }
+                }
+                
+                // Force parent to re-render and update
+                if (window.opener.renderVaults) {
+                    window.opener.renderVaults();
+                }
+                if (window.opener.updatePasswordCount) {
+                    window.opener.updatePasswordCount();
+                }
+                if (window.opener.updateVaultCount) {
+                    window.opener.updateVaultCount();
+                }
+                
+                // Update parent's localStorage
+                window.opener.localStorage.setItem('agies_passwords', JSON.stringify(window.opener.passwords));
+                window.opener.localStorage.setItem('agies_vaults', JSON.stringify(window.opener.vaults));
+            }
+            
+            // Update local vault password count
+            const vaultIndex = allVaults.findIndex(v => v.id === currentVault.id);
+            if (vaultIndex !== -1) {
+                allVaults[vaultIndex].passwordCount++;
+            }
+            
+            // Save to localStorage and notify other tabs
+            saveDataToStorage();
+            
+            updateVaultInfo();
+            renderPasswords();
+            hideAddPasswordModal();
+            
+            console.log('✅ Password added:', newPassword);
+        }
+
+        function handleEditVault(e) {
+            e.preventDefault();
+            
+            const oldName = currentVault.name;
+            currentVault.name = document.getElementById('editVaultName').value;
+            currentVault.description = document.getElementById('editVaultDescription').value;
+            
+            // Update parent window if available
+            if (window.opener && window.opener.vaults) {
+                const parentVault = window.opener.vaults.find(v => v.id === currentVault.id);
+                if (parentVault) {
+                    parentVault.name = currentVault.name;
+                    parentVault.description = currentVault.description;
+                    
+                    // Force parent to re-render and update localStorage
+                    if (window.opener.renderVaults) {
+                        window.opener.renderVaults();
+                    }
+                    if (window.opener.updateVaultCount) {
+                        window.opener.updateVaultCount();
+                    }
+                    
+                    // Update parent's localStorage
+                    window.opener.localStorage.setItem('agies_vaults', JSON.stringify(window.opener.vaults));
+                }
+            }
+            
+            // Update local allVaults array
+            const vaultIndex = allVaults.findIndex(v => v.id === currentVault.id);
+            if (vaultIndex !== -1) {
+                allVaults[vaultIndex] = { ...currentVault };
+            }
+            
+            // Save to localStorage and notify other tabs
+            saveDataToStorage();
+            
+            // Update page title
+            document.title = `${currentVault.name} - Agies Password Manager`;
+            
+            updateVaultInfo();
+            hideEditVaultModal();
+            
+            console.log('✅ Vault updated:', currentVault);
+            
+            // Show success message
+            alert(`Vault "${oldName}" has been renamed to "${currentVault.name}" successfully!`);
+        }
+
+        // Password actions
+        function copyPassword(passwordId) {
+            const password = passwords.find(p => p.id === passwordId);
+            if (password) {
+                navigator.clipboard.writeText(password.password).then(() => {
+                    // Update last used
+                    password.lastUsed = Date.now();
+                    localStorage.setItem('agies_passwords', JSON.stringify(passwords));
+                    
+                    // Show temporary feedback
+                    const btn = document.querySelector(`[data-password-id="${passwordId}"]`);
+                    const originalText = btn.textContent;
+                    btn.textContent = '✅ Copied!';
+                    btn.classList.add('bg-green-600');
+                    setTimeout(() => {
+                        btn.textContent = originalText;
+                        btn.classList.remove('bg-green-600');
+                    }, 2000);
+                });
+            }
+        }
+
+        function editPassword(passwordId) {
+            const password = passwords.find(p => p.id === passwordId);
+            if (password) {
+                // Pre-fill the form with existing data
+                document.getElementById('passwordTitle').value = password.title;
+                document.getElementById('passwordUsername').value = password.username;
+                document.getElementById('passwordValue').value = password.password;
+                document.getElementById('passwordUrl').value = password.url || '';
+                
+                // Remove the old password and show modal for editing
+                passwords = passwords.filter(p => p.id !== passwordId);
+                showAddPasswordModal();
+            }
+        }
+
+        function deletePassword(passwordId) {
+            if (confirm('Are you sure you want to delete this password?')) {
+                passwords = passwords.filter(p => p.id !== passwordId);
+                currentVault.passwordCount--;
+                
+                // Update parent window
+                if (window.opener && window.opener.passwords) {
+                    window.opener.passwords = window.opener.passwords.filter(p => p.id !== passwordId);
+                    
+                    // Update parent vault password count
+                    if (window.opener.vaults) {
+                        const parentVault = window.opener.vaults.find(v => v.id === currentVault.id);
+                        if (parentVault) {
+                            parentVault.passwordCount--;
+                        }
+                    }
+                    
+                    // Force parent to re-render and update
+                    if (window.opener.renderVaults) {
+                        window.opener.renderVaults();
+                    }
+                    if (window.opener.updatePasswordCount) {
+                        window.opener.updatePasswordCount();
+                    }
+                    if (window.opener.updateVaultCount) {
+                        window.opener.updateVaultCount();
+                    }
+                    
+                    // Update parent's localStorage
+                    window.opener.localStorage.setItem('agies_passwords', JSON.stringify(window.opener.passwords));
+                    window.opener.localStorage.setItem('agies_vaults', JSON.stringify(window.opener.vaults));
+                }
+                
+                // Update local vault password count
+                const vaultIndex = allVaults.findIndex(v => v.id === currentVault.id);
+                if (vaultIndex !== -1) {
+                    allVaults[vaultIndex].passwordCount--;
+                }
+                
+                // Save to localStorage and notify other tabs
+                saveDataToStorage();
+                
+                updateVaultInfo();
+                renderPasswords();
+            }
+        }
+
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('passwordValue');
+            const toggleBtn = document.getElementById('togglePassword');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleBtn.textContent = '🙈';
+            } else {
+                passwordInput.type = 'password';
+                toggleBtn.textContent = '👁️';
+            }
+        }
+
+        // Export vault data
+        function exportVaultData() {
+            const vaultPasswords = passwords.filter(p => p.vaultId === currentVault.id);
+            const exportData = {
+                vault: {
+                    name: currentVault.name,
+                    description: currentVault.description,
+                    exported: new Date().toISOString()
+                },
+                passwords: vaultPasswords.map(p => ({
+                    title: p.title,
+                    username: p.username,
+                    url: p.url,
+                    created: p.created
+                    // Note: password field excluded for security
+                }))
+            };
+            
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${currentVault.name.replace(/[^a-z0-9]/gi, '_')}_export.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            alert('Vault data exported successfully! (Passwords excluded for security)');
+        }
+
+        // Run security check
+        function runSecurityCheck() {
+            const vaultPasswords = passwords.filter(p => p.vaultId === currentVault.id);
+            let issues = [];
+            
+            // Check for weak passwords
+            const weakPasswords = vaultPasswords.filter(p => p.password.length < 8);
+            if (weakPasswords.length > 0) {
+                issues.push(`${weakPasswords.length} passwords are too short (less than 8 characters)`);
+            }
+            
+            // Check for duplicate passwords
+            const passwordCounts = {};
+            vaultPasswords.forEach(p => {
+                passwordCounts[p.password] = (passwordCounts[p.password] || 0) + 1;
+            });
+            const duplicates = Object.values(passwordCounts).filter(count => count > 1).length;
+            if (duplicates > 0) {
+                issues.push(`${duplicates} passwords are reused across multiple accounts`);
+            }
+            
+            // Check for old passwords (more than 1 year)
+            const oneYearAgo = new Date();
+            oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+            const oldPasswords = vaultPasswords.filter(p => new Date(p.created) < oneYearAgo);
+            if (oldPasswords.length > 0) {
+                issues.push(`${oldPasswords.length} passwords are over 1 year old`);
+            }
+            
+            // Show security report
+            if (issues.length === 0) {
+                alert('🛡️ Security Check Complete!\n\nGreat news! No security issues found in this vault. Your passwords are secure!');
+            } else {
+                alert(`🛡️ Security Check Complete!\n\nFound ${issues.length} security issues:\n\n• ${issues.join('\n• ')}\n\nConsider updating these passwords for better security.`);
+            }
+        }
+
+        // Save data to localStorage and notify other tabs
+        function saveDataToStorage() {
+            try {
+                localStorage.setItem('agies_vaults', JSON.stringify(allVaults));
+                localStorage.setItem('agies_passwords', JSON.stringify(passwords));
+                console.log('✅ Data saved to storage');
+                
+                // Notify other tabs about the data update
+                window.postMessage({ type: 'agies_data_update' }, '*');
+                
+                // Also trigger storage event for other tabs
+                window.dispatchEvent(new StorageEvent('storage', {
+                    key: 'agies_vaults',
+                    newValue: JSON.stringify(allVaults)
+                }));
+            } catch (error) {
+                console.error('Error saving data to storage:', error);
+            }
+        }
+
+        // Refresh data from parent window
+        function refreshDataFromParent() {
+            if (window.opener && window.opener.vaults) {
+                allVaults = [...window.opener.vaults];
+                passwords = [...(window.opener.passwords || [])];
+                
+                currentVault = allVaults.find(v => v.id === vaultId);
+                if (currentVault) {
+                    updateVaultInfo();
+                    renderPasswords();
+                    document.title = `${currentVault.name} - Agies Password Manager`;
+                    alert('✅ Data refreshed from dashboard!');
+                } else {
+                    alert('❌ Could not refresh vault data');
+                }
+            } else {
+                alert('❌ Dashboard not available for refresh');
+            }
+        }
+
+        // Handle window beforeunload to sync data
+        window.addEventListener('beforeunload', function() {
+            if (window.opener && window.opener.loadVaults) {
+                window.opener.loadVaults();
+            }
+        });
+    </script>
+</body>
+</html>

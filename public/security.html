@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Center - Agies</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .security-gradient { background: linear-gradient(135deg, #1e3a8a 0%, #7c3aed 100%); }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <!-- Header -->
+    <header class="security-gradient p-6">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center">
+                    <span class="text-2xl">🛡️</span>
+                </div>
+                <h1 class="text-3xl font-bold text-white">Security Center</h1>
+            </div>
+            <nav class="flex items-center space-x-6">
+                <a href="/dashboard" class="text-white hover:text-purple-200 transition-colors">Dashboard</a>
+                <a href="/vaults" class="text-white hover:text-purple-200 transition-colors">Vaults</a>
+                <a href="/security" class="text-purple-200 font-semibold">Security</a>
+                <button id="logout-btn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    Sign Out
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-8">
+        <!-- Page Header -->
+        <div class="flex items-center justify-between mb-8">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                    <span class="text-xl">🔒</span>
+                </div>
+                <h2 class="text-2xl font-bold">Security Dashboard</h2>
+            </div>
+            <a href="/dashboard" class="text-blue-400 hover:text-blue-300 transition-colors flex items-center space-x-2">
+                <span>←</span>
+                <span>Back to Dashboard</span>
+            </a>
+        </div>
+
+        <!-- Security Status Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Overall Security Score -->
+            <div class="bg-gradient-to-br from-green-600 to-green-700 rounded-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-green-100 text-sm">Security Score</p>
+                        <p class="text-3xl font-bold text-white">95%</p>
+                    </div>
+                    <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                        <span class="text-2xl">🟢</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Threat Level -->
+            <div class="bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-blue-100 text-sm">Threat Level</p>
+                        <p class="text-3xl font-bold text-white">Low</p>
+                    </div>
+                    <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                        <span class="text-2xl">🔵</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Sessions -->
+            <div class="bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-purple-100 text-sm">Active Sessions</p>
+                        <p class="text-3xl font-bold text-white">2</p>
+                    </div>
+                    <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                        <span class="text-2xl">🟣</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Last Scan -->
+            <div class="bg-gradient-to-br from-orange-600 to-orange-700 rounded-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-orange-100 text-sm">Last Scan</p>
+                        <p class="text-lg font-bold text-white">2 min ago</p>
+                    </div>
+                    <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                        <span class="text-2xl">🟠</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Features Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Chakravyuham Maze Engine -->
+            <div class="bg-gray-800 rounded-xl p-6">
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center">
+                        <span class="text-xl">🌀</span>
+                    </div>
+                    <h3 class="text-xl font-semibold">Chakravyuham Maze Engine</h3>
+                </div>
+                <p class="text-gray-300 mb-4">Multi-layer security system with adaptive defense mechanisms and honeypot protection.</p>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-400">Status:</span>
+                        <span class="text-green-400 font-semibold">Active</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-400">Layers:</span>
+                        <span class="text-white">4 Active</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-400">Honeypots:</span>
+                        <span class="text-white">25 Deployed</span>
+                    </div>
+                </div>
+                <button class="w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    Configure Maze
+                </button>
+            </div>
+
+            <!-- AI Guardian -->
+            <div class="bg-gray-800 rounded-xl p-6">
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                        <span class="text-xl">🤖</span>
+                    </div>
+                    <h3 class="text-xl font-semibold">AI Guardian</h3>
+                </div>
+                <p class="text-gray-300 mb-4">Intelligent threat detection and adaptive security response system.</p>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-400">Status:</span>
+                        <span class="text-green-400 font-semibold">Active</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-400">Threats Detected:</span>
+                        <span class="text-white">0 Today</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-400">Learning Mode:</span>
+                        <span class="text-white">Enabled</span>
+                    </div>
+                </div>
+                <button class="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    View AI Insights
+                </button>
+            </div>
+
+            <!-- Dark Web Monitoring -->
+            <div class="bg-gray-800 rounded-xl p-6">
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center">
+                        <span class="text-xl">🌐</span>
+                    </div>
+                    <h3 class="text-xl font-semibold">Dark Web Monitoring</h3>
+                </div>
+                <p class="text-gray-300 mb-4">Continuous monitoring for compromised credentials across the dark web.</p>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-400">Status:</span>
+                        <span class="text-green-400 font-semibold">Active</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-400">Breaches Found:</span>
+                        <span class="text-white">0</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-400">Last Check:</span>
+                        <span class="text-white">2 min ago</span>
+                    </div>
+                </div>
+                <button class="w-full mt-4 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    View Breach Report
+                </button>
+            </div>
+
+            <!-- One-Way Entry System -->
+            <div class="bg-gray-800 rounded-xl p-6">
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
+                        <span class="text-xl">🚪</span>
+                    </div>
+                    <h3 class="text-xl font-semibold">One-Way Entry</h3>
+                </div>
+                <p class="text-gray-300 mb-4">Data can enter easily but requires strict verification to exit.</p>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-400">Status:</span>
+                        <span class="text-green-400 font-semibold">Active</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-400">Exit Attempts:</span>
+                        <span class="text-white">0 Blocked</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-400">Verification Level:</span>
+                        <span class="text-white">Maximum</span>
+                    </div>
+                </div>
+                <button class="w-full mt-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    Configure Entry
+                </button>
+            </div>
+        </div>
+
+        <!-- Security Settings -->
+        <div class="bg-gray-800 rounded-xl p-6 mb-8">
+            <h3 class="text-xl font-semibold mb-6">Security Settings</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="font-medium mb-3">Authentication</h4>
+                    <div class="space-y-3">
+                        <label class="flex items-center space-x-3">
+                            <input type="checkbox" checked class="rounded border-gray-600 bg-gray-700 text-blue-600">
+                            <span>Two-Factor Authentication</span>
+                        </label>
+                        <label class="flex items-center space-x-3">
+                            <input type="checkbox" checked class="rounded border-gray-600 bg-gray-700 text-blue-600">
+                            <span>Biometric Login</span>
+                        </label>
+                        <label class="flex items-center space-x-3">
+                            <input type="checkbox" class="rounded border-gray-600 bg-gray-700 text-blue-600">
+                            <span>Hardware Key Support</span>
+                        </label>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-medium mb-3">Privacy</h4>
+                    <div class="space-y-3">
+                        <label class="flex items-center space-x-3">
+                            <input type="checkbox" checked class="rounded border-gray-600 bg-gray-700 text-blue-600">
+                            <span>Zero-Knowledge Encryption</span>
+                        </label>
+                        <label class="flex items-center space-x-3">
+                            <input type="checkbox" checked class="rounded border-gray-600 bg-gray-700 text-blue-600">
+                            <span>Local Data Processing</span>
+                        </label>
+                        <label class="flex items-center space-x-3">
+                            <input type="checkbox" class="rounded border-gray-600 bg-gray-700 text-blue-600">
+                            <span>Telemetry Collection</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Security Events -->
+        <div class="bg-gray-800 rounded-xl p-6">
+            <h3 class="text-xl font-semibold mb-6">Recent Security Events</h3>
+            <div class="space-y-4">
+                <div class="flex items-center justify-between p-4 bg-gray-700 rounded-lg">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
+                            <span class="text-sm">✅</span>
+                        </div>
+                        <div>
+                            <p class="font-medium">Login successful</p>
+                            <p class="text-sm text-gray-400">New device login from Chrome on macOS</p>
+                        </div>
+                    </div>
+                    <span class="text-sm text-gray-400">2 minutes ago</span>
+                </div>
+                <div class="flex items-center justify-between p-4 bg-gray-700 rounded-lg">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                            <span class="text-sm">🔒</span>
+                        </div>
+                        <div>
+                            <p class="font-medium">Vault accessed</p>
+                            <p class="text-sm text-gray-400">Personal vault opened with biometric verification</p>
+                        </div>
+                    </div>
+                    <span class="text-sm text-gray-400">5 minutes ago</span>
+                </div>
+                <div class="flex items-center justify-between p-4 bg-gray-700 rounded-lg">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
+                            <span class="text-sm">🌀</span>
+                        </div>
+                        <div>
+                            <p class="font-medium">Maze defense activated</p>
+                            <p class="text-sm text-gray-400">Chakravyuham engine detected suspicious activity</p>
+                        </div>
+                    </div>
+                    <span class="text-sm text-gray-400">10 minutes ago</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Loading Spinner -->
+    <div id="loading" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+    </div>
+
+    <!-- Note: Security features are now integrated into the main dashboard -->
+</body>
+</html>

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vault Management - Padhma Vyuham</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <!-- Header -->
+    <header class="gradient-bg p-6">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center">
+                    <span class="text-2xl">🛡️</span>
+                </div>
+                <h1 class="text-3xl font-bold text-white">Padhma Vyuham</h1>
+            </div>
+            <nav class="flex items-center space-x-6">
+                <a href="/dashboard" class="text-white hover:text-purple-200 transition-colors">Dashboard</a>
+                <a href="/vaults" class="text-purple-200 font-semibold">Vaults</a>
+                <a href="/security" class="text-white hover:text-purple-200 transition-colors">Security</a>
+                <button id="logout-btn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-colors">
+                    Sign Out
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-8">
+        <!-- Page Header -->
+        <div class="flex items-center justify-between mb-8">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                    <span class="text-xl">🔐</span>
+                </div>
+                <h2 class="text-2xl font-bold">Vault Management</h2>
+            </div>
+            <a href="/dashboard" class="text-blue-400 hover:text-blue-300 transition-colors flex items-center space-x-2">
+                <span>←</span>
+                <span>Back to Dashboard</span>
+            </a>
+        </div>
+
+        <!-- Your Secure Vaults Banner -->
+        <div class="bg-blue-600 rounded-xl p-8 mb-8">
+            <div class="flex items-center space-x-4">
+                <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                    <span class="text-3xl">🔐</span>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold text-white">Your Secure Vaults</h3>
+                    <p class="text-blue-100">Organize and manage your passwords with military-grade security.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Your Vaults Section -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-semibold">Your Vaults</h3>
+                <button id="create-vault-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors">
+                    + Create New Vault
+                </button>
+            </div>
+            
+            <div id="vaults-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Vault cards will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Passwords Section -->
+        <div id="passwords-section" class="hidden">
+            <div class="flex items-center justify-between mb-6">
+                <h3 id="passwords-title" class="text-xl font-semibold">Passwords in <span id="current-vault-name">Personal Vault</span></h3>
+                <div class="flex space-x-3">
+                    <button id="add-password-btn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
+                        + Add Password
+                    </button>
+                    <button id="import-passwords-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+                        📥 Import
+                    </button>
+                </div>
+            </div>
+            <div id="passwords-container" class="space-y-4">
+                <!-- Passwords will be loaded here -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Create Vault Modal -->
+    <div id="create-vault-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-gray-800 rounded-xl p-8 w-full max-w-md mx-4">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-semibold text-white">Create New Vault</h3>
+                <button id="close-create-modal" class="text-gray-400 hover:text-white transition-colors">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <form id="create-vault-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Vault Name</label>
+                    <input type="text" id="vault-name" required
+                           class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="e.g., Personal Vault, Work Vault">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Description (Optional)</label>
+                    <textarea id="vault-description" rows="3"
+                              class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              placeholder="Describe what this vault is for..."></textarea>
+                </div>
+                <div class="flex space-x-3 pt-4">
+                    <button type="submit" 
+                            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
+                        Create Vault
+                    </button>
+                    <button type="button" id="cancel-create-vault"
+                            class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Password Modal -->
+    <div id="add-password-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-gray-800 rounded-xl p-8 w-full max-w-md mx-4">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-semibold text-white">Add New Password</h3>
+                <button id="close-password-modal" class="text-gray-400 hover:text-white transition-colors">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <form id="add-password-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Title</label>
+                    <input type="text" id="password-title" required
+                           class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="e.g., Gmail, Facebook, Bank Account">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Username/Email</label>
+                    <input type="text" id="password-username" required
+                           class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="your.email@example.com">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                    <div class="relative">
+                        <input type="password" id="password-value" required
+                               class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="Enter your password">
+                        <button type="button" id="toggle-password" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white">
+                            👁️
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Website URL (Optional)</label>
+                    <input type="url" id="password-url"
+                           class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="https://example.com">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Notes (Optional)</label>
+                    <textarea id="password-notes" rows="3"
+                              class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              placeholder="Additional information..."></textarea>
+                </div>
+                <div class="flex space-x-3 pt-4">
+                    <button type="submit" 
+                            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
+                        Add Password
+                    </button>
+                    <button type="button" id="cancel-add-password"
+                            class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Import Modal -->
+    <div id="import-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-gray-800 rounded-xl p-8 w-full max-w-md mx-4">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-semibold text-white">Import Passwords</h3>
+                <button id="close-import-modal" class="text-gray-400 hover:text-white transition-colors">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <h4 class="text-lg font-medium text-white mb-3">Choose Import Method</h4>
+                    <div class="space-y-3">
+                        <button id="import-chrome-btn" 
+                                class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg transition-colors text-left">
+                            <span class="text-lg mr-3">🌐</span>
+                            Import from Chrome
+                        </button>
+                        <button id="import-csv-btn" 
+                                class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg transition-colors text-left">
+                            <span class="text-lg mr-3">📄</span>
+                            Import from CSV File
+                        </button>
+                        <button id="manual-import-btn" 
+                                class="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-lg transition-colors text-left">
+                            <span class="text-lg mr-3">✏️</span>
+                            Add Manually
+                        </button>
+                    </div>
+                </div>
+                <div class="pt-4">
+                    <button type="button" id="cancel-import"
+                            class="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden file input for CSV import -->
+    <input type="file" id="csv-file-input" accept=".csv,.json" class="hidden">
+
+    <!-- Loading Spinner -->
+    <div id="loading" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+    </div>
+
+    <!-- Note: Vault management is now integrated into the main dashboard -->
+</body>
+</html>

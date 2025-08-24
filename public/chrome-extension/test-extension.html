@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chrome Extension Test - Agies</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-form {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+        .form-group {
+            margin: 20px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        input:focus {
+            border-color: #6366F1;
+            outline: none;
+        }
+        button {
+            background: #6366F1;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #5B5BD6;
+        }
+        .instructions {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .shortcuts {
+            background: #fff3e0;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔐 Agies Chrome Extension Test Page</h1>
+    
+    <div class="instructions">
+        <h3>📋 Test Instructions:</h3>
+        <ol>
+            <li>Make sure the Agies Chrome extension is installed and enabled</li>
+            <li>You should see "Agies Detected" indicators above the login forms</li>
+            <li>Try the keyboard shortcuts: <strong>Ctrl+Shift+L</strong> or <strong>Ctrl+\</strong></li>
+            <li>Click the "Autofill" buttons to test manual autofill</li>
+            <li>Check the browser console for extension logs</li>
+        </ol>
+    </div>
+
+    <div class="shortcuts">
+        <h3>⌨️ Keyboard Shortcuts:</h3>
+        <ul>
+            <li><strong>Ctrl+Shift+L</strong> - Smart Autofill (1Password style)</li>
+            <li><strong>Ctrl+\</strong> - Quick Fill</li>
+            <li><strong>Right-click</strong> on password fields for context menu</li>
+        </ul>
+    </div>
+
+    <!-- Test Login Form 1 -->
+    <div class="test-form">
+        <h3>🔐 Test Login Form 1</h3>
+        <form id="loginForm1">
+            <div class="form-group">
+                <label for="username1">Username:</label>
+                <input type="text" id="username1" name="username" placeholder="Enter your username">
+            </div>
+            <div class="form-group">
+                <label for="password1">Password:</label>
+                <input type="password" id="password1" name="password" placeholder="Enter your password">
+            </div>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+
+    <!-- Test Login Form 2 -->
+    <div class="test-form">
+        <h3>🔐 Test Login Form 2 (Email Style)</h3>
+        <form id="loginForm2">
+            <div class="form-group">
+                <label for="email2">Email Address:</label>
+                <input type="email" id="email2" name="email" placeholder="your@email.com">
+            </div>
+            <div class="form-group">
+                <label for="password2">Password:</label>
+                <input type="password" id="password2" name="password" placeholder="Enter your password">
+            </div>
+            <button type="submit">Sign In</button>
+        </form>
+    </div>
+
+    <!-- Test Registration Form -->
+    <div class="test-form">
+        <h3>✨ Test Registration Form</h3>
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="fullname">Full Name:</label>
+                <input type="text" id="fullname" name="fullname" placeholder="John Doe">
+            </div>
+            <div class="form-group">
+                <label for="email3">Email:</label>
+                <input type="email" id="email3" name="email" placeholder="your@email.com">
+            </div>
+            <div class="form-group">
+                <label for="password3">Password:</label>
+                <input type="password" id="password3" name="password" placeholder="Create a strong password">
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password:</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm your password">
+            </div>
+            <button type="submit">Create Account</button>
+        </form>
+    </div>
+
+    <div class="instructions">
+        <h3>🔍 What to Look For:</h3>
+        <ul>
+            <li>Blue "Agies Detected" indicators above forms</li>
+            <li>Autofill buttons that work</li>
+            <li>Console logs showing extension activity</li>
+            <li>Context menu options on password fields</li>
+            <li>Keyboard shortcuts triggering autofill</li>
+        </ul>
+    </div>
+
+    <script>
+        // Simple form handling for testing
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                alert('Form submitted! (This is just a test page)');
+            });
+        });
+
+        // Log when page loads
+        console.log('🔐 Agies Chrome Extension Test Page Loaded');
+        console.log('📱 Look for extension indicators and try the shortcuts!');
+    </script>
+</body>
+</html>

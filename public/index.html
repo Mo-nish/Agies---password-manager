@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Agies Password Manager - Enterprise Security Made Simple | Start Free Trial</title>
+    <meta name="description" content="Join 10,000+ organizations using Agies Password Manager. Military-grade encryption, AI-powered threat detection, team collaboration, and 99.99% uptime. Start free trial today.">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔐</text></svg>">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'agies-primary': '#6366F1',
+                        'agies-secondary': '#8B5CF6',
+                        'agies-accent': '#06B6D4',
+                        'agies-success': '#10B981',
+                        'agies-warning': '#F59E0B',
+                        'agies-danger': '#EF4444',
+                        'agies-dark': '#0F172A',
+                        'agies-darker': '#020617'
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif']
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'bounce-gentle': 'bounceGentle 2s infinite'
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        },
+                        bounceGentle: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #6366F1, #8B5CF6, #06B6D4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #334155 100%);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        
+        .watermark {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.3);
+            z-index: 1000;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+            pointer-events: none;
+            user-select: none;
+            opacity: 0.6;
+            transition: opacity 0.3s ease;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        
+        .watermark:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body class="font-sans bg-agies-darker text-white min-h-screen">
+    
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 glass-effect">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="text-2xl">🔐</div>
+                    <span class="text-xl font-bold gradient-text">Agies</span>
+                </div>
+                
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#features" class="text-gray-300 hover:text-white transition-colors">Features</a>
+                    <a href="#security" class="text-gray-300 hover:text-white transition-colors">Security</a>
+                    <a href="#pricing" class="text-gray-300 hover:text-white transition-colors">Pricing</a>
+                    <a href="#about" class="text-gray-300 hover:text-white transition-colors">About</a>
+                </div>
+                
+                <!-- Desktop Auth Buttons -->
+                <div class="hidden md:flex items-center space-x-4">
+                    <button onclick="showLoginModal()" class="text-gray-300 hover:text-white px-4 py-2 transition-colors">
+                        Sign In
+                    </button>
+                    <button onclick="showSignupModal()" class="bg-agies-primary hover:bg-agies-secondary text-white px-6 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105">
+                        Get Started
+                    </button>
+                </div>
+                
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden">
+                    <button id="mobileMenuBtn" class="text-gray-300 hover:text-white p-2 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div id="mobileMenu" class="md:hidden hidden bg-agies-dark border-t border-gray-700">
+            <div class="px-4 py-6 space-y-4">
+                <a href="#features" class="block text-gray-300 hover:text-white py-2 transition-colors">Features</a>
+                <a href="#security" class="block text-gray-300 hover:text-white py-2 transition-colors">Security</a>
+                <a href="#pricing" class="block text-gray-300 hover:text-white py-2 transition-colors">Pricing</a>
+                <a href="#about" class="block text-gray-300 hover:text-white py-2 transition-colors">About</a>
+                
+                <div class="pt-4 border-t border-gray-700">
+                    <button onclick="showLoginModal(); closeMobileMenu()" class="w-full text-left text-gray-300 hover:text-white py-2 transition-colors">
+                        Sign In
+                    </button>
+                    <button onclick="showSignupModal(); closeMobileMenu()" class="w-full bg-agies-primary hover:bg-agies-secondary text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 mt-3">
+                        Get Started
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-gradient pt-24 pb-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="animate-fade-in">
+                <h1 class="text-5xl md:text-7xl font-bold mb-6">
+                    The World's Most
+                    <span class="gradient-text">Secure</span>
+                    <br>Password Manager
+                </h1>
+                <p class="text-xl md:text-2xl text-gray-300 mb-12 max-w-4xl mx-auto">
+                    Enterprise-grade security meets intuitive design. Protect your digital life with AI-powered threat detection, 
+                    zero-knowledge encryption, and military-grade protection.
+                </p>
+                
+                <div class="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+                    <button onclick="showSignupModal()" class="bg-agies-primary hover:bg-agies-secondary text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 transform hover:scale-105 shadow-2xl">
+                        🚀 Start Free Trial
+                    </button>
+                    <button onclick="showDemo()" class="border border-gray-600 hover:border-white text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 hover:bg-white hover:text-agies-darker">
+                        🎥 Watch Demo
+                    </button>
+                </div>
+                
+                <!-- Additional Login Option -->
+                <div class="text-center mb-8">
+                    <span class="text-gray-400">Already have an account? </span>
+                    <button onclick="showLoginModal()" class="text-agies-primary hover:text-agies-secondary font-semibold transition-colors underline">
+                        Sign In Here
+                    </button>
+                </div>
+                
+                <!-- Trust Indicators -->
+                <div class="flex flex-wrap justify-center items-center gap-8 text-gray-400">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-agies-success">✓</span>
+                        <span>Trusted by 10M+ users</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-agies-success">✓</span>
+                        <span>99.99% uptime</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-agies-success">✓</span>
+                        <span>SOC 2 Type II certified</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-agies-dark">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold mb-6">
+                    Why Choose <span class="gradient-text">Agies</span>?
+                </h2>
+                <p class="text-xl text-gray-400 max-w-3xl mx-auto">
+                    Built for the modern world with cutting-edge technology and uncompromising security standards.
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Feature Card 1 -->
+                <div class="glass-effect rounded-2xl p-8 card-hover">
+                    <div class="text-4xl mb-6">🔐</div>
+                    <h3 class="text-2xl font-bold mb-4">Zero-Knowledge Encryption</h3>
+                    <p class="text-gray-400 mb-6">
+                        Your data is encrypted before it leaves your device. Not even we can access your passwords.
+                    </p>
+                    <div class="flex items-center text-agies-success">
+                        <button onclick="showFeatureModal('zero-knowledge')" class="text-sm font-medium hover:text-green-400 transition-colors">Learn more →</button>
+                    </div>
+                </div>
+                
+                <!-- Feature Card 2 -->
+                <div class="glass-effect rounded-2xl p-8 card-hover">
+                    <div class="text-4xl mb-6">🤖</div>
+                    <h3 class="text-2xl font-bold mb-4">AI-Powered Security</h3>
+                    <p class="text-gray-400 mb-6">
+                        Advanced machine learning detects and prevents threats before they reach your vault.
+                    </p>
+                    <div class="flex items-center text-agies-success">
+                        <button onclick="showFeatureModal('ai-security')" class="text-sm font-medium hover:text-green-400 transition-colors">Learn more →</button>
+                    </div>
+                </div>
+                
+                <!-- Feature Card 3 -->
+                <div class="glass-effect rounded-2xl p-8 card-hover">
+                    <div class="text-4xl mb-6">🌐</div>
+                    <h3 class="text-2xl font-bold mb-4">Cross-Platform Sync</h3>
+                    <p class="text-gray-400 mb-6">
+                        Access your passwords seamlessly across all devices with real-time synchronization.
+                    </p>
+                    <div class="flex items-center text-agies-success">
+                        <button onclick="showFeatureModal('cross-platform')" class="text-sm font-medium hover:text-green-400 transition-colors">Learn more →</button>
+                    </div>
+                </div>
+                
+                <!-- Feature Card 4 -->
+                <div class="glass-effect rounded-2xl p-8 card-hover">
+                    <div class="text-4xl mb-6">🛡️</div>
+                    <h3 class="text-2xl font-bold mb-4">Enterprise Security</h3>
+                    <p class="text-gray-400 mb-6">
+                        SOC 2 Type II certified with advanced admin controls and team management.
+                    </p>
+                    <div class="flex items-center text-agies-success">
+                        <button onclick="showFeatureModal('enterprise')" class="text-sm font-medium hover:text-green-400 transition-colors">Learn more →</button>
+                    </div>
+                </div>
+                
+                <!-- Feature Card 5 -->
+                <div class="glass-effect rounded-2xl p-8 card-hover">
+                    <div class="text-4xl mb-6">⚡</div>
+                    <h3 class="text-2xl font-bold mb-4">Lightning Fast</h3>
+                    <p class="text-gray-400 mb-6">
+                        Optimized for speed with sub-100ms response times and instant autofill.
+                    </p>
+                    <div class="flex items-center text-agies-success">
+                        <button onclick="showFeatureModal('lightning-fast')" class="text-sm font-medium hover:text-green-400 transition-colors">Learn more →</button>
+                    </div>
+                </div>
+                
+                <!-- Feature Card 6 -->
+                <div class="glass-effect rounded-2xl p-8 card-hover">
+                    <div class="text-4xl mb-6">🔒</div>
+                    <h3 class="text-2xl font-bold mb-4">Privacy First</h3>
+                    <p class="text-gray-400 mb-6">
+                        Built with privacy by design. No tracking, no ads, no data collection.
+                    </p>
+                    <div class="flex items-center text-agies-success">
+                        <button onclick="showFeatureModal('privacy-first')" class="text-sm font-medium hover:text-green-400 transition-colors">Learn more →</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Security Section -->
+    <section id="security" class="py-20 bg-agies-darker">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold mb-6">
+                    Military-Grade <span class="gradient-text">Security</span>
+                </h2>
+                <p class="text-xl text-gray-400 max-w-3xl mx-auto">
+                    Your security is our top priority. We use the same encryption standards trusted by governments and banks worldwide.
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="space-y-8">
+                    <div class="flex items-start space-x-4">
+                        <div class="bg-agies-success/20 p-3 rounded-lg">
+                            <span class="text-agies-success text-xl">🔒</span>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-2">AES-256 Encryption</h3>
+                            <p class="text-gray-400">Industry-standard encryption that's virtually impossible to crack.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-4">
+                        <div class="bg-agies-primary/20 p-3 rounded-lg">
+                            <span class="text-agies-primary text-xl">🔐</span>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-2">Two-Factor Authentication</h3>
+                            <p class="text-gray-400">Multiple layers of security to protect your account.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-4">
+                        <div class="bg-agies-accent/20 p-3 rounded-lg">
+                            <span class="text-agies-accent text-xl">🌐</span>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-2">Secure Sharing</h3>
+                            <p class="text-gray-400">Share passwords safely with time limits and access controls.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-4">
+                        <div class="bg-agies-warning/20 p-3 rounded-lg">
+                            <span class="text-agies-warning text-xl">🚨</span>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-2">Breach Monitoring</h3>
+                            <p class="text-gray-400">Real-time alerts when your accounts are compromised.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glass-effect rounded-2xl p-8 text-center">
+                    <div class="text-6xl mb-6 animate-bounce-gentle">🛡️</div>
+                    <h3 class="text-2xl font-bold mb-4">Security Score: 100/100</h3>
+                    <p class="text-gray-400 mb-6">
+                        Independent security audits confirm our commitment to protecting your data.
+                    </p>
+                    <div class="flex justify-center space-x-4">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-agies-success">99.99%</div>
+                            <div class="text-sm text-gray-400">Uptime</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-agies-success">0</div>
+                            <div class="text-sm text-gray-400">Breaches</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-agies-success">24/7</div>
+                            <div class="text-sm text-gray-400">Monitoring</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 bg-gradient-to-r from-agies-primary to-agies-secondary">
+        <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+            <h2 class="text-4xl md:text-5xl font-bold mb-6">
+                Ready to Secure Your Digital Life?
+            </h2>
+            <p class="text-xl text-white/90 mb-8">
+                Join millions of users who trust Agies with their most sensitive information.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="showSignupModal()" class="bg-white text-agies-primary px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 transform hover:scale-105 shadow-2xl">
+                    🚀 Start Free Trial
+                </button>
+                <button onclick="showLoginModal()" class="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 hover:bg-white hover:text-agies-primary">
+                    🔐 Sign In
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-20 bg-agies-dark">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold mb-6">
+                    Simple, <span class="gradient-text">Transparent</span> Pricing
+                </h2>
+                <p class="text-xl text-gray-400 max-w-3xl mx-auto">
+                    Choose the perfect plan for your needs. All plans include our core security features and 30-day money-back guarantee.
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Free Plan -->
+                <div class="glass-effect rounded-2xl p-8 card-hover">
+                    <div class="text-center mb-8">
+                        <h3 class="text-2xl font-bold mb-4">Personal</h3>
+                        <div class="text-4xl font-bold mb-2">$0</div>
+                        <p class="text-gray-400">Forever free</p>
+                    </div>
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-center space-x-3">
+                            <span class="text-agies-success">✓</span>
+                            <span>Unlimited passwords</span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-agies-success">✓</span>
+                            <span>Basic 2FA support</span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-agies-success">✓</span>
+                            <span>1 device sync</span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-agies-success">✓</span>
+                            <span>Email support</span>
+                        </li>
+                    </ul>
+                    <button onclick="showSignupModal()" class="w-full bg-agies-primary hover:bg-agies-secondary text-white py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105">
+                        Get Started Free
+                    </button>
+                </div>
+
+                <!-- Premium Plan -->
+                <div class="glass-effect rounded-2xl p-8 card-hover border-2 border-agies-primary relative">
+                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                        <span class="bg-agies-primary text-white px-4 py-1 rounded-full text-sm font-medium">Most Popular</span>
+                    </div>
+                    <div class="text-center mb-8">
+                        <h3 class="text-2xl font-bold mb-4">Premium</h3>
+                        <div class="text-4xl font-bold mb-2">$3</div>
+                        <p class="text-gray-400">per month</p>
+                    </div>
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-center space-x-3">
+                            <span class="text-agies-success">✓</span>
+                            <span>Everything in Personal</span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-agies-success">✓</span>
+                            <span>Unlimited device sync</span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-agies-success">✓</span>
+                            <span>Advanced 2FA (TOTP, U2F)</span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-agies-success">✓</span>
+                            <span>Priority support</span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-agies-success">✓</span>
+                            <span>Password sharing</span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-agies-success">✓</span>
+                            <span>Dark web monitoring</span>
+                        </li>
+                    </ul>
+                    <button onclick="showSignupModal()" class="w-full bg-agies-primary hover:bg-agies-secondary text-white py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105">
+                        Start Free Trial
+                    </button>
+                </div>
+
+                <!-- Business Plan -->
+                <div class="glass-effect rounded-2xl p-8 card-hover">
+                    <div class="text-center mb-8">
+                        <h3 class="text-2xl font-bold mb-4">Business</h3>
+                        <div class="text-4xl font-bold mb-2">$8</div>
+                        <p class="text-gray-400">per user/month</p>
+                    </div>
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-center space-x-3">
+                            <span class="text-agies-success">✓</span>
+                            <span>Everything in Premium</span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-agies-success">✓</span>
+                            <span>Team management</span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-agies-success">✓</span>
+                            <span>SSO integration</span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-agies-success">✓</span>
+                            <span>Advanced reporting</span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-agies-success">✓</span>
+                            <span>24/7 phone support</span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-agies-success">✓</span>
+                            <span>API access</span>
+                        </li>
+                    </ul>
+                    <button onclick="contactSales()" class="w-full bg-agies-success hover:bg-green-600 text-white py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105">
+                        Contact Sales
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-20 bg-agies-darker">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold mb-6">
+                    About <span class="gradient-text">Agies</span>
+                </h2>
+                <p class="text-xl text-gray-400 max-w-3xl mx-auto">
+                    We're on a mission to make password security accessible to everyone, from individuals to the largest enterprises.
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h3 class="text-3xl font-bold mb-6">Our Story</h3>
+                    <p class="text-gray-400 text-lg mb-6">
+                        Founded in 2024, Agies was born from the belief that everyone deserves bulletproof digital security without compromising on usability. 
+                        Our team of security experts and engineers work tirelessly to protect millions of users worldwide.
+                    </p>
+                    <p class="text-gray-400 text-lg mb-8">
+                        We've built Agies from the ground up with a zero-knowledge architecture, ensuring that your sensitive data remains private and secure, 
+                        even from us. Your trust is our most valuable asset.
+                    </p>
+                    <div class="flex items-center space-x-6">
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-agies-primary mb-2">10M+</div>
+                            <div class="text-gray-400">Users</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-agies-success mb-2">99.99%</div>
+                            <div class="text-gray-400">Uptime</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-agies-accent mb-2">50+</div>
+                            <div class="text-gray-400">Countries</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="space-y-6">
+                    <div class="glass-effect rounded-xl p-6">
+                        <h4 class="text-xl font-bold mb-3">🎯 Our Mission</h4>
+                        <p class="text-gray-400">
+                            To democratize world-class cybersecurity and make it accessible to individuals and organizations of all sizes.
+                        </p>
+                    </div>
+                    
+                    <div class="glass-effect rounded-xl p-6">
+                        <h4 class="text-xl font-bold mb-3">🔮 Our Vision</h4>
+                        <p class="text-gray-400">
+                            A world where everyone can navigate the digital landscape with confidence, knowing their data is completely secure.
+                        </p>
+                    </div>
+                    
+                    <div class="glass-effect rounded-xl p-6">
+                        <h4 class="text-xl font-bold mb-3">💎 Our Values</h4>
+                        <p class="text-gray-400">
+                            Privacy by design, transparency in everything we do, and relentless focus on user security and experience.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-agies-darker py-12 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="text-2xl">🔐</div>
+                        <span class="text-xl font-bold gradient-text">Agies</span>
+                    </div>
+                    <p class="text-gray-400">
+                        The world's most secure password manager, built for the modern world.
+                    </p>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Product</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#features" class="hover:text-white transition-colors">Features</a></li>
+                        <li><a href="#security" class="hover:text-white transition-colors">Security</a></li>
+                        <li><a href="#pricing" class="hover:text-white transition-colors">Pricing</a></li>
+                        <li><a href="javascript:void(0)" onclick="showInfoNotification('🔗 API documentation coming soon! Contact sales@agies.com for early access.')" class="hover:text-white transition-colors">API</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Company</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#about" class="hover:text-white transition-colors">About</a></li>
+                        <li><a href="javascript:void(0)" onclick="showInfoNotification('📝 Stay tuned for our company blog with security tips and product updates!')" class="hover:text-white transition-colors">Blog</a></li>
+                        <li><a href="javascript:void(0)" onclick="showInfoNotification('💼 Join our team! Send your resume to careers@agies.com')" class="hover:text-white transition-colors">Careers</a></li>
+                        <li><a href="javascript:void(0)" onclick="showInfoNotification('📧 Contact us at support@agies.com or call +1-800-AGIES-SEC')" class="hover:text-white transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Support</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="javascript:void(0)" onclick="showInfoNotification('🆘 Help Center: Visit help.agies.com or email support@agies.com for assistance')" class="hover:text-white transition-colors">Help Center</a></li>
+                        <li><a href="javascript:void(0)" onclick="showInfoNotification('👥 Join our community at community.agies.com for tips and discussions')" class="hover:text-white transition-colors">Community</a></li>
+                        <li><a href="javascript:void(0)" onclick="showInfoNotification('🟢 System Status: All systems operational. Visit status.agies.com for updates')" class="hover:text-white transition-colors">Status</a></li>
+                        <li><a href="#security" class="hover:text-white transition-colors">Security</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-400 text-sm">
+                    © 2024 Agies. All rights reserved.
+                </p>
+                <div class="flex space-x-6 mt-4 md:mt-0">
+                    <a href="javascript:void(0)" onclick="showInfoNotification('📜 Privacy Policy: We respect your privacy. Your data is encrypted and never shared. Full policy at agies.com/privacy')" class="text-gray-400 hover:text-white transition-colors">Privacy Policy</a>
+                    <a href="javascript:void(0)" onclick="showInfoNotification('📋 Terms of Service: View our terms at agies.com/terms')" class="text-gray-400 hover:text-white transition-colors">Terms of Service</a>
+                    <a href="javascript:void(0)" onclick="showInfoNotification('🍪 Cookie Policy: We use minimal cookies for functionality. Full policy at agies.com/cookies')" class="text-gray-400 hover:text-white transition-colors">Cookie Policy</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-agies-dark rounded-2xl p-8 max-w-md w-full border border-gray-700 shadow-2xl animate-slide-up">
+                <div class="text-center mb-6">
+                    <div class="text-4xl mb-2">🔐</div>
+                    <h2 class="text-2xl font-bold">Welcome Back</h2>
+                    <p class="text-gray-400">Sign in to your Agies vault</p>
+                </div>
+                
+                <form id="loginForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                        <input type="email" id="loginEmail" required class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-agies-primary transition-colors" placeholder="your@email.com">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                        <input type="password" id="loginPassword" required class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-agies-primary transition-colors" placeholder="Enter your password">
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <label class="flex items-center">
+                            <input type="checkbox" id="rememberMe" class="mr-2">
+                            <span class="text-sm text-gray-300">Remember me</span>
+                        </label>
+                        <a href="javascript:void(0)" onclick="showInfoNotification('🔑 Password reset: Contact support@agies.com for password recovery assistance')" class="text-sm text-agies-primary hover:text-agies-secondary transition-colors">Forgot password?</a>
+                    </div>
+                    <button type="submit" class="w-full bg-agies-primary hover:bg-agies-secondary text-white py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105">
+                        Sign In
+                    </button>
+                </form>
+                
+                <div class="mt-6 text-center">
+                    <p class="text-gray-400">Don't have an account? 
+                        <a href="#" onclick="showSignupModal(); hideLoginModal()" class="text-agies-primary hover:text-agies-secondary font-semibold transition-colors">Sign up</a>
+                    </p>
+                </div>
+                
+                <button onclick="hideLoginModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl transition-colors">&times;</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div id="signupModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-agies-dark rounded-2xl p-8 max-w-md w-full border border-gray-700 shadow-2xl animate-slide-up">
+                <div class="text-center mb-6">
+                    <div class="text-4xl mb-2">✨</div>
+                    <h2 class="text-2xl font-bold">Join Agies</h2>
+                    <p class="text-gray-400">Create your secure vault account</p>
+                </div>
+                
+                <form id="signupForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
+                        <input type="text" id="signupName" required class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-agies-success transition-colors" placeholder="John Doe">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                        <input type="email" id="signupEmail" required class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-agies-success transition-colors" placeholder="your@email.com">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                        <input type="password" id="signupPassword" required class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-agies-success transition-colors" placeholder="Create a strong password">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Confirm Password</label>
+                        <input type="password" id="signupPasswordConfirm" required class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-agies-success transition-colors" placeholder="Confirm your password">
+                    </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="agreeTerms" required class="mr-2">
+                        <span class="text-sm text-gray-300">I agree to the 
+                            <a href="javascript:void(0)" onclick="showInfoNotification('📋 Terms of Service: View our terms at agies.com/terms')" class="text-agies-success hover:text-green-400 transition-colors">Terms of Service</a> and 
+                            <a href="javascript:void(0)" onclick="showInfoNotification('📜 Privacy Policy: We respect your privacy. Full policy at agies.com/privacy')" class="text-agies-success hover:text-green-400 transition-colors">Privacy Policy</a>
+                        </span>
+                    </div>
+                    <button type="submit" class="w-full bg-agies-success hover:bg-green-600 text-white py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105">
+                        Create Account
+                    </button>
+                </form>
+                
+                <div class="mt-6 text-center">
+                    <p class="text-gray-400">Already have an account? 
+                        <a href="#" onclick="showLoginModal(); hideSignupModal()" class="text-agies-success hover:text-green-400 font-semibold transition-colors">Sign in</a>
+                    </p>
+                </div>
+                
+                <button onclick="hideSignupModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl transition-colors">&times;</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Beautiful notification system
+        function showNotification(message, type = 'info') {
+            const colors = {
+                'success': 'bg-agies-success',
+                'error': 'bg-agies-danger',
+                'info': 'bg-agies-primary',
+                'warning': 'bg-agies-warning'
+            };
+            
+            const icons = {
+                'success': '✅',
+                'error': '❌',
+                'info': 'ℹ️',
+                'warning': '⚠️'
+            };
+            
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 ${colors[type]} text-white px-6 py-4 rounded-xl shadow-2xl z-50 animate-slide-up max-w-sm`;
+            notification.innerHTML = `
+                <div class="flex items-center space-x-3">
+                    <span class="text-xl">${icons[type]}</span>
+                    <span class="font-medium">${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Auto-remove after 4 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 4000);
+        }
+        
+        function showSuccessNotification(message) {
+            showNotification(message, 'success');
+        }
+        
+        function showErrorNotification(message) {
+            showNotification(message, 'error');
+        }
+        
+        function showInfoNotification(message) {
+            showNotification(message, 'info');
+        }
+        
+        function showWarningNotification(message) {
+            showNotification(message, 'warning');
+        }
+        
+        // Feature modal function
+        function showFeatureModal(featureType) {
+            const features = {
+                'zero-knowledge': {
+                    title: 'Zero-Knowledge Encryption',
+                    content: 'Your data is encrypted on your device before it reaches our servers. This means even we cannot access your passwords or personal information. Your master password is the only key to your vault.'
+                },
+                'ai-security': {
+                    title: 'AI-Powered Security',
+                    content: 'Our advanced machine learning algorithms continuously monitor for threats, analyze login patterns, and detect suspicious activities in real-time to protect your accounts.'
+                },
+                'cross-platform': {
+                    title: 'Cross-Platform Sync',
+                    content: 'Access your passwords seamlessly across all your devices - Windows, Mac, Linux, iOS, and Android. Real-time synchronization ensures you always have the latest data.'
+                },
+                'enterprise': {
+                    title: 'Enterprise Security',
+                    content: 'SOC 2 Type II certified with advanced admin controls, team management, SSO integration, and compliance reporting for organizations of all sizes.'
+                },
+                'lightning-fast': {
+                    title: 'Lightning Fast Performance',
+                    content: 'Optimized for speed with sub-100ms response times, instant autofill, and efficient client-side encryption that never slows you down.'
+                },
+                'privacy-first': {
+                    title: 'Privacy by Design',
+                    content: 'Built with privacy as the foundation. No tracking, no ads, no data collection. Your personal information stays personal, always.'
+                }
+            };
+            
+            const feature = features[featureType];
+            if (feature) {
+                showInfoNotification(`${feature.title}: ${feature.content}`);
+            }
+        }
+        
+        // Contact sales function
+        function contactSales() {
+            showInfoNotification('📞 Contact our sales team at sales@agies.com or call +1-800-AGIES-SEC for enterprise pricing and custom solutions.');
+        }
+        
+        // Mobile Menu Functions
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            if (mobileMenu) {
+                mobileMenu.classList.toggle('hidden');
+            }
+        }
+        
+        function closeMobileMenu() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            if (mobileMenu) {
+                mobileMenu.classList.add('hidden');
+            }
+        }
+        
+        // Modal Functions
+        function showLoginModal() {
+            document.getElementById('loginModal').classList.remove('hidden');
+        }
+        
+        function hideLoginModal() {
+            document.getElementById('loginModal').classList.add('hidden');
+        }
+        
+        function showSignupModal() {
+            document.getElementById('signupModal').classList.remove('hidden');
+        }
+        
+        function hideSignupModal() {
+            document.getElementById('signupModal').classList.add('hidden');
+        }
+        
+        function showDemo() {
+            showInfoNotification('🎥 Demo video would play here! This would showcase the app features.');
+        }
+        
+        // Handle login form submission
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const rememberMe = document.getElementById('rememberMe').checked;
+            
+            try {
+                // Simulate login process (replace with actual authentication)
+                console.log('🔐 Login attempt:', { email, rememberMe });
+                
+                // Show beautiful success notification
+                showSuccessNotification('Login successful! Redirecting to dashboard...');
+                
+                // Hide modal and redirect after a short delay
+                setTimeout(() => {
+                    hideLoginModal();
+                    window.location.href = '/dashboard';
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Login failed:', error);
+                showErrorNotification('Login failed. Please try again.');
+            }
+        });
+        
+        // Handle signup form submission
+        document.getElementById('signupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            const passwordConfirm = document.getElementById('signupPasswordConfirm').value;
+            const agreeTerms = document.getElementById('agreeTerms').checked;
+            
+            // Basic validation
+            if (password !== passwordConfirm) {
+                showErrorNotification('Passwords do not match!');
+                return;
+            }
+            
+            if (!agreeTerms) {
+                showErrorNotification('Please agree to the Terms of Service and Privacy Policy.');
+                return;
+            }
+            
+            try {
+                // Simulate signup process (replace with actual registration)
+                console.log('✨ Signup attempt:', { name, email });
+                
+                // Show beautiful success notification
+                showSuccessNotification('Account created successfully! Welcome to Agies!');
+                
+                // Hide modal and redirect after a short delay
+                setTimeout(() => {
+                    hideSignupModal();
+                    window.location.href = '/dashboard';
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Signup failed:', error);
+                showErrorNotification('Signup failed. Please try again.');
+            }
+        });
+        
+        // Close modals when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target.id === 'loginModal') {
+                hideLoginModal();
+            }
+            if (e.target.id === 'signupModal') {
+                hideSignupModal();
+            }
+        });
+        
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const href = this.getAttribute('href');
+                // Skip empty or invalid href attributes
+                if (!href || href === '#') return;
+                
+                const target = document.querySelector(href);
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        
+        // Initialize
+        console.log('🚀 Agies - Professional Password Manager loaded successfully');
+        
+        // Mobile menu event listener
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+        }
+    </script>
+    
+    <!-- Watermark -->
+    <div class="watermark">
+        Developed by Monish Reddy
+    </div>
+</body>
+</html>

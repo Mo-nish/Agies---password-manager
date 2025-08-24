@@ -1,0 +1,68 @@
+{
+  "name": "agies-password-manager-desktop",
+  "version": "1.0.0",
+  "description": "Agies Password Manager - Desktop App for Windows, macOS, and Linux",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build",
+    "tauri:build:windows": "tauri build --target x86_64-pc-windows-msvc",
+    "tauri:build:macos": "tauri build --target x86_64-apple-darwin",
+    "tauri:build:linux": "tauri build --target x86_64-unknown-linux-gnu",
+    "tauri:build:all": "npm run tauri:build:windows && npm run tauri:build:macos && npm run tauri:build:linux"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.8.1",
+    "@tauri-apps/api": "^1.5.0",
+    "@tauri-apps/plugin-shell": "^1.0.0",
+    "@tauri-apps/plugin-dialog": "^1.0.0",
+    "@tauri-apps/plugin-fs": "^1.0.0",
+    "@tauri-apps/plugin-store": "^1.0.0",
+    "@tauri-apps/plugin-notification": "^1.0.0",
+    "@tauri-apps/plugin-global-shortcut": "^1.0.0",
+    "crypto-js": "^4.1.1",
+    "qrcode": "^1.5.3",
+    "react-qr-code": "^2.0.12",
+    "react-hot-toast": "^2.4.1",
+    "lucide-react": "^0.263.1",
+    "clsx": "^1.2.1",
+    "tailwind-merge": "^1.14.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.28",
+    "@types/react-dom": "^18.0.11",
+    "@types/crypto-js": "^4.1.2",
+    "@vitejs/plugin-react": "^3.1.0",
+    "autoprefixer": "^10.4.14",
+    "postcss": "^8.4.24",
+    "tailwindcss": "^3.3.2",
+    "typescript": "^4.9.5",
+    "vite": "^4.2.0",
+    "@tauri-apps/cli": "^1.5.0"
+  },
+  "keywords": [
+    "tauri",
+    "desktop",
+    "password-manager",
+    "security",
+    "encryption",
+    "windows",
+    "macos",
+    "linux"
+  ],
+  "author": "Agies Security Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/agies/password-manager-desktop"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

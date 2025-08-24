@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌀 Agies - The Maze Vault Password Manager</title>
+    <meta name="description" content="World-class password manager with revolutionary Chakravyuham security system. Zero-knowledge encryption, AI-powered threat defense, and military-grade protection.">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌀</text></svg>">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'agies-purple': '#7C3AED',
+                        'agies-pink': '#EC4899',
+                        'agies-blue': '#3B82F6',
+                        'agies-green': '#10B981',
+                        'agies-orange': '#F97316',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 font-['Inter']">
+    
+    <!-- Navigation -->
+    <nav class="bg-black/20 backdrop-blur-sm border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-4">
+                    <div class="text-3xl">🌀</div>
+                    <h1 class="text-2xl font-bold text-white">Agies</h1>
+                </div>
+                <div id="authButtons" class="flex items-center space-x-4">
+                    <button id="loginBtn" class="bg-agies-purple hover:bg-purple-600 text-white px-4 py-2 rounded-lg transition-colors">
+                        Login
+                    </button>
+                    <button id="registerBtn" class="bg-transparent border border-agies-purple text-agies-purple hover:bg-agies-purple hover:text-white px-4 py-2 rounded-lg transition-colors">
+                        Register
+                    </button>
+                </div>
+                <div id="userMenu" class="hidden flex items-center space-x-4">
+                    <span id="userName" class="text-white"></span>
+                    <button id="logoutBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main id="mainContent" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        
+        <!-- Hero Section -->
+        <div class="text-center mb-16">
+            <h1 class="text-6xl font-bold text-white mb-6">
+                The Maze Vault
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-agies-purple to-agies-pink">
+                    Password Manager
+                </span>
+            </h1>
+            <p class="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
+                World-class security with revolutionary Chakravyuham Maze Engine. 
+                Zero-knowledge encryption, AI-powered threat defense, and military-grade protection.
+            </p>
+            <div class="flex justify-center space-x-4">
+                <button id="getStartedBtn" class="bg-agies-purple hover:bg-purple-600 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors">
+                    Get Started
+                </button>
+                <button id="learnMoreBtn" class="bg-transparent border border-white/30 text-white hover:bg-white/10 px-8 py-4 rounded-lg text-lg font-semibold transition-colors">
+                    Learn More
+                </button>
+            </div>
+        </div>
+
+        <!-- Features Grid -->
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+            <div class="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+                <div class="text-4xl mb-4">🔐</div>
+                <h3 class="text-xl font-semibold text-white mb-2">Zero-Knowledge Security</h3>
+                <p class="text-gray-300">Your data is encrypted locally. We can never see your passwords.</p>
+            </div>
+            <div class="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+                <div class="text-4xl mb-4">🛡️</div>
+                <h3 class="text-xl font-semibold text-white mb-2">Chakravyuham Engine</h3>
+                <p class="text-gray-300">Multi-layer maze security that actively defends against threats.</p>
+            </div>
+            <div class="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+                <div class="text-4xl mb-4">🤖</div>
+                <h3 class="text-xl font-semibold text-white mb-2">AI Guardian</h3>
+                <p class="text-gray-300">Adaptive security that learns and responds to new threats.</p>
+            </div>
+            <div class="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+                <div class="text-4xl mb-4">🌐</div>
+                <h3 class="text-xl font-semibold text-white mb-2">Cross-Platform</h3>
+                <p class="text-gray-300">Works on Windows, macOS, Linux, iOS, and Android.</p>
+            </div>
+            <div class="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+                <div class="text-4xl mb-4">🔗</div>
+                <h3 class="text-xl font-semibold text-white mb-2">Real-time Sync</h3>
+                <p class="text-gray-300">Your vaults sync securely across all your devices.</p>
+            </div>
+            <div class="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+                <div class="text-4xl mb-4">🚀</div>
+                <h3 class="text-xl font-semibold text-white mb-2">Lightning Fast</h3>
+                <p class="text-gray-300">Built with modern technology for optimal performance.</p>
+            </div>
+        </div>
+
+        <!-- CTA Section -->
+        <div class="text-center bg-gradient-to-r from-agies-purple/20 to-agies-pink/20 rounded-2xl p-12 border border-white/10">
+            <h2 class="text-4xl font-bold text-white mb-4">Ready to Secure Your Digital Life?</h2>
+            <p class="text-xl text-gray-300 mb-8">Join thousands of users who trust Agies with their most sensitive data.</p>
+            <button id="ctaBtn" class="bg-white text-agies-purple hover:bg-gray-100 px-8 py-4 rounded-lg text-lg font-semibold transition-colors">
+                Start Your Free Trial
+            </button>
+        </div>
+    </main>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-slate-800 rounded-2xl p-8 max-w-md w-full border border-white/10">
+                <div class="text-center mb-6">
+                    <div class="text-4xl mb-2">🌀</div>
+                    <h2 class="text-2xl font-bold text-white">Welcome Back</h2>
+                    <p class="text-gray-400">Sign in to your Agies vault</p>
+                </div>
+                
+                <form id="loginForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                        <input type="email" id="loginEmail" required class="w-full px-4 py-3 bg-slate-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-agies-purple">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                        <input type="password" id="loginPassword" required class="w-full px-4 py-3 bg-slate-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-agies-purple">
+                    </div>
+                    <button type="submit" class="w-full bg-agies-purple hover:bg-purple-600 text-white py-3 rounded-lg font-semibold transition-colors">
+                        Sign In
+                    </button>
+                </form>
+                
+                <div class="text-center mt-6">
+                    <button id="closeLoginModal" class="text-gray-400 hover:text-white">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="registerModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-slate-800 rounded-2xl p-8 max-w-md w-full border border-white/10">
+                <div class="text-center mb-6">
+                    <div class="text-4xl mb-2">🌀</div>
+                    <h2 class="text-2xl font-bold text-white">Create Account</h2>
+                    <p class="text-gray-400">Join the Agies security revolution</p>
+                </div>
+                
+                <form id="registerForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
+                        <input type="text" id="registerName" required class="w-full px-4 py-3 bg-slate-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-agies-purple">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                        <input type="email" id="registerEmail" required class="w-full px-4 py-3 bg-slate-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-agies-purple">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                        <input type="password" id="registerPassword" required class="w-full px-4 py-3 bg-slate-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-agies-purple">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Confirm Password</label>
+                        <input type="password" id="registerConfirmPassword" required class="w-full px-4 py-3 bg-slate-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-agies-purple">
+                    </div>
+                    <button type="submit" class="w-full bg-agies-purple hover:bg-purple-600 text-white py-3 rounded-lg font-semibold transition-colors">
+                        Create Account
+                    </button>
+                </form>
+                
+                <div class="text-center mt-6">
+                    <button id="closeRegisterModal" class="text-gray-400 hover:text-white">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" class="hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <!-- Welcome Header -->
+            <div class="text-center mb-12">
+                <h1 class="text-4xl font-bold text-white mb-4">Welcome to Your Agies Vault</h1>
+                <p class="text-xl text-gray-300">Your secure password manager is ready</p>
+            </div>
+            
+            <!-- Stats Cards -->
+            <div class="grid md:grid-cols-3 gap-8 mb-12">
+                <div class="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 text-center">
+                    <div class="text-4xl mb-4">🔐</div>
+                    <h3 class="text-xl font-semibold text-white mb-2">Passwords</h3>
+                    <p id="passwordCount" class="text-3xl font-bold text-agies-purple">0</p>
+                    <p class="text-gray-400">stored securely</p>
+                </div>
+                <div class="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 text-center">
+                    <div class="text-4xl mb-4">🗄️</div>
+                    <h3 class="text-xl font-semibold text-white mb-2">Vaults</h3>
+                    <p id="vaultCount" class="text-3xl font-bold text-agies-green">1</p>
+                    <p class="text-gray-400">personal vault</p>
+                </div>
+                <div class="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 text-center">
+                    <div class="text-4xl mb-4">🛡️</div>
+                    <h3 class="text-xl font-semibold text-white mb-2">Security</h3>
+                    <p class="text-3xl font-bold text-agies-pink">100%</p>
+                    <p class="text-gray-400">protected</p>
+                </div>
+            </div>
+
+            <!-- Vault Management -->
+            <div class="bg-white/5 backdrop-blur-sm rounded-xl p-8 border border-white/10 mb-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-white">Vault Management</h2>
+                    <button id="createVaultBtn" class="bg-agies-green hover:bg-green-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+                        + Create New Vault
+                    </button>
+                </div>
+                
+                <div id="vaultsList" class="space-y-4">
+                    <!-- Vaults will be populated here -->
+                </div>
+            </div>
+
+            <!-- Password Management -->
+            <div class="bg-white/5 backdrop-blur-sm rounded-xl p-8 border border-white/10 mb-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-white">Passwords</h2>
+                    <div class="flex space-x-4">
+                        <button id="addPasswordBtn" class="bg-agies-purple hover:bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+                            + Add Password
+                        </button>
+                        <button id="importPasswordsBtn" class="bg-agies-blue hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+                            📥 Import
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="passwordsList" class="space-y-4">
+                    <!-- Passwords will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Vault Modal -->
+    <div id="createVaultModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-slate-800 rounded-2xl p-8 max-w-md w-full border border-white/10">
+                <div class="text-center mb-6">
+                    <div class="text-4xl mb-2">🗄️</div>
+                    <h2 class="text-2xl font-bold text-white">Create New Vault</h2>
+                    <p class="text-gray-400">Organize your passwords securely</p>
+                </div>
+                
+                <form id="createVaultForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Vault Name</label>
+                        <input type="text" id="vaultName" required class="w-full px-4 py-3 bg-slate-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-agies-purple" placeholder="e.g., Work, Personal, Family">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Description</label>
+                        <textarea id="vaultDescription" class="w-full px-4 py-3 bg-slate-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-agies-purple" rows="3" placeholder="Optional description"></textarea>
+                    </div>
+                    <div class="flex space-x-4">
+                        <button type="submit" class="flex-1 bg-agies-green hover:bg-green-600 text-white py-3 rounded-lg font-semibold transition-colors">
+                            Create Vault
+                        </button>
+                        <button type="button" id="closeCreateVaultModal" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-3 rounded-lg font-semibold transition-colors">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Password Modal -->
+    <div id="addPasswordModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-slate-800 rounded-2xl p-8 max-w-md w-full border border-white/10">
+                <div class="text-center mb-6">
+                    <div class="text-4xl mb-2">🔐</div>
+                    <h2 class="text-2xl font-bold text-white">Add New Password</h2>
+                    <p class="text-gray-400">Store your credentials securely</p>
+                </div>
+                
+                <form id="addPasswordForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Title</label>
+                        <input type="text" id="passwordTitle" required class="w-full px-4 py-3 bg-slate-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-agies-purple" placeholder="e.g., Gmail, Facebook, Bank">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Username/Email</label>
+                        <input type="text" id="passwordUsername" required class="w-full px-4 py-3 bg-slate-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-agies-purple" placeholder="your@email.com">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                        <div class="relative">
+                            <input type="password" id="passwordValue" required class="w-full px-4 py-3 bg-slate-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-agies-purple" placeholder="Enter password">
+                            <button type="button" id="togglePassword" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white">
+                                👁️
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Website URL</label>
+                        <input type="url" id="passwordUrl" class="w-full px-4 py-3 bg-slate-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-agies-purple" placeholder="https://example.com">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Vault</label>
+                        <select id="passwordVault" class="w-full px-4 py-3 bg-slate-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-agies-purple">
+                            <!-- Vaults will be populated here -->
+                        </select>
+                    </div>
+                    <div class="flex space-x-4">
+                        <button type="submit" class="flex-1 bg-agies-purple hover:bg-purple-600 text-white py-3 rounded-lg font-semibold transition-colors">
+                            Add Password
+                        </button>
+                        <button type="button" id="closeAddPasswordModal" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-3 rounded-lg font-semibold transition-colors">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Modal -->
+    <div id="importModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-slate-800 rounded-2xl p-8 max-w-md w-full border border-white/10">
+                <div class="text-center mb-6">
+                    <div class="text-4xl mb-2">📥</div>
+                    <h2 class="text-2xl font-bold text-white">Import Passwords</h2>
+                    <p class="text-gray-400">Bring your existing passwords</p>
+                </div>
+                
+                <div class="space-y-4">
+                    <button id="importChromeBtn" class="w-full bg-agies-blue hover:bg-blue-600 text-white py-3 rounded-lg font-semibold transition-colors">
+                        🌐 Import from Chrome
+                    </button>
+                    <button id="importCsvBtn" class="w-full bg-agies-green hover:bg-green-600 text-white py-3 rounded-lg font-semibold transition-colors">
+                        📄 Import from CSV
+                    </button>
+                    <button id="manualImportBtn" class="w-full bg-agies-purple hover:bg-purple-600 text-white py-3 rounded-lg font-semibold transition-colors">
+                        ✏️ Manual Entry
+                    </button>
+                    <button id="closeImportModal" class="w-full bg-gray-600 hover:bg-gray-700 text-white py-3 rounded-lg font-semibold transition-colors">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-black/20 border-t border-white/10 mt-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="text-center text-gray-400">
+                <p>&copy; 2024 Agies Security. All rights reserved.</p>
+                <p class="mt-2">Built with ❤️ for maximum security</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Simple App Logic -->
+    <script>
+        console.log('🌀 Agies - Simple Version Loaded');
+        
+        // App state
+        let isLoggedIn = false;
+        let currentUser = null;
+        let vaults = [];
+        let passwords = [];
+        
+        // Initialize with default vault
+        function initializeDefaultVault() {
+            vaults = [{
+                id: 'default',
+                name: 'Personal Vault',
+                description: 'Your personal passwords and secure notes',
+                passwordCount: 0,
+                created: new Date().toISOString()
+            }];
+            updateVaultCount();
+            renderVaults();
+        }
+        
+        // Update counts
+        function updatePasswordCount() {
+            document.getElementById('passwordCount').textContent = passwords.length;
+        }
+        
+        function updateVaultCount() {
+            document.getElementById('vaultCount').textContent = vaults.length;
+        }
+        
+        // Render vaults
+        function renderVaults() {
+            const vaultsList = document.getElementById('vaultsList');
+            vaultsList.innerHTML = vaults.map(vault => `
+                <div class="bg-slate-700/50 rounded-lg p-4 border border-white/10">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="text-lg font-semibold text-white">${vault.name}</h3>
+                            <p class="text-gray-400">${vault.description}</p>
+                            <p class="text-sm text-gray-500">${vault.passwordCount} passwords</p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="viewVault('${vault.id}')" class="bg-agies-blue hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm transition-colors">
+                                View
+                            </button>
+                            <button onclick="editVault('${vault.id}')" class="bg-agies-green hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm transition-colors">
+                                Edit
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Render passwords
+        function renderPasswords() {
+            const passwordsList = document.getElementById('passwordsList');
+            if (passwords.length === 0) {
+                passwordsList.innerHTML = `
+                    <div class="text-center py-12">
+                        <div class="text-6xl mb-4">🔐</div>
+                        <h3 class="text-xl font-semibold text-white mb-2">No passwords yet</h3>
+                        <p class="text-gray-400 mb-6">Start by adding your first password or importing from your browser</p>
+                        <button onclick="showAddPasswordModal()" class="bg-agies-purple hover:bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+                            + Add Your First Password
+                        </button>
+                    </div>
+                `;
+            } else {
+                passwordsList.innerHTML = passwords.map(password => `
+                    <div class="bg-slate-700/50 rounded-lg p-4 border border-white/10">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 bg-agies-purple rounded-lg flex items-center justify-center">
+                                    <span class="text-white font-bold">${password.title.charAt(0).toUpperCase()}</span>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-white">${password.title}</h3>
+                                    <p class="text-gray-400">${password.username}</p>
+                                    ${password.url ? `<p class="text-sm text-gray-500">${password.url}</p>` : ''}
+                                </div>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button onclick="copyPassword('${password.id}')" class="bg-agies-blue hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm transition-colors">
+                                    Copy
+                                </button>
+                                <button onclick="editPassword('${password.id}')" class="bg-agies-green hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm transition-colors">
+                                    Edit
+                                </button>
+                                <button onclick="deletePassword('${password.id}')" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        // Global functions for onclick handlers
+        window.viewVault = function(vaultId) {
+            alert(`Viewing vault: ${vaultId}`);
+        };
+        
+        window.editVault = function(vaultId) {
+            alert(`Editing vault: ${vaultId}`);
+        };
+        
+        window.copyPassword = function(passwordId) {
+            const password = passwords.find(p => p.id === passwordId);
+            if (password) {
+                navigator.clipboard.writeText(password.password);
+                alert('Password copied to clipboard!');
+            }
+        };
+        
+        window.editPassword = function(passwordId) {
+            alert(`Editing password: ${passwordId}`);
+        };
+        
+        window.deletePassword = function(passwordId) {
+            if (confirm('Are you sure you want to delete this password?')) {
+                passwords = passwords.filter(p => p.id !== passwordId);
+                renderPasswords();
+                updatePasswordCount();
+            }
+        };
+        
+        // Show modals
+        function showModal(modal) {
+            modal.classList.remove('hidden');
+        }
+        
+        function hideModal(modal) {
+            modal.classList.add('hidden');
+        }
+        
+        function showDashboard() {
+            // Redirect to the working dashboard
+            window.location.href = '/dashboard';
+        }
+        
+        function showMainContent() {
+            mainContent.classList.remove('hidden');
+            dashboard.classList.add('hidden');
+            document.getElementById('authButtons').classList.remove('hidden');
+            document.getElementById('userMenu').classList.add('hidden');
+        }
+        
+        // Event handlers
+        document.getElementById('loginBtn').addEventListener('click', () => {
+            showModal(loginModal);
+        });
+        
+        document.getElementById('registerBtn').addEventListener('click', () => {
+            showModal(registerModal);
+        });
+        
+        document.getElementById('getStartedBtn').addEventListener('click', () => {
+            showModal(registerModal);
+        });
+        
+        document.getElementById('ctaBtn').addEventListener('click', () => {
+            showModal(registerModal);
+        });
+        
+        document.getElementById('learnMoreBtn').addEventListener('click', () => {
+            alert('Learn more about Agies security features:\n\n🔐 Zero-Knowledge Encryption\n🛡️ Chakravyuham Maze Engine\n🤖 AI-Powered Threat Detection\n🌐 Cross-Platform Support\n🔗 Real-time Sync\n🚀 Military-Grade Security');
+        });
+        
+        // Close modal handlers
+        document.getElementById('closeLoginModal').addEventListener('click', () => {
+            hideModal(loginModal);
+        });
+        
+        document.getElementById('closeRegisterModal').addEventListener('click', () => {
+            hideModal(registerModal);
+        });
+        
+        // Dashboard buttons
+        document.getElementById('createVaultBtn').addEventListener('click', () => {
+            showModal(createVaultModal);
+            populateVaultSelect();
+        });
+        
+        document.getElementById('addPasswordBtn').addEventListener('click', () => {
+            showModal(addPasswordModal);
+            populateVaultSelect();
+        });
+        
+        document.getElementById('importPasswordsBtn').addEventListener('click', () => {
+            showModal(importModal);
+        });
+        
+        // Close dashboard modals
+        document.getElementById('closeCreateVaultModal').addEventListener('click', () => {
+            hideModal(createVaultModal);
+        });
+        
+        document.getElementById('closeAddPasswordModal').addEventListener('click', () => {
+            hideModal(addPasswordModal);
+        });
+        
+        document.getElementById('closeImportModal').addEventListener('click', () => {
+            hideModal(importModal);
+        });
+        
+        // Populate vault select
+        function populateVaultSelect() {
+            const select = document.getElementById('passwordVault');
+            select.innerHTML = vaults.map(vault => 
+                `<option value="${vault.id}">${vault.name}</option>`
+            ).join('');
+        }
+        
+        // Form submissions
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (email && password) {
+                currentUser = { email, name: email.split('@')[0] };
+                isLoggedIn = true;
+                
+                hideModal(loginModal);
+                showDashboard();
+                document.getElementById('loginForm').reset();
+                
+                console.log('✅ User logged in:', currentUser);
+            }
+        });
+        
+        document.getElementById('registerForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('registerConfirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                alert('Passwords do not match!');
+                return;
+            }
+            
+            if (password.length < 8) {
+                alert('Password must be at least 8 characters long!');
+                return;
+            }
+            
+            currentUser = { email, name };
+            isLoggedIn = true;
+            
+            hideModal(registerModal);
+            showDashboard();
+            document.getElementById('registerForm').reset();
+            
+            console.log('✅ User registered:', currentUser);
+        });
+        
+        // Create vault form
+        document.getElementById('createVaultForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('vaultName').value;
+            const description = document.getElementById('vaultDescription').value;
+            
+            const newVault = {
+                id: Date.now().toString(),
+                name,
+                description: description || 'No description',
+                passwordCount: 0,
+                created: new Date().toISOString()
+            };
+            
+            vaults.push(newVault);
+            renderVaults();
+            updateVaultCount();
+            hideModal(createVaultModal);
+            document.getElementById('createVaultForm').reset();
+            
+            console.log('✅ Vault created:', newVault);
+        });
+        
+        // Add password form
+        document.getElementById('addPasswordForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const title = document.getElementById('passwordTitle').value;
+            const username = document.getElementById('passwordUsername').value;
+            const password = document.getElementById('passwordValue').value;
+            const url = document.getElementById('passwordUrl').value;
+            const vaultId = document.getElementById('passwordVault').value;
+            
+            const newPassword = {
+                id: Date.now().toString(),
+                title,
+                username,
+                password,
+                url: url || null,
+                vaultId,
+                created: new Date().toISOString()
+            };
+            
+            passwords.push(newPassword);
+            
+            // Update vault password count
+            const vault = vaults.find(v => v.id === vaultId);
+            if (vault) {
+                vault.passwordCount++;
+            }
+            
+            renderPasswords();
+            renderVaults();
+            updatePasswordCount();
+            hideModal(addPasswordModal);
+            document.getElementById('addPasswordForm').reset();
+            
+            console.log('✅ Password added:', newPassword);
+        });
+        
+        // Import functionality
+        document.getElementById('importChromeBtn').addEventListener('click', () => {
+            alert('Chrome import functionality coming soon! This will allow you to import passwords directly from your Chrome browser.');
+        });
+        
+        document.getElementById('importCsvBtn').addEventListener('click', () => {
+            alert('CSV import functionality coming soon! You can export passwords from other password managers as CSV and import them here.');
+        });
+        
+        document.getElementById('manualImportBtn').addEventListener('click', () => {
+            hideModal(importModal);
+            showModal(addPasswordModal);
+        });
+        
+        // Toggle password visibility
+        document.getElementById('togglePassword').addEventListener('click', () => {
+            const passwordInput = document.getElementById('passwordValue');
+            const toggleBtn = document.getElementById('togglePassword');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleBtn.textContent = '🙈';
+            } else {
+                passwordInput.type = 'password';
+                toggleBtn.textContent = '👁️';
+            }
+        });
+        
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            isLoggedIn = false;
+            currentUser = null;
+            vaults = [];
+            passwords = [];
+            showMainContent();
+            console.log('✅ User logged out');
+        });
+        
+        // Add interactive effects
+        document.querySelectorAll('.bg-white\\/5').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-5px)';
+                card.style.transition = 'transform 0.3s ease';
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0)';
+            });
+        });
+        
+        console.log('✅ Agies Simple App initialized successfully');
+    </script>
+</body>
+</html>

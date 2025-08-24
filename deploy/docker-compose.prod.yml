@@ -1,0 +1,101 @@
+version: '3.8'
+
+services:
+  # Agies Web Application
+  agies-app:
+    build: 
+      context: ..
+      dockerfile: deploy/Dockerfile.prod
+    ports:
+      - "443:443"
+      - "80:80"
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=agies_maze_vault
+      - DB_USER=agies
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET=${JWT_SECRET}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      - DOMAIN=${DOMAIN}
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ./ssl:/etc/ssl/certs
+      - ./backups:/app/backups
+    networks:
+      - agies-network
+    restart: unless-stopped
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: agies_maze_vault
+      POSTGRES_USER: agies
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    networks:
+      - agies-network
+    restart: unless-stopped
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    networks:
+      - agies-network
+    restart: unless-stopped
+
+  # Nginx Load Balancer & SSL Termination
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/ssl/certs
+      - ../public:/var/www/html
+    depends_on:
+      - agies-app
+    networks:
+      - agies-network
+    restart: unless-stopped
+
+  # Backup Service
+  backup:
+    image: postgres:15-alpine
+    command: |
+      sh -c '
+      while true; do
+        sleep 86400  # 24 hours
+        pg_dump -h postgres -U agies agies_maze_vault > /backups/backup_$$(date +%Y%m%d_%H%M%S).sql
+        find /backups -name "backup_*.sql" -mtime +7 -delete
+      done
+      '
+    environment:
+      PGPASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./backups:/backups
+    depends_on:
+      - postgres
+    networks:
+      - agies-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  agies-network:
+    driver: bridge
