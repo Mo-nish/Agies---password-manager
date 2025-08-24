@@ -1,0 +1,36 @@
+[build]
+  publish = "public"
+  command = "echo 'Static site - no build required'"
+
+[[redirects]]
+  from = "/"
+  to = "/dashboard-working.html"
+  status = 302
+
+[[redirects]]
+  from = "/dashboard"
+  to = "/dashboard-working.html"
+  status = 302
+
+[[redirects]]
+  from = "/security-dashboard"
+  to = "/security-dashboard-working.html"
+  status = 302
+
+[[redirects]]
+  from = "/vaults"
+  to = "/vaults.html"
+  status = 302
+
+[[redirects]]
+  from = "/login"
+  to = "/login.html"
+  status = 302
+
+[[redirects]]
+  from = "/pricing"
+  to = "/pricing.html"
+  status = 302
+
+[build.environment]
+  NODE_VERSION = "18"
