@@ -22,7 +22,6 @@
     <script src="js/performance-optimizer.js"></script>
     <script src="js/payment-processor.js"></script>
     <script src="js/indian-payment-gateways.js"></script>
-    <script src="js/auth.js"></script>
     <script src="js/analytics.js"></script>
     
     <!-- Fonts -->
@@ -697,6 +696,93 @@
         </div>
     </div>
 
+    <!-- Login Modal -->
+    <div id="loginModal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl p-6 max-w-md w-full">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">🔐 Login</h2>
+                <button onclick="hideModal('loginModal')" class="text-gray-400 hover:text-gray-600 text-2xl">×</button>
+            </div>
+            
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-800 mb-2">Email</label>
+                    <input type="email" id="login-email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500" placeholder="your@email.com" required>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-800 mb-2">Password</label>
+                    <input type="password" id="login-password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500" placeholder="Enter password" required>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <label class="flex items-center">
+                        <input type="checkbox" class="rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                        <span class="ml-2 text-sm text-gray-600">Remember me</span>
+                    </label>
+                    <a href="#" class="text-sm text-purple-600 hover:text-purple-500">Forgot password?</a>
+                </div>
+            </form>
+            
+            <div class="flex space-x-3 mt-6">
+                <button onclick="loginUser()" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg">
+                    🔐 Login
+                </button>
+                <button onclick="showSignupModal()" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg">
+                    Sign Up
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div id="signupModal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl p-6 max-w-md w-full">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">📝 Sign Up</h2>
+                <button onclick="hideModal('signupModal')" class="text-gray-400 hover:text-gray-600 text-2xl">×</button>
+            </div>
+            
+            <form id="signup-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-800 mb-2">Full Name</label>
+                    <input type="text" id="signup-name" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500" placeholder="Your full name" required>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-800 mb-2">Email</label>
+                    <input type="email" id="signup-email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500" placeholder="your@email.com" required>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-800 mb-2">Password</label>
+                    <input type="password" id="signup-password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500" placeholder="Create password" required>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-800 mb-2">Confirm Password</label>
+                    <input type="password" id="signup-confirm-password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500" placeholder="Confirm password" required>
+                </div>
+                
+                <div class="flex items-center">
+                    <input type="checkbox" id="signup-terms" class="rounded border-gray-300 text-purple-600 focus:ring-purple-500" required>
+                    <label for="signup-terms" class="ml-2 text-sm text-gray-600">
+                        I agree to the <a href="#" class="text-purple-600 hover:text-purple-500">Terms of Service</a>
+                    </label>
+                </div>
+            </form>
+            
+            <div class="flex space-x-3 mt-6">
+                <button onclick="signupUser()" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg">
+                    📝 Create Account
+                </button>
+                <button onclick="showLoginModal()" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg">
+                    Back to Login
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- JavaScript -->
     <script>
         // Global data storage with localStorage persistence
@@ -710,6 +796,7 @@
             initializeDashboard();
             initializeTestingSuite();
             loadUserData();
+            addLoginButton();
         });
 
         // Load user data from localStorage
@@ -912,19 +999,22 @@
         // Update security status
         function updateSecurityStatus() {
             // Update 2FA status in the security cards
-            const twoFACard = document.querySelector('.glass-card:has(h4:contains("Two-Factor Auth"))');
-            if (twoFACard) {
-                const statusElement = twoFACard.querySelector('span:contains("Setup Required")');
-                if (statusElement) {
-                    if (is2FAEnabled) {
-                        statusElement.textContent = 'Active';
-                        statusElement.className = 'text-green-400';
-                    } else {
-                        statusElement.textContent = 'Setup Required';
-                        statusElement.className = 'text-yellow-400';
+            const allCards = document.querySelectorAll('.glass-card');
+            allCards.forEach(card => {
+                const heading = card.querySelector('h4');
+                if (heading && heading.textContent.includes('Two-Factor Auth')) {
+                    const statusElement = card.querySelector('span');
+                    if (statusElement && statusElement.textContent.includes('Setup Required')) {
+                        if (is2FAEnabled) {
+                            statusElement.textContent = 'Active';
+                            statusElement.className = 'text-green-400';
+                        } else {
+                            statusElement.textContent = 'Setup Required';
+                            statusElement.className = 'text-yellow-400';
+                        }
                     }
                 }
-            }
+            });
         }
 
         // Modal functions
@@ -1738,6 +1828,94 @@
 
         function showEncryptionStatus() {
             showNotification('AES-256 encryption is active!', 'success');
+        }
+
+        // Login and Signup functions
+        function showLoginModal() {
+            hideModal('signupModal');
+            showModal('loginModal');
+        }
+
+        function showSignupModal() {
+            hideModal('loginModal');
+            showModal('signupModal');
+        }
+
+        function loginUser() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            if (!email || !password) {
+                showNotification('Please fill in all fields', 'error');
+                return;
+            }
+            
+            // Simulate login (in real app, this would call your backend)
+            if (email === 'demo@example.com' && password === 'password') {
+                showNotification('Login successful!', 'success');
+                hideModal('loginModal');
+                
+                // Update user info
+                currentUser = { username: 'Demo User', email: email, plan: 'premium' };
+                saveData();
+                
+                // Update UI
+                const userElement = document.querySelector('p:contains("Welcome, User!")');
+                if (userElement) {
+                    userElement.textContent = `Welcome, ${currentUser.username}!`;
+                }
+            } else {
+                showNotification('Invalid credentials. Try demo@example.com / password', 'error');
+            }
+        }
+
+        function signupUser() {
+            const name = document.getElementById('signup-name').value;
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            const confirmPassword = document.getElementById('signup-confirm-password').value;
+            const terms = document.getElementById('signup-terms').checked;
+            
+            if (!name || !email || !password || !confirmPassword) {
+                showNotification('Please fill in all fields', 'error');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showNotification('Passwords do not match', 'error');
+                return;
+            }
+            
+            if (!terms) {
+                showNotification('Please accept the terms of service', 'error');
+                return;
+            }
+            
+            // Simulate signup (in real app, this would call your backend)
+            showNotification('Account created successfully! Please login.', 'success');
+            hideModal('signupModal');
+            showLoginModal();
+        }
+
+        // Add login button to sidebar
+        function addLoginButton() {
+            const sidebar = document.querySelector('.sidebar nav');
+            if (sidebar) {
+                const loginButton = document.createElement('a');
+                loginButton.href = '#';
+                loginButton.onclick = (e) => {
+                    e.preventDefault();
+                    showLoginModal();
+                };
+                loginButton.className = 'flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-white/5 hover:text-white transition-all';
+                loginButton.innerHTML = `
+                    <span class="text-lg">🔐</span>
+                    <span class="font-medium">Login / Signup</span>
+                `;
+                
+                // Insert at the top of navigation
+                sidebar.insertBefore(loginButton, sidebar.firstChild);
+            }
         }
     </script>
 </body>
