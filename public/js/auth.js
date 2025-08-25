@@ -3,6 +3,8 @@ const Auth = {
     API_BASE: 'http://localhost:3002/api',
     token: localStorage.getItem('token'),
     user: null,
+    masterKey: localStorage.getItem('masterKey'),
+    isAuthenticated: false,
 
     // Initialize authentication
     init() {
@@ -49,85 +51,351 @@ const Auth = {
                 throw new Error('Email and password are required');
             }
 
-            // Check for demo credentials (for testing purposes)
-            if (email === 'demo@agies.com' && password === 'demo123') {
-                // Demo user - generate demo token
-                this.token = 'demo_token_' + Date.now();
-                this.user = {
-                    id: 'demo_user',
-                    email: 'demo@agies.com',
-                    username: 'Demo User',
-                    plan: 'premium'
-                };
-                localStorage.setItem('token', this.token);
-                localStorage.setItem('user', JSON.stringify(this.user));
-                
-                this.showDashboard();
-                return { success: true };
-            }
-
-            // For real implementation, this would call your backend
-            // For now, we'll simulate a failed login for any other credentials
-            throw new Error('Invalid credentials. Use demo@agies.com / demo123 for testing.');
-
-            // Real implementation would be:
-            /*
+            // Real authentication with backend API
             const response = await fetch(`${this.API_BASE}/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ email, password, masterKey })
+                body: JSON.stringify({ 
+                    email, 
+                    password, 
+                    masterKey: masterKey || null 
+                })
             });
 
             if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || 'Login failed');
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Login failed');
             }
 
             const data = await response.json();
+            
+            // Store authentication data
             this.token = data.token;
             this.user = data.user;
-            localStorage.setItem('token', this.token);
+            this.masterKey = masterKey;
             
+            localStorage.setItem('token', this.token);
+            localStorage.setItem('user', JSON.stringify(this.user));
+            if (masterKey) {
+                localStorage.setItem('masterKey', masterKey);
+            }
+            
+            // Update authentication status
+            this.isAuthenticated = true;
+            
+            // Show success message
+            this.showSuccess('Login successful! Welcome back.');
+            
+            // Redirect to dashboard
             this.showDashboard();
-            return { success: true };
-            */
+            
+            return { success: true, user: this.user };
+            
         } catch (error) {
             console.error('Login error:', error);
-            return { success: false, error: error.message };
+            
+            // Show user-friendly error message
+            let errorMessage = 'Login failed. Please check your credentials.';
+            
+            if (error.message.includes('Invalid credentials')) {
+                errorMessage = 'Invalid email or password. Please try again.';
+            } else if (error.message.includes('User not found')) {
+                errorMessage = 'Account not found. Please check your email or create a new account.';
+            } else if (error.message.includes('Account locked')) {
+                errorMessage = 'Account temporarily locked due to multiple failed attempts. Please try again later.';
+            } else if (error.message.includes('Email not verified')) {
+                errorMessage = 'Please verify your email address before logging in.';
+            }
+            
+            this.showError(errorMessage);
+            return { success: false, error: errorMessage };
         }
     },
 
     // Register user
     async register(email, username, password, masterKey) {
         try {
+            // Basic validation
+            if (!email || !username || !password) {
+                throw new Error('All fields are required');
+            }
+
+            if (password.length < 8) {
+                throw new Error('Password must be at least 8 characters long');
+            }
+
+            if (masterKey && masterKey.length < 12) {
+                throw new Error('Master key must be at least 12 characters long');
+            }
+
+            // Real registration with backend API
             const response = await fetch(`${this.API_BASE}/auth/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ email, username, password, masterKey })
+                body: JSON.stringify({ 
+                    email, 
+                    username, 
+                    password, 
+                    masterKey: masterKey || null 
+                })
             });
 
             if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || 'Registration failed');
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Registration failed');
             }
 
             const data = await response.json();
+            
+            // Show success message
+            this.showSuccess('Registration successful! Please check your email to verify your account.');
+            
+            // Optionally auto-login after registration
+            if (data.autoLogin) {
+                return await this.login(email, password, masterKey);
+            }
+            
             return { success: true, message: data.message };
+            
         } catch (error) {
             console.error('Registration error:', error);
+            
+            // Show user-friendly error message
+            let errorMessage = 'Registration failed. Please try again.';
+            
+            if (error.message.includes('Email already exists')) {
+                errorMessage = 'An account with this email already exists. Please use a different email or try logging in.';
+            } else if (error.message.includes('Username already exists')) {
+                errorMessage = 'This username is already taken. Please choose a different username.';
+            } else if (error.message.includes('Invalid email')) {
+                errorMessage = 'Please enter a valid email address.';
+            } else if (error.message.includes('Password too weak')) {
+                errorMessage = 'Password is too weak. Please use a stronger password with at least 8 characters.';
+            }
+            
+            this.showError(errorMessage);
+            return { success: false, error: errorMessage };
+        }
+    },
+
+    // Verify email
+    async verifyEmail(token) {
+        try {
+            const response = await fetch(`${this.API_BASE}/auth/verify-email`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ token })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Email verification failed');
+            }
+
+            const data = await response.json();
+            this.showSuccess('Email verified successfully! You can now log in.');
+            
+            return { success: true, message: data.message };
+            
+        } catch (error) {
+            console.error('Email verification error:', error);
+            this.showError('Email verification failed. Please try again or contact support.');
             return { success: false, error: error.message };
         }
+    },
+
+    // Reset password
+    async resetPassword(email) {
+        try {
+            if (!email) {
+                throw new Error('Email is required');
+            }
+
+            const response = await fetch(`${this.API_BASE}/auth/reset-password`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Password reset failed');
+            }
+
+            const data = await response.json();
+            this.showSuccess('Password reset email sent! Please check your inbox.');
+            
+            return { success: true, message: data.message };
+            
+        } catch (error) {
+            console.error('Password reset error:', error);
+            this.showError('Password reset failed. Please try again.');
+            return { success: false, error: error.message };
+        }
+    },
+
+    // Confirm password reset
+    async confirmPasswordReset(token, newPassword) {
+        try {
+            if (!token || !newPassword) {
+                throw new Error('Token and new password are required');
+            }
+
+            if (newPassword.length < 8) {
+                throw new Error('Password must be at least 8 characters long');
+            }
+
+            const response = await fetch(`${this.API_BASE}/auth/confirm-reset`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ token, newPassword })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Password reset confirmation failed');
+            }
+
+            const data = await response.json();
+            this.showSuccess('Password reset successfully! You can now log in with your new password.');
+            
+            return { success: true, message: data.message };
+            
+        } catch (error) {
+            console.error('Password reset confirmation error:', error);
+            this.showError('Password reset confirmation failed. Please try again.');
+            return { success: false, error: error.message };
+        }
+    },
+
+    // Validate token
+    async validateToken() {
+        try {
+            if (!this.token) {
+                return false;
+            }
+
+            const response = await fetch(`${this.API_BASE}/auth/validate`, {
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                this.user = data.user;
+                this.isAuthenticated = true;
+                return true;
+            } else {
+                // Token is invalid
+                this.logout();
+                return false;
+            }
+        } catch (error) {
+            console.error('Token validation error:', error);
+            this.logout();
+            return false;
+        }
+    },
+
+    // Get current user
+    getCurrentUser() {
+        if (this.user) {
+            return this.user;
+        }
+        
+        // Try to get from localStorage
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            try {
+                this.user = JSON.parse(storedUser);
+                return this.user;
+            } catch (e) {
+                console.error('Error parsing stored user:', e);
+                return null;
+            }
+        }
+        
+        return null;
+    },
+
+    // Check if user is authenticated
+    isUserAuthenticated() {
+        return this.isAuthenticated && !!this.token && !!this.user;
+    },
+
+    // Get authentication headers for API calls
+    getAuthHeaders() {
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        
+        if (this.token) {
+            headers['Authorization'] = `Bearer ${this.token}`;
+        }
+        
+        if (this.user && this.user.id) {
+            headers['X-User-ID'] = this.user.id;
+        }
+        
+        return headers;
+    },
+
+    // Show success message
+    showSuccess(message) {
+        this.showNotification(message, 'success');
+    },
+
+    // Show error message
+    showError(message) {
+        this.showNotification(message, 'error');
+    },
+
+    // Show notification
+    showNotification(message, type) {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 max-w-sm ${
+            type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
+        }`;
+        
+        notification.innerHTML = `
+            <div class="flex items-center space-x-3">
+                <div class="text-xl">${type === 'success' ? '✅' : '❌'}</div>
+                <div>${message}</div>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 5000);
     },
 
     // Logout user
     logout() {
         this.token = null;
         this.user = null;
+        this.masterKey = null;
+        this.isAuthenticated = false;
         localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        localStorage.removeItem('masterKey');
         this.showLogin();
     },
 
@@ -377,38 +645,6 @@ const Auth = {
                 modal.remove();
             });
         }
-    },
-
-    // Show success message
-    showSuccess(message) {
-        this.showNotification(message, 'success');
-    },
-
-    // Show error message
-    showError(message) {
-        this.showNotification(message, 'error');
-    },
-
-    // Show notification
-    showNotification(message, type) {
-        // Remove existing notifications
-        const existing = document.querySelector('.notification');
-        if (existing) existing.remove();
-        
-        const notification = document.createElement('div');
-        notification.className = `notification fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
-            type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
-        }`;
-        notification.textContent = message;
-        
-        document.body.appendChild(notification);
-        
-        // Auto-remove after 5 seconds
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.parentNode.removeChild(notification);
-            }
-        }, 5000);
     }
 };
 

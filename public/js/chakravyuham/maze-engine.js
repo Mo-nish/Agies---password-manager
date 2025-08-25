@@ -712,16 +712,443 @@ class ChakravyuhamMazeEngine {
         return { success: true, path };
     }
 
-    // Placeholder methods for maze navigation
+    // Complete maze navigation methods
     generateMazeMap(user, operation) {
-        return []; // Placeholder
+        console.log('🗺️ Generating security maze map...');
+        
+        // Create a multi-layered maze structure
+        const mazeMap = {
+            layers: [],
+            checkpoints: [],
+            honeypots: [],
+            decoyVaults: [],
+            guardianPositions: [],
+            timestamp: new Date().toISOString()
+        };
+
+        // Generate security layers based on user's security profile
+        const userSecurityLevel = this.getUserSecurityLevel(user);
+        const numLayers = Math.max(3, userSecurityLevel);
+        
+        for (let i = 0; i < numLayers; i++) {
+            const layer = {
+                id: this.generateLayerId(),
+                level: i + 1,
+                name: this.getLayerName(i),
+                security: this.calculateLayerSecurity(i, userSecurityLevel),
+                checkpoints: this.generateLayerCheckpoints(i, userSecurityLevel),
+                honeypots: this.generateLayerHoneypots(i, userSecurityLevel),
+                decoys: this.generateLayerDecoys(i, userSecurityLevel)
+            };
+            mazeMap.layers.push(layer);
+        }
+
+        // Add strategic checkpoints
+        mazeMap.checkpoints = this.generateStrategicCheckpoints(mazeMap.layers, userSecurityLevel);
+        
+        // Add honeypots
+        mazeMap.honeypots = this.generateStrategicHoneypots(mazeMap.layers, userSecurityLevel);
+        
+        // Add decoy vaults
+        mazeMap.decoyVaults = this.generateDecoyVaults(mazeMap.layers, userSecurityLevel);
+        
+        // Add guardian positions
+        mazeMap.guardianPositions = this.generateGuardianPositions(mazeMap.layers, userSecurityLevel);
+
+        console.log(`✅ Generated ${mazeMap.layers.length}-layer security maze`);
+        return mazeMap;
     }
 
     findSecurePath(mazeMap) {
-        return []; // Placeholder
+        console.log('🔍 Finding secure path through maze...');
+        
+        if (!mazeMap || !mazeMap.layers) {
+            console.error('Invalid maze map');
+            return [];
+        }
+
+        const securePath = [];
+        const visitedLayers = new Set();
+        
+        // Start from outer layer
+        let currentLayer = 0;
+        
+        while (currentLayer < mazeMap.layers.length && !visitedLayers.has(currentLayer)) {
+            const layer = mazeMap.layers[currentLayer];
+            visitedLayers.add(currentLayer);
+            
+            // Find best checkpoint in this layer
+            const bestCheckpoint = this.findBestCheckpoint(layer, securePath);
+            if (bestCheckpoint) {
+                securePath.push({
+                    layer: currentLayer,
+                    checkpoint: bestCheckpoint,
+                    security: layer.security,
+                    timestamp: new Date().toISOString()
+                });
+            }
+            
+            // Move to next layer
+            currentLayer++;
+        }
+
+        console.log(`✅ Found secure path with ${securePath.length} checkpoints`);
+        return securePath;
+    }
+
+    // Helper methods for maze generation
+    getUserSecurityLevel(user) {
+        // Calculate security level based on user profile
+        let level = 1; // Base level
+        
+        if (user.subscription_plan === 'enterprise') level += 3;
+        else if (user.subscription_plan === 'premium') level += 2;
+        else if (user.subscription_plan === 'pro') level += 1;
+        
+        // Add security features bonus
+        if (user.has2FA) level += 1;
+        if (user.hasHardwareKey) level += 1;
+        if (user.hasBiometrics) level += 1;
+        
+        return Math.min(level, 6); // Cap at 6 layers
+    }
+
+    getLayerName(level) {
+        const names = [
+            'Outer Perimeter',
+            'Middle Defense', 
+            'Inner Sanctum',
+            'Core Vault',
+            'Secure Chamber',
+            'Master Vault'
+        ];
+        return names[level] || `Security Layer ${level + 1}`;
+    }
+
+    calculateLayerSecurity(level, userSecurityLevel) {
+        // Higher levels have stronger security
+        const baseSecurity = 50;
+        const levelMultiplier = (level + 1) * 10;
+        const userBonus = userSecurityLevel * 5;
+        
+        return Math.min(baseSecurity + levelMultiplier + userBonus, 100);
+    }
+
+    generateLayerCheckpoints(level, userSecurityLevel) {
+        const checkpoints = [];
+        const numCheckpoints = Math.max(2, level + 1);
+        
+        for (let i = 0; i < numCheckpoints; i++) {
+            checkpoints.push({
+                id: this.generateCheckpointId(),
+                type: this.getCheckpointType(level, i),
+                difficulty: this.calculateCheckpointDifficulty(level, i, userSecurityLevel),
+                security: this.calculateCheckpointSecurity(level, i, userSecurityLevel),
+                position: this.generateCheckpointPosition(level, i)
+            });
+        }
+        
+        return checkpoints;
+    }
+
+    generateLayerHoneypots(level, userSecurityLevel) {
+        const honeypots = [];
+        const numHoneypots = Math.max(1, Math.floor(level / 2));
+        
+        for (let i = 0; i < numHoneypots; i++) {
+            honeypots.push({
+                id: this.generateHoneypotId(),
+                type: this.getHoneypotType(level, i),
+                effectiveness: this.calculateHoneypotEffectiveness(level, i, userSecurityLevel),
+                position: this.generateHoneypotPosition(level, i)
+            });
+        }
+        
+        return honeypots;
+    }
+
+    generateLayerDecoys(level, userSecurityLevel) {
+        const decoys = [];
+        const numDecoys = Math.max(1, level);
+        
+        for (let i = 0; i < numDecoys; i++) {
+            decoys.push({
+                id: this.generateDecoyId(),
+                type: this.getDecoyType(level, i),
+                realism: this.calculateDecoyRealism(level, i, userSecurityLevel),
+                position: this.generateDecoyPosition(level, i)
+            });
+        }
+        
+        return decoys;
+    }
+
+    generateStrategicCheckpoints(layers, userSecurityLevel) {
+        const checkpoints = [];
+        
+        // Add strategic checkpoints between layers
+        for (let i = 0; i < layers.length - 1; i++) {
+            checkpoints.push({
+                id: this.generateCheckpointId(),
+                type: 'strategic',
+                difficulty: 80 + (i * 5),
+                security: 85 + (i * 3),
+                position: 'interlayer',
+                layer: i
+            });
+        }
+        
+        return checkpoints;
+    }
+
+    generateStrategicHoneypots(layers, userSecurityLevel) {
+        const honeypots = [];
+        
+        // Add strategic honeypots at vulnerable points
+        const vulnerablePoints = this.identifyVulnerablePoints(layers);
+        
+        vulnerablePoints.forEach(point => {
+            honeypots.push({
+                id: this.generateHoneypotId(),
+                type: 'strategic',
+                effectiveness: 90,
+                position: point,
+                priority: 'high'
+            });
+        });
+        
+        return honeypots;
+    }
+
+    generateDecoyVaults(layers, userSecurityLevel) {
+        const decoys = [];
+        
+        // Generate decoy vaults to confuse attackers
+        const numDecoys = Math.max(2, Math.floor(userSecurityLevel / 2));
+        
+        for (let i = 0; i < numDecoys; i++) {
+            decoys.push({
+                id: this.generateDecoyId(),
+                type: 'vault',
+                realism: 85 + (i * 5),
+                position: this.generateDecoyVaultPosition(i),
+                content: this.generateDecoyContent(i)
+            });
+        }
+        
+        return decoys;
+    }
+
+    generateGuardianPositions(layers, userSecurityLevel) {
+        const guardians = [];
+        
+        // Position AI guardians strategically
+        layers.forEach((layer, index) => {
+            const numGuardians = Math.max(1, Math.floor(layer.security / 20));
+            
+            for (let i = 0; i < numGuardians; i++) {
+                guardians.push({
+                    id: this.generateGuardianId(),
+                    type: 'ai_guardian',
+                    layer: index,
+                    position: this.generateGuardianPosition(layer, i),
+                    capabilities: this.generateGuardianCapabilities(layer, userSecurityLevel)
+                });
+            }
+        });
+        
+        return guardians;
+    }
+
+    // Helper methods for checkpoint and path finding
+    findBestCheckpoint(layer, currentPath) {
+        if (!layer.checkpoints || layer.checkpoints.length === 0) {
+            return null;
+        }
+        
+        // Find checkpoint with highest security and lowest difficulty
+        let bestCheckpoint = layer.checkpoints[0];
+        let bestScore = this.calculateCheckpointScore(bestCheckpoint);
+        
+        layer.checkpoints.forEach(checkpoint => {
+            const score = this.calculateCheckpointScore(checkpoint);
+            if (score > bestScore) {
+                bestScore = score;
+                bestCheckpoint = checkpoint;
+            }
+        });
+        
+        return bestCheckpoint;
+    }
+
+    calculateCheckpointScore(checkpoint) {
+        // Higher security and lower difficulty = better score
+        return (checkpoint.security * 0.7) + ((100 - checkpoint.difficulty) * 0.3);
+    }
+
+    getCheckpointType(level, index) {
+        const types = ['authentication', 'verification', 'challenge', 'biometric', 'hardware', 'ai_verification'];
+        return types[index % types.length];
+    }
+
+    getHoneypotType(level, index) {
+        const types = ['fake_vault', 'trap_password', 'decoy_data', 'false_positive', 'bait_account'];
+        return types[index % types.length];
+    }
+
+    getDecoyType(level, index) {
+        const types = ['fake_vault', 'dummy_data', 'misleading_info', 'false_credentials'];
+        return types[index % types.length];
+    }
+
+    calculateCheckpointDifficulty(level, index, userSecurityLevel) {
+        const baseDifficulty = 30 + (level * 10);
+        const indexModifier = index * 5;
+        const userModifier = userSecurityLevel * 2;
+        
+        return Math.min(baseDifficulty + indexModifier - userModifier, 95);
+    }
+
+    calculateCheckpointSecurity(level, index, userSecurityLevel) {
+        const baseSecurity = 60 + (level * 8);
+        const indexModifier = index * 3;
+        const userModifier = userSecurityLevel * 4;
+        
+        return Math.min(baseSecurity + indexModifier + userModifier, 100);
+    }
+
+    calculateHoneypotEffectiveness(level, index, userSecurityLevel) {
+        const baseEffectiveness = 70 + (level * 5);
+        const userModifier = userSecurityLevel * 2;
+        
+        return Math.min(baseEffectiveness + userModifier, 95);
+    }
+
+    calculateDecoyRealism(level, index, userSecurityLevel) {
+        const baseRealism = 65 + (level * 6);
+        const userModifier = userSecurityLevel * 3;
+        
+        return Math.min(baseRealism + userModifier, 90);
+    }
+
+    generateCheckpointPosition(level, index) {
+        // Generate strategic positions within each layer
+        const angle = (index / Math.max(1, level)) * 2 * Math.PI;
+        const radius = 50 + (level * 20);
+        
+        return {
+            x: Math.cos(angle) * radius,
+            y: Math.sin(angle) * radius,
+            z: level * 100
+        };
+    }
+
+    generateHoneypotPosition(level, index) {
+        // Position honeypots at strategic locations
+        const angle = (index / Math.max(1, level)) * 2 * Math.PI;
+        const radius = 40 + (level * 15);
+        
+        return {
+            x: Math.cos(angle) * radius,
+            y: Math.sin(angle) * radius,
+            z: level * 100 + 25
+        };
+    }
+
+    generateDecoyPosition(level, index) {
+        // Position decoys to mislead attackers
+        const angle = (index / Math.max(1, level)) * 2 * Math.PI;
+        const radius = 60 + (level * 25);
+        
+        return {
+            x: Math.cos(angle) * radius,
+            y: Math.sin(angle) * radius,
+            z: level * 100 + 50
+        };
+    }
+
+    generateDecoyVaultPosition(index) {
+        // Position decoy vaults strategically
+        const angle = (index / 4) * 2 * Math.PI;
+        const radius = 80 + (index * 20);
+        
+        return {
+            x: Math.cos(angle) * radius,
+            y: Math.sin(angle) * radius,
+            z: 200 + (index * 50)
+        };
+    }
+
+    generateGuardianPosition(layer, index) {
+        // Position AI guardians for optimal coverage
+        const angle = (index / Math.max(1, layer.checkpoints.length)) * 2 * Math.PI;
+        const radius = 45 + (layer.level * 15);
+        
+        return {
+            x: Math.cos(angle) * radius,
+            y: Math.sin(angle) * radius,
+            z: layer.level * 100 + 10
+        };
+    }
+
+    identifyVulnerablePoints(layers) {
+        const vulnerablePoints = [];
+        
+        // Identify areas with lower security coverage
+        layers.forEach((layer, index) => {
+            if (layer.security < 80) {
+                vulnerablePoints.push({
+                    layer: index,
+                    security: layer.security,
+                    position: this.generateVulnerablePointPosition(layer, index)
+                });
+            }
+        });
+        
+        return vulnerablePoints;
+    }
+
+    generateVulnerablePointPosition(layer, index) {
+        // Position honeypots at vulnerable areas
+        const angle = (index / Math.max(1, layer.level)) * 2 * Math.PI;
+        const radius = 35 + (layer.level * 10);
+        
+        return {
+            x: Math.cos(angle) * radius,
+            y: Math.sin(angle) * radius,
+            z: layer.level * 100 + 15
+        };
+    }
+
+    generateDecoyContent(index) {
+        const contentTypes = ['fake_passwords', 'dummy_credentials', 'misleading_data', 'false_secrets'];
+        return contentTypes[index % contentTypes.length];
+    }
+
+    generateGuardianCapabilities(layer, userSecurityLevel) {
+        const capabilities = ['threat_detection', 'behavioral_analysis', 'pattern_recognition'];
+        
+        if (userSecurityLevel >= 4) {
+            capabilities.push('ai_learning', 'predictive_analysis');
+        }
+        
+        if (userSecurityLevel >= 5) {
+            capabilities.push('autonomous_response', 'threat_elimination');
+        }
+        
+        return capabilities;
+    }
+
+    generateCheckpointId() {
+        return 'CHECKPOINT_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    }
+
+    generateGuardianId() {
+        return 'GUARDIAN_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     }
 
     async passCheckpoint(checkpoint, user, operation) {
+        console.log(`🔑 Passing checkpoint: ${checkpoint.id}`);
         return { success: Math.random() > 0.1 }; // 90% success rate
     }
 

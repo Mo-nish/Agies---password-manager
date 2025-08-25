@@ -520,8 +520,192 @@ class VaultManager {
     }
 
     editPassword(passwordId) {
-        // Mock password editing
-        this.showSuccess('Edit functionality coming soon');
+        // Load password data and show edit modal
+        this.loadPasswordForEditing(passwordId);
+    }
+
+    // Load password data for editing
+    async loadPasswordForEditing(passwordId) {
+        try {
+            this.showLoading(true);
+            
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${this.API_BASE}/passwords/${passwordId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                const password = await response.json();
+                this.showEditPasswordModal(password);
+            } else {
+                throw new Error('Failed to load password details');
+            }
+        } catch (error) {
+            console.error('Error loading password for editing:', error);
+            this.showError('Failed to load password details. Using local data.');
+            
+            // Fallback to local password data
+            const localPasswords = JSON.parse(localStorage.getItem('agies_passwords') || '[]');
+            const password = localPasswords.find(p => p.id === passwordId);
+            if (password) {
+                this.showEditPasswordModal(password);
+            } else {
+                this.showError('Password not found');
+            }
+        } finally {
+            this.showLoading(false);
+        }
+    }
+
+    // Show edit password modal
+    showEditPasswordModal(password) {
+        const modalHTML = `
+            <div id="edit-password-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                <div class="bg-gray-800 rounded-xl p-6 w-full max-w-md mx-4">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-xl font-semibold text-white">Edit Password</h3>
+                        <button onclick="this.parentElement.parentElement.parentElement.remove()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+                    </div>
+                    
+                    <form id="edit-password-form" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Title</label>
+                            <input type="text" id="edit-password-title" value="${password.title || ''}" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:border-blue-500 focus:outline-none" required>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Username/Email</label>
+                            <input type="text" id="edit-password-username" value="${password.username || ''}" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:border-blue-500 focus:outline-none" required>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                            <div class="relative">
+                                <input type="password" id="edit-password-value" value="${password.password || ''}" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:border-blue-500 focus:outline-none pr-12" required>
+                                <button type="button" onclick="togglePasswordVisibility('edit-password-value')" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white">
+                                    👁️
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">URL (optional)</label>
+                            <input type="url" id="edit-password-url" value="${password.url || ''}" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:border-blue-500 focus:outline-none">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Notes (optional)</label>
+                            <textarea id="edit-password-notes" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:border-blue-500 focus:outline-none" rows="3">${password.notes || ''}</textarea>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Category</label>
+                            <select id="edit-password-category" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:border-blue-500 focus:outline-none">
+                                <option value="general" ${password.category === 'general' ? 'selected' : ''}>General</option>
+                                <option value="finance" ${password.category === 'finance' ? 'selected' : ''}>Finance</option>
+                                <option value="social" ${password.category === 'social' ? 'selected' : ''}>Social Media</option>
+                                <option value="work" ${password.category === 'work' ? 'selected' : ''}>Work</option>
+                                <option value="personal" ${password.category === 'personal' ? 'selected' : ''}>Personal</option>
+                                <option value="shopping" ${password.category === 'shopping' ? 'selected' : ''}>Shopping</option>
+                                <option value="gaming" ${password.category === 'gaming' ? 'selected' : ''}>Gaming</option>
+                                <option value="development" ${password.category === 'development' ? 'selected' : ''}>Development</option>
+                            </select>
+                        </div>
+                        
+                        <div class="flex space-x-3 pt-4">
+                            <button type="submit" class="flex-1 btn-primary px-4 py-2 rounded-lg text-white">
+                                Update Password
+                            </button>
+                            <button type="button" onclick="this.parentElement.parentElement.parentElement.remove()" class="flex-1 px-4 py-2 border border-gray-600 rounded-lg text-gray-300 hover:bg-gray-700 transition-colors">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        
+        // Handle form submission
+        document.getElementById('edit-password-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await this.updatePassword(password.id);
+        });
+    }
+
+    // Update password
+    async updatePassword(passwordId) {
+        try {
+            const title = document.getElementById('edit-password-title').value.trim();
+            const username = document.getElementById('edit-password-username').value.trim();
+            const password = document.getElementById('edit-password-value').value;
+            const url = document.getElementById('edit-password-url').value.trim();
+            const notes = document.getElementById('edit-password-notes').value.trim();
+            const category = document.getElementById('edit-password-category').value;
+
+            if (!title || !username || !password) {
+                this.showError('Title, username, and password are required');
+                return;
+            }
+
+            this.showLoading(true);
+
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${this.API_BASE}/passwords/${passwordId}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    title,
+                    username,
+                    password,
+                    url: url || null,
+                    notes: notes || null,
+                    category
+                })
+            });
+
+            if (response.ok) {
+                this.showSuccess('Password updated successfully!');
+                this.closeEditPasswordModal();
+                
+                // Refresh passwords display
+                if (this.currentVault) {
+                    await this.loadPasswords(this.currentVault);
+                }
+            } else {
+                throw new Error('Failed to update password');
+            }
+        } catch (error) {
+            console.error('Error updating password:', error);
+            this.showError('Failed to update password. Please try again.');
+        } finally {
+            this.showLoading(false);
+        }
+    }
+
+    // Close edit password modal
+    closeEditPasswordModal() {
+        const modal = document.getElementById('edit-password-modal');
+        if (modal) {
+            modal.remove();
+        }
+    }
+
+    // Toggle password visibility
+    togglePasswordVisibility(inputId) {
+        const input = document.getElementById(inputId);
+        if (input.type === 'password') {
+            input.type = 'text';
+        } else {
+            input.type = 'password';
+        }
     }
 
     logout() {

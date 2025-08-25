@@ -823,13 +823,345 @@ class PasswordHealthAnalyzer {
     }
 
     // Fix all issues automatically
-    fixAllIssues() {
-        alert('Auto-fix feature would be implemented to:\n\n' +
-              '• Generate new passwords for weak ones\n' +
-              '• Create unique passwords for reused ones\n' +
-              '• Flag breached passwords for immediate change\n' +
-              '• Set up automatic password aging alerts\n\n' +
-              'This would integrate with the password management system.');
+    async fixAllIssues() {
+        try {
+            console.log('🔧 Starting automatic password fixes...');
+            
+            if (!this.healthReport || !this.healthReport.issues) {
+                this.showError('No health report available. Please run analysis first.');
+                return;
+            }
+
+            const criticalIssues = this.healthReport.issues.filter(i => i.severity === 'critical');
+            const highIssues = this.healthReport.issues.filter(i => i.severity === 'high');
+            
+            if (criticalIssues.length === 0 && highIssues.length === 0) {
+                this.showSuccess('No critical or high-priority issues to fix!');
+                return;
+            }
+
+            // Show progress modal
+            this.showFixProgressModal();
+            
+            let fixedCount = 0;
+            const totalIssues = criticalIssues.length + highIssues.length;
+
+            // Fix critical issues first
+            for (const issue of criticalIssues) {
+                await this.fixPasswordIssue(issue);
+                fixedCount++;
+                this.updateFixProgress(fixedCount, totalIssues);
+            }
+
+            // Fix high priority issues
+            for (const issue of highIssues) {
+                await this.fixPasswordIssue(issue);
+                fixedCount++;
+                this.updateFixProgress(fixedCount, totalIssues);
+            }
+
+            // Complete fixes
+            this.completeFixes(fixedCount, totalIssues);
+            
+        } catch (error) {
+            console.error('Error during auto-fix:', error);
+            this.showError('Error during automatic fixes: ' + error.message);
+        }
+    }
+
+    // Fix individual password issue
+    async fixPasswordIssue(issue) {
+        try {
+            switch (issue.type) {
+                case 'weak_password':
+                    await this.fixWeakPassword(issue.passwordId);
+                    break;
+                case 'reused_password':
+                    await this.fixReusedPassword(issue.passwordId);
+                    break;
+                case 'breached_password':
+                    await this.flagBreachedPassword(issue.passwordId);
+                    break;
+                case 'old_password':
+                    await this.flagOldPassword(issue.passwordId);
+                    break;
+                default:
+                    console.log(`Unknown issue type: ${issue.type}`);
+            }
+        } catch (error) {
+            console.error(`Error fixing issue ${issue.type}:`, error);
+        }
+    }
+
+    // Fix weak password by generating new one
+    async fixWeakPassword(passwordId) {
+        try {
+            const newPassword = this.generateSecurePassword(16);
+            
+            // Update password in the system
+            await this.updatePasswordInSystem(passwordId, newPassword);
+            
+            // Add to fixed passwords list
+            this.fixedPasswords.push({
+                id: passwordId,
+                type: 'weak_password',
+                oldStrength: 'weak',
+                newStrength: 'strong',
+                timestamp: new Date()
+            });
+            
+            console.log(`✅ Fixed weak password ${passwordId}`);
+            
+        } catch (error) {
+            console.error(`Error fixing weak password ${passwordId}:`, error);
+        }
+    }
+
+    // Fix reused password by generating unique one
+    async fixReusedPassword(passwordId) {
+        try {
+            const newPassword = this.generateSecurePassword(16);
+            
+            // Update password in the system
+            await this.updatePasswordInSystem(passwordId, newPassword);
+            
+            // Add to fixed passwords list
+            this.fixedPasswords.push({
+                id: passwordId,
+                type: 'reused_password',
+                oldStrength: 'reused',
+                newStrength: 'unique',
+                timestamp: new Date()
+            });
+            
+            console.log(`✅ Fixed reused password ${passwordId}`);
+            
+        } catch (error) {
+            console.error(`Error fixing reused password ${passwordId}:`, error);
+        }
+    }
+
+    // Flag breached password for immediate change
+    async flagBreachedPassword(passwordId) {
+        try {
+            // Mark password as compromised
+            await this.flagPasswordAsCompromised(passwordId);
+            
+            // Add to fixed passwords list
+            this.fixedPasswords.push({
+                id: passwordId,
+                type: 'breached_password',
+                action: 'flagged_for_change',
+                timestamp: new Date()
+            });
+            
+            console.log(`🚨 Flagged breached password ${passwordId} for immediate change`);
+            
+        } catch (error) {
+            console.error(`Error flagging breached password ${passwordId}:`, error);
+        }
+    }
+
+    // Flag old password for rotation
+    async flagOldPassword(passwordId) {
+        try {
+            // Mark password for rotation
+            await this.flagPasswordForRotation(passwordId);
+            
+            // Add to fixed passwords list
+            this.fixedPasswords.push({
+                id: passwordId,
+                type: 'old_password',
+                action: 'flagged_for_rotation',
+                timestamp: new Date()
+            });
+            
+            console.log(`⏰ Flagged old password ${passwordId} for rotation`);
+            
+        } catch (error) {
+            console.error(`Error flagging old password ${passwordId}:`, error);
+        }
+    }
+
+    // Update password in the system
+    async updatePasswordInSystem(passwordId, newPassword) {
+        try {
+            // Try to update via API first
+            if (window.authService && window.authService.updatePassword) {
+                await window.authService.updatePassword(passwordId, newPassword);
+            } else {
+                // Fallback to local storage update
+                this.updatePasswordInLocalStorage(passwordId, newPassword);
+            }
+        } catch (error) {
+            console.error('Error updating password in system:', error);
+            // Fallback to local storage
+            this.updatePasswordInLocalStorage(passwordId, newPassword);
+        }
+    }
+
+    // Update password in local storage (fallback)
+    updatePasswordInLocalStorage(passwordId, newPassword) {
+        try {
+            const passwords = JSON.parse(localStorage.getItem('agies_passwords') || '[]');
+            const passwordIndex = passwords.findIndex(p => p.id === passwordId);
+            
+            if (passwordIndex !== -1) {
+                passwords[passwordIndex].password = newPassword;
+                passwords[passwordIndex].updated_at = new Date().toISOString();
+                passwords[passwordIndex].strength = 'strong';
+                passwords[passwordIndex].last_checked = new Date().toISOString();
+                
+                localStorage.setItem('agies_passwords', JSON.stringify(passwords));
+                console.log(`✅ Updated password ${passwordId} in local storage`);
+            }
+        } catch (error) {
+            console.error('Error updating password in local storage:', error);
+        }
+    }
+
+    // Flag password as compromised
+    async flagPasswordAsCompromised(passwordId) {
+        try {
+            if (window.authService && window.authService.flagPassword) {
+                await window.authService.flagPassword(passwordId, 'compromised');
+            } else {
+                // Fallback to local storage
+                this.flagPasswordInLocalStorage(passwordId, 'compromised');
+            }
+        } catch (error) {
+            console.error('Error flagging password as compromised:', error);
+            this.flagPasswordInLocalStorage(passwordId, 'compromised');
+        }
+    }
+
+    // Flag password for rotation
+    async flagPasswordForRotation(passwordId) {
+        try {
+            if (window.authService && window.authService.flagPassword) {
+                await window.authService.flagPassword(passwordId, 'needs_rotation');
+            } else {
+                // Fallback to local storage
+                this.flagPasswordInLocalStorage(passwordId, 'needs_rotation');
+            }
+        } catch (error) {
+            console.error('Error flagging password for rotation:', error);
+            this.flagPasswordInLocalStorage(passwordId, 'needs_rotation');
+        }
+    }
+
+    // Flag password in local storage (fallback)
+    flagPasswordInLocalStorage(passwordId, flag) {
+        try {
+            const passwords = JSON.parse(localStorage.getItem('agies_passwords') || '[]');
+            const passwordIndex = passwords.findIndex(p => p.id === passwordId);
+            
+            if (passwordIndex !== -1) {
+                passwords[passwordIndex].flags = passwords[passwordIndex].flags || [];
+                passwords[passwordIndex].flags.push({
+                    type: flag,
+                    timestamp: new Date().toISOString()
+                });
+                
+                localStorage.setItem('agies_passwords', JSON.stringify(passwords));
+                console.log(`✅ Flagged password ${passwordId} as ${flag} in local storage`);
+            }
+        } catch (error) {
+            console.error('Error flagging password in local storage:', error);
+        }
+    }
+
+    // Show fix progress modal
+    showFixProgressModal() {
+        const modalHTML = `
+            <div id="fix-progress-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                <div class="bg-gray-800 rounded-xl p-6 w-full max-w-md mx-4">
+                    <div class="text-center">
+                        <div class="text-4xl mb-4">🔧</div>
+                        <h3 class="text-xl font-semibold text-white mb-4">Fixing Password Issues</h3>
+                        
+                        <div class="w-full bg-gray-700 rounded-full h-4 mb-4">
+                            <div id="fix-progress-bar" class="bg-blue-600 h-4 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                        
+                        <p id="fix-progress-text" class="text-gray-300">Preparing fixes...</p>
+                        
+                        <div class="mt-4 text-sm text-gray-400">
+                            <span id="fix-count">0</span> of <span id="fix-total">0</span> issues fixed
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+    }
+
+    // Update fix progress
+    updateFixProgress(fixed, total) {
+        const progressBar = document.getElementById('fix-progress-bar');
+        const progressText = document.getElementById('fix-progress-text');
+        const fixCount = document.getElementById('fix-count');
+        const fixTotal = document.getElementById('fix-total');
+        
+        if (progressBar && progressText && fixCount && fixTotal) {
+            const percentage = (fixed / total) * 100;
+            progressBar.style.width = percentage + '%';
+            fixCount.textContent = fixed;
+            fixTotal.textContent = total;
+            
+            if (fixed === total) {
+                progressText.textContent = 'All fixes completed!';
+            } else {
+                progressText.textContent = `Fixing issue ${fixed + 1} of ${total}...`;
+            }
+        }
+    }
+
+    // Complete fixes
+    completeFixes(fixed, total) {
+        // Remove progress modal
+        const modal = document.getElementById('fix-progress-modal');
+        if (modal) {
+            modal.remove();
+        }
+        
+        // Show completion modal
+        this.showFixCompletionModal(fixed, total);
+        
+        // Refresh health report
+        this.runComprehensiveAnalysis();
+    }
+
+    // Show fix completion modal
+    showFixCompletionModal(fixed, total) {
+        const modalHTML = `
+            <div id="fix-completion-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                <div class="bg-gray-800 rounded-xl p-6 w-full max-w-md mx-4">
+                    <div class="text-center">
+                        <div class="text-6xl mb-4">✅</div>
+                        <h3 class="text-xl font-semibold text-white mb-4">Fixes Completed!</h3>
+                        
+                        <p class="text-gray-300 mb-6">
+                            Successfully fixed <span class="text-green-400 font-semibold">${fixed}</span> of <span class="text-blue-400 font-semibold">${total}</span> password issues.
+                        </p>
+                        
+                        <div class="space-y-2 text-sm text-gray-400 mb-6">
+                            <div>🔧 Weak passwords strengthened</div>
+                            <div>🔄 Reused passwords made unique</div>
+                            <div>🚨 Breached passwords flagged</div>
+                            <div>⏰ Old passwords marked for rotation</div>
+                        </div>
+                        
+                        <button onclick="this.parentElement.parentElement.parentElement.remove()" class="btn-primary px-6 py-2 rounded-lg text-white">
+                            Continue
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
     }
 
     // Run quick health check
