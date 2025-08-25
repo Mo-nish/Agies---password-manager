@@ -152,13 +152,13 @@
         <div class="max-w-7xl mx-auto flex items-center justify-between">
             <div class="flex items-center space-x-4">
                 <a href="/" class="text-2xl hover:scale-110 transition-transform" title="Back to Home">🏠</a>
-                <div class="text-3xl">🔐</div>
-                <div>
+                    <div class="text-3xl">🔐</div>
+                    <div>
                     <h1 class="text-2xl font-bold gradient-text">Maze Password Manager</h1>
                     <p class="text-sm text-gray-300">Chakravyuham Vault</p>
+                    </div>
                 </div>
-            </div>
-            
+                
             <div class="flex items-center space-x-6">
                 <a href="/" class="text-gray-300 hover:text-white transition-colors">Home</a>
                 <a href="/vaults" class="text-gray-300 hover:text-white transition-colors">Vaults</a>
@@ -172,17 +172,17 @@
                     </button>
                 </div>
             </div>
-        </div>
+                    </div>
     </nav>
 
     <!-- Main Content -->
     <div class="pt-24 pb-12 px-6">
         <div class="max-w-7xl mx-auto">
-            <!-- Welcome Section -->
+                <!-- Welcome Section -->
             <div class="text-center mb-16">
                 <h1 class="text-5xl font-bold mb-6 gradient-text">Welcome to Your Secure Vault</h1>
                 <p class="text-xl text-gray-300">Manage your passwords with military-grade security</p>
-            </div>
+                </div>
 
             <!-- Subscription Status -->
             <div class="glass-card p-6 mb-8">
@@ -190,12 +190,12 @@
                     <div>
                         <h3 class="text-xl font-semibold mb-2">Your Subscription</h3>
                         <p class="text-gray-300">Current Plan: <span id="plan-badge" class="px-3 py-1 bg-blue-600 text-white rounded-full text-sm">Free</span></p>
-                    </div>
+                        </div>
                     <a href="/pricing" class="btn-primary px-6 py-3 rounded-lg text-white font-semibold">
                         Upgrade Plan
                     </a>
-                </div>
-                
+                    </div>
+                    
                 <!-- Free Plan Features -->
                 <div id="free-plan-features" class="mt-4 p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg">
                     <h4 class="font-semibold text-blue-400 mb-2">Free Plan Features:</h4>
@@ -207,7 +207,7 @@
                         <div class="flex items-center space-x-2">
                             <span class="text-green-400">✅</span>
                             <span>2 Vaults</span>
-                        </div>
+                    </div>
                         <div class="flex items-center space-x-2">
                             <span class="text-green-400">✅</span>
                             <span>Basic Encryption</span>
@@ -222,11 +222,11 @@
                         <p class="text-yellow-400 text-sm">
                             <strong>Upgrade to Pro</strong> to unlock unlimited passwords, advanced security features, and priority support!
                         </p>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Quick Actions -->
+                <!-- Quick Actions -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
                 <div class="feature-card text-center">
                     <div class="text-5xl mb-4">🔐</div>
@@ -234,27 +234,27 @@
                     <p class="text-gray-300 mb-6">Organize your passwords into secure vaults</p>
                     <button onclick="createVault()" class="btn-primary px-6 py-3 rounded-full text-white">
                         New Vault
-                    </button>
+                        </button>
                 </div>
-                
+
                 <div class="feature-card text-center">
                     <div class="text-5xl mb-4">🔍</div>
                     <h3 class="text-xl font-semibold mb-4">View Vaults</h3>
                     <p class="text-gray-300 mb-6">Access your existing password vaults</p>
                     <button onclick="viewVaults()" class="btn-primary px-6 py-3 rounded-full text-white">
                         View All
-                    </button>
-                </div>
-                
+                            </button>
+                        </div>
+                        
                 <div class="feature-card text-center">
                     <div class="text-5xl mb-4">🛡️</div>
                     <h3 class="text-xl font-semibold mb-4">Security</h3>
                     <p class="text-gray-300 mb-6">Monitor your security status and settings</p>
                     <button onclick="window.location.href='/security'" class="btn-primary px-6 py-3 rounded-full text-white">
                         Security
-                    </button>
-                </div>
-            </div>
+                            </button>
+                        </div>
+                            </div>
 
             <!-- Recent Vaults -->
             <div class="mb-12">
@@ -262,22 +262,22 @@
                     <h2 class="text-3xl font-bold">Recent Vaults</h2>
                     <button onclick="window.location.href='/vaults'" class="text-blue-400 hover:text-blue-300 transition-colors">
                         View All →
-                    </button>
+                            </button>
                 </div>
-                
+
                 <div id="recent-vaults" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <!-- Vaults will be loaded here -->
                 </div>
-                
+
                 <div id="no-vaults" class="text-center py-16 hidden">
                     <div class="text-8xl mb-6">🔐</div>
                     <h3 class="text-2xl font-bold mb-4">No Vaults Yet</h3>
                     <p class="text-xl text-gray-300 mb-8">Create your first vault to start organizing passwords</p>
                     <button onclick="createVault()" class="btn-primary px-8 py-4 rounded-full text-white text-lg font-semibold">
                         Create Your First Vault
-                    </button>
+                        </button>
+                    </div>
                 </div>
-            </div>
 
             <!-- Premium Features Preview -->
             <div class="glass-card rounded-2xl p-8 mb-12">
@@ -291,9 +291,9 @@
                             <p class="text-xs text-yellow-300 mb-2">Pro Plan Required</p>
                             <button onclick="upgradeToPro()" class="btn-premium px-4 py-1 rounded text-white text-xs">
                                 Upgrade
-                            </button>
-                        </div>
+                        </button>
                     </div>
+                </div>
                     
                     <div class="text-center feature-locked" id="feature-ai">
                         <div class="text-4xl mb-3">🧠</div>
@@ -303,10 +303,10 @@
                             <p class="text-xs text-yellow-300 mb-2">Pro Plan Required</p>
                             <button onclick="upgradeToPro()" class="btn-premium px-4 py-1 rounded text-white text-xs">
                                 Upgrade
-                            </button>
-                        </div>
-                    </div>
-                    
+                        </button>
+        </div>
+    </div>
+
                     <div class="text-center feature-locked" id="feature-analytics">
                         <div class="text-4xl mb-3">📊</div>
                         <h3 class="font-semibold mb-2">Advanced Analytics</h3>
@@ -316,9 +316,9 @@
                             <button onclick="upgradeToPremium()" class="btn-premium px-4 py-1 rounded text-white text-xs">
                                 Upgrade
                             </button>
-                        </div>
-                    </div>
-                    
+    </div>
+            </div>
+            
                     <div class="text-center feature-locked" id="feature-team">
                         <div class="text-4xl mb-3">👥</div>
                         <h3 class="font-semibold mb-2">Team Sharing</h3>
@@ -328,27 +328,27 @@
                             <button onclick="upgradeToPremium()" class="btn-premium px-4 py-1 rounded text-white text-xs">
                                 Upgrade
                             </button>
-                        </div>
+                </div>
+                </div>
                     </div>
                 </div>
-            </div>
-
+                
             <!-- Recent Activity -->
             <div class="glass-card rounded-2xl p-8">
                 <h2 class="text-2xl font-bold mb-6">Recent Activity</h2>
                 <div id="recent-activity" class="space-y-4">
                     <div class="flex items-center space-x-4 p-4 bg-white/5 rounded-lg">
                         <div class="text-2xl">✅</div>
-                        <div>
+                <div>
                             <p class="text-white">Successfully logged in</p>
                             <p class="text-gray-400 text-sm">Just now</p>
-                        </div>
-                    </div>
+                </div>
                 </div>
             </div>
         </div>
     </div>
-
+            </div>
+            
     <!-- Create Vault Modal -->
     <div id="create-vault-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
         <div class="flex items-center justify-center min-h-screen p-4">
@@ -356,17 +356,17 @@
                 <h2 class="text-2xl font-bold mb-6">Create New Vault</h2>
                 
                 <form id="create-vault-form" class="space-y-4">
-                    <div>
+                <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Vault Name</label>
                         <input type="text" id="vault-name" class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500" placeholder="e.g., Personal, Work, Finance" required>
-                    </div>
-                    
-                    <div>
+                </div>
+                
+                <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Description (Optional)</label>
                         <textarea id="vault-description" class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500" placeholder="Describe what this vault contains" rows="3"></textarea>
-                    </div>
-                    
-                    <div>
+                </div>
+                
+                <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Icon</label>
                         <select id="vault-icon" class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-blue-500">
                             <option value="🔐">🔐 Default</option>
@@ -377,18 +377,18 @@
                             <option value="🛒">🛒 Shopping</option>
                             <option value="📧">📧 Email</option>
                             <option value="🌐">🌐 Social</option>
-                        </select>
-                    </div>
-                    
+                    </select>
+            </div>
+            
                     <div class="flex space-x-4 pt-4">
                         <button type="button" onclick="closeCreateVaultModal()" class="flex-1 px-4 py-3 border border-white/20 rounded-lg text-white hover:bg-white/10 transition-colors">
-                            Cancel
-                        </button>
+                    Cancel
+                </button>
                         <button type="submit" class="flex-1 btn-primary px-4 py-3 rounded-lg text-white">
                             Create Vault
-                        </button>
-                    </div>
-                </form>
+                </button>
+                </div>
+            </form>
             </div>
         </div>
     </div>
@@ -546,11 +546,11 @@
                 <div class="vault-card">
                     <div class="flex items-center justify-between mb-4">
                         <div class="text-3xl">${vault.icon}</div>
-                        <div class="flex space-x-2">
+                                    <div class="flex space-x-2">
                             <button onclick="openVault('${vault.id}')" class="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-white text-sm">
                                 Open
-                            </button>
-                        </div>
+                                        </button>
+                                    </div>
                     </div>
                     
                     <h3 class="text-lg font-semibold mb-2">${vault.name}</h3>
@@ -560,7 +560,7 @@
                         <span>${vault.password_count || 0} passwords</span>
                         <span>Created ${new Date(vault.created_at).toLocaleDateString()}</span>
                     </div>
-                </div>
+                        </div>
             `).join('');
         }
 
@@ -590,10 +590,10 @@
                 scrollTrigger: {
                     trigger: ".vault-card",
                     start: "top 80%"
-                }
-            });
-        }
-
+                                    }
+                                });
+                            }
+                            
         // Quick action functions
         function createVault() {
             document.getElementById('create-vault-modal').classList.remove('hidden');
@@ -605,7 +605,7 @@
         }
 
         async function handleCreateVault(e) {
-            e.preventDefault();
+                    e.preventDefault();
             
             const name = document.getElementById('vault-name').value;
             const description = document.getElementById('vault-description').value;
@@ -625,7 +625,7 @@
                 if (error.message.includes('upgrade_required')) {
                     alert('Vault limit reached! Please upgrade your plan to create more vaults.');
                     window.location.href = '/pricing';
-                } else {
+                    } else {
                     alert('Error creating vault: ' + error.message);
                 }
             }

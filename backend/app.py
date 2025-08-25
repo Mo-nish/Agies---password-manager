@@ -192,8 +192,9 @@ def init_db():
     conn.close()
 
 def get_db():
+    """Get database connection with row factory set to return dictionaries"""
     conn = sqlite3.connect(DATABASE)
-    conn.row_factory = sqlite3.Row
+    conn.row_factory = sqlite3.Row  # This will allow us to access columns by name
     return conn
 
 # Initialize database
@@ -413,7 +414,7 @@ def home():
             '../public', 
             './public',
             os.path.join(os.getcwd(), 'public'),
-            os.path.join(os.path.dirname(__file__), '..', 'public')
+            os.path.join(os.path.dirname(__file__), 'public')
         ]
         
         for path in possible_paths:
@@ -746,11 +747,20 @@ def login_api():
                 # Fallback to basic user query
                 c.execute('SELECT id, password_hash FROM users WHERE email = ?', (email,))
         
-        user = c.fetchone()
+        user_result = c.fetchone()
         
-        if not user:
+        if not user_result:
             conn.close()
             return jsonify({"error": "Invalid credentials"}), 401
+        
+        # Convert Row object to dictionary
+        if hasattr(user_result, 'keys'):
+            # It's already a Row object
+            user = dict(user_result)
+        else:
+            # It's a tuple, convert to dict
+            columns = [description[0] for description in c.description]
+            user = dict(zip(columns, user_result))
         
         # Check password
         if bcrypt.checkpw(password.encode('utf-8'), user['password_hash'].encode('utf-8')):

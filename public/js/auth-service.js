@@ -2,9 +2,9 @@
 // Handles user authentication, session management, and API calls
 
 class AuthService {
-    constructor() {
-        this.user = null;
-        this.token = null;
+  constructor() {
+    this.user = null;
+    this.token = null;
         this.init();
     }
 
@@ -35,10 +35,10 @@ class AuthService {
                 } else {
                     console.log('⚠️ User data loaded but login is old, consider re-authentication');
                 }
-            } else {
+        } else {
                 console.log('ℹ️ No stored user data found');
-            }
-        } catch (error) {
+        }
+      } catch (error) {
             console.error('Error loading user data:', error);
         }
     }
@@ -86,13 +86,13 @@ class AuthService {
             }
 
             const data = await response.json();
-            console.log('✅ Registration successful');
+        console.log('✅ Registration successful');
             return data;
-        } catch (error) {
+    } catch (error) {
             console.error('❌ Registration error:', error);
-            throw error;
-        }
+      throw error;
     }
+  }
 
     // User login
     async login(email, password) {
@@ -202,11 +202,11 @@ class AuthService {
             }
 
             return await response.json();
-        } catch (error) {
+    } catch (error) {
             console.error('Get profile error:', error);
-            throw error;
-        }
+      throw error;
     }
+  }
 
     // Enhanced vault loading with better error handling
     async getVaults() {
@@ -268,7 +268,7 @@ class AuthService {
             }
 
             return await response.json();
-        } catch (error) {
+    } catch (error) {
             console.error('Create vault error:', error);
             throw error;
         }
@@ -301,7 +301,7 @@ class AuthService {
             }
             
             return passwords;
-        } catch (error) {
+    } catch (error) {
             console.error('❌ Get passwords error:', error);
             
             // Try to return cached passwords if available
@@ -323,7 +323,7 @@ class AuthService {
     async addPassword(vaultId, passwordData) {
         try {
             const response = await fetch(`/api/vaults/${vaultId}/passwords`, {
-                method: 'POST',
+        method: 'POST',
                 headers: this.getAuthHeaders(),
                 body: JSON.stringify(passwordData)
             });
@@ -334,11 +334,11 @@ class AuthService {
             }
 
             return await response.json();
-        } catch (error) {
+    } catch (error) {
             console.error('Add password error:', error);
-            throw error;
-        }
+      throw error;
     }
+  }
 
     // Update password
     async updatePassword(passwordId, passwordData) {
@@ -375,11 +375,11 @@ class AuthService {
             }
 
             return await response.json();
-        } catch (error) {
+    } catch (error) {
             console.error('Delete password error:', error);
-            throw error;
-        }
+      throw error;
     }
+  }
 
     // Get vault details
     async getVault(vaultId) {
@@ -448,11 +448,11 @@ class AuthService {
             // For now, simulate success (implement real password reset later)
             await new Promise(resolve => setTimeout(resolve, 1000));
             return { success: true, message: 'Reset link sent' };
-        } catch (error) {
+    } catch (error) {
             console.error('Forgot password API error:', error);
-            throw error;
-        }
+      throw error;
     }
+  }
 
     // Test API connection
     async testConnection() {
@@ -465,7 +465,7 @@ class AuthService {
                 console.error('❌ Backend connection failed');
                 return false;
             }
-        } catch (error) {
+    } catch (error) {
             console.error('❌ Backend connection error:', error);
             return false;
         }
