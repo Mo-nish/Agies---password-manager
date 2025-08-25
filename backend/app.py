@@ -132,7 +132,7 @@ def register():
 
 # User login
 @app.route('/api/auth/login', methods=['POST'])
-def login():
+def login_api():
     try:
         data = request.get_json()
         email = data.get('email')
@@ -502,12 +502,22 @@ def delete_vault(vault_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Serve static files for frontend
+# Serve static files for frontend (catch-all for remaining static files)
 @app.route('/<path:path>')
 def serve_frontend(path):
-    if path == '' or path == 'index.html':
-        return send_from_directory('../public', 'index-simple.html')
-    return send_from_directory('../public', path)
+    # Skip API routes
+    if path.startswith('api/'):
+        return jsonify({"error": "API endpoint not found"}), 404
+    
+    # Skip specific routes we've already defined
+    if path in ['', 'login', 'maze', 'index.html']:
+        return jsonify({"error": "Route not found"}), 404
+    
+    # Serve static files from public directory
+    try:
+        return send_from_directory('../public', path)
+    except FileNotFoundError:
+        return jsonify({"error": "File not found"}), 404
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8000))
