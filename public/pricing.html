@@ -212,7 +212,7 @@
                 align-items: center;
             }
             .pricing-row .plan-card {
-                width: 100%;
+            width: 100%;
                 max-width: 400px;
             }
         }
@@ -686,8 +686,8 @@
                         <p class="text-yellow-400 text-sm">📱 Responsive: Mobile stacks, Desktop shows all 4</p>
                     </div>
                 </div>
-            </div>
-
+                </div>
+                
             <!-- Test Section - Verify All Plans Are Loading -->
             <div style="background: rgba(16, 185, 129, 0.2); border: 2px solid #10B981; border-radius: 15px; padding: 2rem; margin: 2rem 0; text-align: center;">
                 <h3 style="color: #10B981; font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem;">🧪 TEST: Verify All 4 Plans Are Loading</h3>
@@ -722,8 +722,8 @@
                                     <span class="period">/month</span>
                                 </div>
                                 <p class="text-gray-400 mt-2">Perfect for getting started</p>
-                            </div>
-                            
+            </div>
+
                             <ul class="feature-list mb-6">
                                 <li>Up to 50 passwords</li>
                                 <li>2 vaults</li>
@@ -738,8 +738,8 @@
                             <button class="w-full btn-primary py-3 rounded-lg text-white font-semibold" disabled>
                                 Current Plan
                             </button>
-                        </div>
-
+                </div>
+                
                         <!-- Pro Plan -->
                         <div class="plan-card popular" style="width: 300px; flex-shrink: 0; margin: 0; position: relative; z-index: 10; padding: 1.5rem;">
                             <div class="text-center mb-6">
@@ -760,13 +760,13 @@
                                 <li>Dark web monitoring</li>
                                 <li>AI security</li>
                                 <li>Custom themes</li>
-                            </ul>
-                            
+                </ul>
+                
                             <button onclick="selectPlan('pro')" class="w-full btn-premium py-3 rounded-lg text-white font-semibold">
                                 Choose Pro
                             </button>
-                        </div>
-                    </div>
+                </div>
+            </div>
 
                     <!-- VISUAL SEPARATOR - COMPACT -->
                     <div style="text-align: center; margin: 3rem 0; padding: 1.5rem; background: rgba(245, 158, 11, 0.2); border: 3px solid #F59E0B; border-radius: 15px; position: relative; z-index: 10;">
@@ -787,8 +787,8 @@
                                         <span class="period">/month</span>
                                     </div>
                                     <p class="text-gray-400 mt-2">For power users</p>
-                                </div>
-                                
+                </div>
+                
                                 <ul class="feature-list mb-6">
                                     <li>Up to 10,000 passwords</li>
                                     <li>50 vaults</li>
@@ -800,13 +800,13 @@
                                     <li>Team sharing</li>
                                     <li>Advanced analytics</li>
                                     <li>Custom themes</li>
-                                </ul>
-                                
+                </ul>
+                
                                 <button onclick="selectPlan('premium')" class="w-full btn-premium py-3 rounded-lg text-white font-semibold">
                                     Choose Premium
                                 </button>
-                            </div>
-                        </div>
+                </div>
+            </div>
 
                         <!-- Enterprise Plan - COMPACT CONTAINER -->
                         <div style="width: 100%; max-width: 700px; margin: 0 auto; padding: 0; position: relative; z-index: 30; clear: both;">
@@ -818,7 +818,7 @@
                                         <span class="period">/month</span>
                                     </div>
                                     <p class="text-gray-400 mt-2">For teams & businesses</p>
-                                </div>
+        </div>
 
                                 <ul class="feature-list mb-6">
                                     <li>Up to 100,000 passwords</li>
@@ -838,9 +838,9 @@
                                 <button onclick="selectPlan('enterprise')" class="w-full btn-enterprise py-3 rounded-lg text-white font-semibold">
                                     Choose Enterprise
                                 </button>
-                            </div>
-                        </div>
-                    </div>
+                </div>
+                </div>
+                </div>
                 </div>
             </section>
 
@@ -858,8 +858,8 @@
                             <li>• Direct to your SBI account</li>
                             <li>• 24/7 availability</li>
                         </ul>
-                </div>
-                    
+            </div>
+            
                     <div class="text-center">
                         <div class="text-6xl mb-4">📱</div>
                         <h3 class="text-xl font-semibold mb-3">Google Pay</h3>
@@ -870,8 +870,8 @@
                             <li>• Rewards & cashback</li>
                             <li>• Easy verification</li>
                         </ul>
-                </div>
-                    
+        </div>
+
                     <div class="text-center">
                         <div class="text-6xl mb-4">📱</div>
                         <h3 class="text-xl font-semibold mb-3">Paytm</h3>
@@ -894,7 +894,7 @@
                             <li>• No app required</li>
                             <li>• Instant settlement</li>
                         </ul>
-        </div>
+            </div>
 
                     <div class="text-center">
                         <div class="text-6xl mb-4">📦</div>
@@ -919,8 +919,8 @@
                             <li>• Multiple options</li>
                         </ul>
             </div>
-            </div>
-                
+        </div>
+
                 <div class="mt-8 text-center">
                     <div class="bg-green-900/20 border border-green-500/30 rounded-lg p-6">
                         <h3 class="text-xl font-semibold text-green-400 mb-3">💰 Money Goes Directly to Your SBI Account!</h3>
@@ -1133,7 +1133,7 @@
                             }
                         });
                     }
-                } else {
+            } else {
                     console.log('Failed to load subscription data:', response.status);
                 }
             } catch (error) {
@@ -1365,7 +1365,7 @@
                 if (verifyResponse.ok) {
                     const result = await verifyResponse.json();
                     alert('Payment verification submitted successfully! Your subscription will be activated within 24 hours after verification.');
-                    closePaymentModal();
+                closePaymentModal();
                     
                     // Reload user subscription
                     await loadUserSubscription();
