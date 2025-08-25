@@ -224,6 +224,33 @@
             opacity: 1 !important;
             height: auto !important;
             overflow: visible !important;
+            margin: 0 !important;
+            position: relative !important;
+            z-index: 1 !important;
+        }
+        
+        /* Prevent overlapping */
+        .plan-card + .plan-card {
+            margin-left: 0 !important;
+        }
+        
+        /* Ensure proper spacing */
+        .pricing-container {
+            margin-bottom: 4rem !important;
+        }
+        
+        .pricing-row {
+            margin-bottom: 3rem !important;
+        }
+        
+        /* Force all plans to be visible */
+        .plan-card:nth-child(1),
+        .plan-card:nth-child(2),
+        .plan-card:nth-child(3),
+        .plan-card:nth-child(4) {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
         }
         
         .payment-methods {
@@ -346,12 +373,23 @@
                 </div>
             </div>
 
-            <!-- Pricing Plans - FORCED VISIBLE LAYOUT -->
+            <!-- Test Section - Verify All Plans Are Loading -->
+            <div style="background: rgba(16, 185, 129, 0.2); border: 2px solid #10B981; border-radius: 15px; padding: 2rem; margin: 2rem 0; text-align: center;">
+                <h3 style="color: #10B981; font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem;">🧪 TEST: Verify All 4 Plans Are Loading</h3>
+                <div id="plan-test-results" style="color: #10B981; font-size: 1rem;">
+                    <p>Checking plan visibility...</p>
+                </div>
+                <button onclick="testPlanVisibility()" style="background: #10B981; color: white; padding: 0.5rem 1rem; border: none; border-radius: 8px; margin-top: 1rem; cursor: pointer;">
+                    Test Plan Visibility
+                </button>
+            </div>
+
+            <!-- Pricing Plans - CLEAN LAYOUT -->
             <div style="width: 100%; margin-bottom: 4rem;">
                 <!-- Row 1: Free and Pro Plans -->
-                <div style="display: flex; justify-content: center; gap: 2rem; margin-bottom: 2rem; flex-wrap: wrap;">
+                <div style="display: flex; justify-content: center; gap: 3rem; margin-bottom: 3rem; flex-wrap: wrap;">
                     <!-- Free Plan -->
-                    <div class="plan-card" style="flex: 1; min-width: 280px; max-width: 320px;">
+                    <div class="plan-card" style="width: 300px; flex-shrink: 0;">
                         <div class="text-center mb-6">
                             <h3 class="text-2xl font-bold mb-2">Free Plan</h3>
                             <div class="price">
@@ -378,7 +416,7 @@
                     </div>
 
                     <!-- Pro Plan -->
-                    <div class="plan-card popular" style="flex: 1; min-width: 280px; max-width: 320px;">
+                    <div class="plan-card popular" style="width: 300px; flex-shrink: 0;">
                         <div class="text-center mb-6">
                             <h3 class="text-2xl font-bold mb-2">Pro Plan</h3>
                             <div class="price">
@@ -405,16 +443,16 @@
                     </div>
                 </div>
 
-                <!-- VISUAL SEPARATOR - ROW 2 BELOW -->
-                <div style="text-align: center; margin: 2rem 0; padding: 1rem; background: rgba(245, 158, 11, 0.2); border: 2px solid #F59E0B; border-radius: 10px;">
-                    <h3 style="color: #F59E0B; font-size: 1.5rem; font-weight: bold; margin-bottom: 0.5rem;">⬇️ ROW 2: PREMIUM & ENTERPRISE PLANS ⬇️</h3>
+                <!-- VISUAL SEPARATOR -->
+                <div style="text-align: center; margin: 3rem 0; padding: 1.5rem; background: rgba(245, 158, 11, 0.2); border: 2px solid #F59E0B; border-radius: 15px;">
+                    <h3 style="color: #F59E0B; font-size: 1.5rem; font-weight: bold; margin-bottom: 0.5rem;">⬇️ PREMIUM & ENTERPRISE PLANS BELOW ⬇️</h3>
                     <p style="color: #F59E0B; font-size: 1rem;">Scroll down to see Premium (₹599) and Enterprise (₹999) plans</p>
                 </div>
 
-                <!-- Row 2: Premium and Enterprise Plans - FORCED VISIBLE -->
-                <div style="display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap;">
+                <!-- Row 2: Premium and Enterprise Plans -->
+                <div style="display: flex; justify-content: center; gap: 3rem; flex-wrap: wrap;">
                     <!-- Premium Plan -->
-                    <div class="plan-card" style="flex: 1; min-width: 280px; max-width: 320px; border: 2px solid #10B981;">
+                    <div class="plan-card" style="width: 300px; flex-shrink: 0; border: 3px solid #10B981;">
                         <div class="text-center mb-6">
                             <h3 class="text-2xl font-bold mb-2">Premium Plan</h3>
                             <div class="price">
@@ -443,7 +481,7 @@
                     </div>
 
                     <!-- Enterprise Plan -->
-                    <div class="plan-card" style="flex: 1; min-width: 280px; max-width: 320px; border: 2px solid #F59E0B;">
+                    <div class="plan-card" style="width: 300px; flex-shrink: 0; border: 3px solid #F59E0B;">
                         <div class="text-center mb-6">
                             <h3 class="text-2xl font-bold mb-2">Enterprise</h3>
                             <div class="price">
@@ -1001,6 +1039,33 @@
         window.submitPaymentVerification = submitPaymentVerification;
         window.closePaymentModal = closePaymentModal;
         window.goBackToPricing = goBackToPricing;
+
+        // Test function to verify plan visibility
+        function testPlanVisibility() {
+            const resultsDiv = document.getElementById('plan-test-results');
+            resultsDiv.innerHTML = 'Checking plan visibility...';
+
+            const allPlanCards = document.querySelectorAll('.plan-card');
+            let visibleCount = 0;
+            let invisibleCount = 0;
+
+            allPlanCards.forEach((card, index) => {
+                const rect = card.getBoundingClientRect();
+                const isVisible = rect.width > 0 && rect.height > 0;
+                if (isVisible) {
+                    visibleCount++;
+                } else {
+                    invisibleCount++;
+                }
+            });
+
+            resultsDiv.innerHTML = `
+                <p>Total Plan Cards: ${allPlanCards.length}</p>
+                <p>Visible: ${visibleCount}</p>
+                <p>Invisible: ${invisibleCount}</p>
+            `;
+            console.log(`Test Results: Total=${allPlanCards.length}, Visible=${visibleCount}, Invisible=${invisibleCount}`);
+        }
     </script>
 </body>
 </html>
