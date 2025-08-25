@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vault Interface - Maze Password Manager</title>
+    
+    <!-- External Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <!-- Custom CSS -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+            color: #F8FAFC;
+            min-height: 100vh;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #6366F1, #8B5CF6, #06B6D4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #6366F1, #8B5CF6);
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+        }
+        
+        .navbar {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .password-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s ease;
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+        
+        .password-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+        
+        .search-bar {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(20px);
+        }
+        
+        .search-bar:focus {
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar fixed top-0 left-0 right-0 z-50 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <div class="text-3xl">🔐</div>
+                <div>
+                    <h1 class="text-2xl font-bold gradient-text">Maze Password Manager</h1>
+                    <p class="text-sm text-gray-300">Chakravyuham Vault</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-6">
+                <a href="/dashboard" class="text-gray-300 hover:text-white transition-colors">Dashboard</a>
+                <a href="/maze" class="text-gray-300 hover:text-white transition-colors">Maze Vault</a>
+                <a href="/security" class="text-gray-300 hover:text-white transition-colors">Security</a>
+                <a href="/vaults" class="text-gray-300 hover:text-white transition-colors">Vaults</a>
+                
+                <div class="flex items-center space-x-4">
+                    <span id="user-email" class="text-gray-300"></span>
+                    <button id="logout-btn" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-full text-white transition-colors">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="pt-24 pb-12 px-6">
+        <div class="max-w-7xl mx-auto">
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-8">
+                <div>
+                    <h1 id="vault-title" class="text-4xl font-bold mb-2 gradient-text">Loading Vault...</h1>
+                    <p id="vault-description" class="text-xl text-gray-300">Loading description...</p>
+                </div>
+                
+                <button id="add-password-btn" class="btn-primary px-6 py-3 rounded-full text-white font-semibold">
+                    + Add Password
+                </button>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="mb-8">
+                <div class="relative">
+                    <input type="text" id="search-input" placeholder="Search passwords..." 
+                           class="search-bar w-full px-6 py-4 rounded-full text-white placeholder-gray-400 text-lg focus:outline-none">
+                    <div class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400">
+                        🔍
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="glass-card rounded-2xl p-6 text-center">
+                    <div class="text-3xl mb-2">🔐</div>
+                    <div class="text-2xl font-bold" id="total-passwords">0</div>
+                    <div class="text-gray-300">Total Passwords</div>
+                </div>
+                
+                <div class="glass-card rounded-2xl p-6 text-center">
+                    <div class="text-3xl mb-2">📅</div>
+                    <div class="text-2xl font-bold" id="recent-passwords">0</div>
+                    <div class="text-gray-300">Recent (7 days)</div>
+                </div>
+                
+                <div class="glass-card rounded-2xl p-6 text-center">
+                    <div class="text-3xl mb-2">🔄</div>
+                    <div class="text-2xl font-bold" id="updated-passwords">0</div>
+                    <div class="text-gray-300">Updated (30 days)</div>
+                </div>
+            </div>
+
+            <!-- Passwords Grid -->
+            <div id="passwords-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Passwords will be loaded here -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty-state" class="text-center py-16 hidden">
+                <div class="text-8xl mb-6">🔐</div>
+                <h2 class="text-3xl font-bold mb-4">No Passwords Yet</h2>
+                <p class="text-xl text-gray-300 mb-8">Add your first password to get started</p>
+                <button onclick="showAddPasswordModal()" class="btn-primary px-8 py-4 rounded-full text-white text-lg font-semibold">
+                    Add Your First Password
+                </button>
+            </div>
+
+            <!-- Loading State -->
+            <div id="loading-state" class="text-center py-16">
+                <div class="text-6xl mb-6">⏳</div>
+                <h2 class="text-2xl font-bold mb-4">Loading Passwords...</h2>
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Password Modal -->
+    <div id="password-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="glass-card rounded-2xl p-8 max-w-md w-full">
+                <h2 id="modal-title" class="text-2xl font-bold mb-6">Add New Password</h2>
+                
+                <form id="password-form" class="space-y-4">
+                    <input type="hidden" id="password-id">
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Title</label>
+                        <input type="text" id="password-title" class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500" placeholder="e.g., Gmail, Facebook, Bank Account" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Username/Email</label>
+                        <input type="text" id="password-username" class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500" placeholder="your.email@example.com" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                        <div class="relative">
+                            <input type="password" id="password-value" class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500" placeholder="Enter password" required>
+                            <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white">
+                                👁️
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Website URL (Optional)</label>
+                        <input type="url" id="password-url" class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500" placeholder="https://example.com">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Notes (Optional)</label>
+                        <textarea id="password-notes" class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500" placeholder="Additional information..." rows="3"></textarea>
+                    </div>
+                    
+                    <div class="flex space-x-4 pt-4">
+                        <button type="button" onclick="closePasswordModal()" class="flex-1 px-4 py-3 border border-white/20 rounded-lg text-white hover:bg-white/10 transition-colors">
+                            Cancel
+                        </button>
+                        <button type="submit" class="flex-1 btn-primary px-4 py-3 rounded-lg text-white">
+                            Save Password
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/auth-service.js"></script>
+    <script>
+        let currentVaultId = null;
+        let currentVault = null;
+        let passwords = [];
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check authentication
+            if (!window.authService || !window.authService.isAuthenticated()) {
+                window.location.href = '/login';
+                return;
+            }
+
+            // Get vault ID from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            currentVaultId = urlParams.get('vault');
+            
+            if (!currentVaultId) {
+                window.location.href = '/vaults';
+                return;
+            }
+
+            // Display user info
+            const user = window.authService.getCurrentUser();
+            document.getElementById('user-email').textContent = user.email;
+
+            // Setup event listeners
+            setupEventListeners();
+            
+            // Load vault and passwords
+            loadVaultData();
+        });
+
+        function setupEventListeners() {
+            // Logout button
+            document.getElementById('logout-btn').addEventListener('click', async function() {
+                await window.authService.logout();
+                window.location.href = '/';
+            });
+
+            // Add password button
+            document.getElementById('add-password-btn').addEventListener('click', showAddPasswordModal);
+
+            // Search input
+            document.getElementById('search-input').addEventListener('input', function(e) {
+                const query = e.target.value.trim();
+                if (query) {
+                    searchPasswords(query);
+                } else {
+                    displayPasswords(passwords);
+                }
+            });
+
+            // Password form
+            document.getElementById('password-form').addEventListener('submit', handlePasswordSubmit);
+        }
+
+        async function loadVaultData() {
+            try {
+                // Load vault info
+                currentVault = await window.authService.getVault(currentVaultId);
+                displayVaultInfo(currentVault);
+                
+                // Load passwords
+                await loadPasswords();
+                
+                // Hide loading state
+                document.getElementById('loading-state').classList.add('hidden');
+                
+            } catch (error) {
+                console.error('Error loading vault data:', error);
+                alert('Error loading vault: ' + error.message);
+                window.location.href = '/vaults';
+            }
+        }
+
+        function displayVaultInfo(vault) {
+            document.getElementById('vault-title').textContent = vault.name;
+            document.getElementById('vault-description').textContent = vault.description || 'No description';
+            document.getElementById('total-passwords').textContent = vault.password_count || 0;
+        }
+
+        async function loadPasswords() {
+            try {
+                passwords = await window.authService.getPasswords(currentVaultId);
+                displayPasswords(passwords);
+                updateStats();
+            } catch (error) {
+                console.error('Error loading passwords:', error);
+                passwords = [];
+                displayPasswords([]);
+            }
+        }
+
+        function displayPasswords(passwordsToShow) {
+            const container = document.getElementById('passwords-container');
+            const emptyState = document.getElementById('empty-state');
+            
+            if (!passwordsToShow || passwordsToShow.length === 0) {
+                container.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            
+            container.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+            
+            container.innerHTML = passwordsToShow.map(password => `
+                <div class="password-card">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="text-2xl">🔐</div>
+                        <div class="flex space-x-2">
+                            <button onclick="editPassword('${password.id}')" class="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-white text-sm">
+                                Edit
+                            </button>
+                            <button onclick="deletePassword('${password.id}')" class="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-white text-sm">
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <h3 class="text-lg font-semibold mb-2">${password.title}</h3>
+                    <p class="text-gray-300 mb-2">${password.username}</p>
+                    <p class="text-gray-400 text-sm mb-3">${password.url || 'No URL'}</p>
+                    
+                    ${password.notes ? `<p class="text-gray-300 text-sm mb-3">${password.notes}</p>` : ''}
+                    
+                    <div class="text-xs text-gray-400">
+                        Created: ${new Date(password.created_at).toLocaleDateString()}
+                        ${password.updated_at !== password.created_at ? `<br>Updated: ${new Date(password.updated_at).toLocaleDateString()}` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateStats() {
+            const total = passwords.length;
+            const now = new Date();
+            const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+            
+            const recent = passwords.filter(p => new Date(p.created_at) > sevenDaysAgo).length;
+            const updated = passwords.filter(p => new Date(p.updated_at) > thirtyDaysAgo).length;
+            
+            document.getElementById('total-passwords').textContent = total;
+            document.getElementById('recent-passwords').textContent = recent;
+            document.getElementById('updated-passwords').textContent = updated;
+        }
+
+        async function searchPasswords(query) {
+            try {
+                const results = await window.authService.searchPasswords(query);
+                // Filter results to current vault
+                const vaultResults = results.filter(p => p.vault_id === currentVaultId);
+                displayPasswords(vaultResults);
+            } catch (error) {
+                console.error('Search error:', error);
+                // Fallback to local search
+                const localResults = passwords.filter(p => 
+                    p.title.toLowerCase().includes(query.toLowerCase()) ||
+                    p.username.toLowerCase().includes(query.toLowerCase()) ||
+                    p.url.toLowerCase().includes(query.toLowerCase()) ||
+                    p.notes.toLowerCase().includes(query.toLowerCase())
+                );
+                displayPasswords(localResults);
+            }
+        }
+
+        function showAddPasswordModal() {
+            document.getElementById('modal-title').textContent = 'Add New Password';
+            document.getElementById('password-id').value = '';
+            document.getElementById('password-form').reset();
+            document.getElementById('password-modal').classList.remove('hidden');
+        }
+
+        function editPassword(passwordId) {
+            const password = passwords.find(p => p.id === passwordId);
+            if (!password) return;
+            
+            document.getElementById('modal-title').textContent = 'Edit Password';
+            document.getElementById('password-id').value = password.id;
+            document.getElementById('password-title').value = password.title;
+            document.getElementById('password-username').value = password.username;
+            document.getElementById('password-value').value = password.password;
+            document.getElementById('password-url').value = password.url || '';
+            document.getElementById('password-notes').value = password.notes || '';
+            
+            document.getElementById('password-modal').classList.remove('hidden');
+        }
+
+        function closePasswordModal() {
+            document.getElementById('password-modal').classList.add('hidden');
+        }
+
+        async function handlePasswordSubmit(e) {
+            e.preventDefault();
+            
+            const passwordId = document.getElementById('password-id').value;
+            const passwordData = {
+                title: document.getElementById('password-title').value,
+                username: document.getElementById('password-username').value,
+                password: document.getElementById('password-value').value,
+                url: document.getElementById('password-url').value,
+                notes: document.getElementById('password-notes').value
+            };
+            
+            try {
+                if (passwordId) {
+                    // Update existing password
+                    await window.authService.updatePassword(passwordId, passwordData);
+                    alert('Password updated successfully!');
+                } else {
+                    // Add new password
+                    await window.authService.addPassword(currentVaultId, passwordData);
+                    alert('Password added successfully!');
+                }
+                
+                closePasswordModal();
+                await loadPasswords(); // Reload passwords
+                
+            } catch (error) {
+                alert('Error saving password: ' + error.message);
+            }
+        }
+
+        async function deletePassword(passwordId) {
+            if (!confirm('Are you sure you want to delete this password? This action cannot be undone.')) {
+                return;
+            }
+            
+            try {
+                await window.authService.deletePassword(passwordId);
+                alert('Password deleted successfully!');
+                await loadPasswords(); // Reload passwords
+            } catch (error) {
+                alert('Error deleting password: ' + error.message);
+            }
+        }
+
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('password-value');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+            } else {
+                passwordInput.type = 'password';
+            }
+        }
+
+        // Global functions for onclick handlers
+        window.showAddPasswordModal = showAddPasswordModal;
+        window.editPassword = editPassword;
+        window.deletePassword = deletePassword;
+    </script>
+</body>
+</html>

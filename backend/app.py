@@ -189,6 +189,27 @@ def security():
     except Exception as e:
         return jsonify({"error": f"Error serving security page: {str(e)}"}), 500
 
+@app.route('/vault-interface')
+def vault_interface():
+    try:
+        # Try multiple possible paths for the public directory
+        possible_paths = [
+            'public',
+            '../public', 
+            './public',
+            os.path.join(os.getcwd(), 'public'),
+            os.path.join(os.path.dirname(__file__), '..', 'public')
+        ]
+        
+        for path in possible_paths:
+            if os.path.exists(os.path.join(path, 'vault-interface.html')):
+                return send_from_directory(path, 'vault-interface.html')
+        
+        return jsonify({"error": "vault-interface.html not found"}), 404
+        
+    except Exception as e:
+        return jsonify({"error": f"Error serving vault interface: {str(e)}"}), 500
+
 @app.route('/vaults')
 def vaults():
     try:
@@ -459,8 +480,9 @@ def get_passwords(vault_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Add password
+# Add password to vault
 @app.route('/api/vaults/<vault_id>/passwords', methods=['POST'])
+@require_auth
 def add_password(vault_id):
     try:
         user_id = request.headers.get('X-User-ID')
@@ -475,7 +497,7 @@ def add_password(vault_id):
         notes = data.get('notes', '')
         
         if not title or not username or not password:
-            return jsonify({"error": "Title, username, and password required"}), 400
+            return jsonify({"error": "Title, username, and password are required"}), 400
         
         conn = get_db()
         c = conn.cursor()
@@ -486,11 +508,11 @@ def add_password(vault_id):
             conn.close()
             return jsonify({"error": "Vault not found"}), 404
         
-        # Add password
+        # Create password
         password_id = str(uuid.uuid4())
         c.execute('''
-            INSERT INTO passwords (id, vault_id, title, username, password, url, notes) 
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO passwords (id, vault_id, title, username, password, url, notes, created_at, updated_at) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
         ''', (password_id, vault_id, title, username, password, url, notes))
         
         # Update vault password count
@@ -500,12 +522,8 @@ def add_password(vault_id):
         conn.close()
         
         return jsonify({
-            "id": password_id,
-            "title": title,
-            "username": username,
-            "url": url,
-            "notes": notes,
-            "created_at": datetime.now().isoformat()
+            "message": "Password added successfully",
+            "password_id": password_id
         }), 201
         
     except Exception as e:
@@ -513,6 +531,7 @@ def add_password(vault_id):
 
 # Update password
 @app.route('/api/passwords/<password_id>', methods=['PUT'])
+@require_auth
 def update_password(password_id):
     try:
         user_id = request.headers.get('X-User-ID')
@@ -527,7 +546,7 @@ def update_password(password_id):
         notes = data.get('notes', '')
         
         if not title or not username or not password:
-            return jsonify({"error": "Title, username, and password required"}), 400
+            return jsonify({"error": "Title, username, and password are required"}), 400
         
         conn = get_db()
         c = conn.cursor()
@@ -560,6 +579,7 @@ def update_password(password_id):
 
 # Delete password
 @app.route('/api/passwords/<password_id>', methods=['DELETE'])
+@require_auth
 def delete_password(password_id):
     try:
         user_id = request.headers.get('X-User-ID')
@@ -569,19 +589,25 @@ def delete_password(password_id):
         conn = get_db()
         c = conn.cursor()
         
-        # Get vault ID for this password
+        # Get vault_id before deleting
+        c.execute('SELECT vault_id FROM passwords WHERE id = ?', (password_id,))
+        password = c.fetchone()
+        if not password:
+            conn.close()
+            return jsonify({"error": "Password not found"}), 404
+        
+        vault_id = password['vault_id']
+        
+        # Verify password belongs to user's vault
         c.execute('''
-            SELECT p.vault_id FROM passwords p 
+            SELECT p.id FROM passwords p 
             JOIN vaults v ON p.vault_id = v.id 
             WHERE p.id = ? AND v.user_id = ?
         ''', (password_id, user_id))
         
-        result = c.fetchone()
-        if not result:
+        if not c.fetchone():
             conn.close()
             return jsonify({"error": "Password not found"}), 404
-        
-        vault_id = result['vault_id']
         
         # Delete password
         c.execute('DELETE FROM passwords WHERE id = ?', (password_id,))
@@ -593,6 +619,106 @@ def delete_password(password_id):
         conn.close()
         
         return jsonify({"message": "Password deleted successfully"}), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Get vault with password count
+@app.route('/api/vaults/<vault_id>', methods=['GET'])
+@require_auth
+def get_vault(vault_id):
+    try:
+        user_id = request.headers.get('X-User-ID')
+        if not user_id:
+            return jsonify({"error": "Authentication required"}), 401
+        
+        conn = get_db()
+        c = conn.cursor()
+        
+        # Get vault with password count
+        c.execute('''
+            SELECT v.*, COUNT(p.id) as actual_password_count 
+            FROM vaults v 
+            LEFT JOIN passwords p ON v.id = p.vault_id 
+            WHERE v.id = ? AND v.user_id = ? 
+            GROUP BY v.id
+        ''', (vault_id, user_id))
+        
+        vault = c.fetchone()
+        conn.close()
+        
+        if not vault:
+            return jsonify({"error": "Vault not found"}), 404
+        
+        # Update the stored password count to match actual count
+        if vault['actual_password_count'] != vault['password_count']:
+            conn = get_db()
+            c = conn.cursor()
+            c.execute('UPDATE vaults SET password_count = ? WHERE id = ?', (vault['actual_password_count'], vault_id))
+            conn.commit()
+            conn.close()
+            vault['password_count'] = vault['actual_password_count']
+        
+        return jsonify({
+            "id": vault['id'],
+            "name": vault['name'],
+            "description": vault['description'],
+            "icon": vault['icon'],
+            "password_count": vault['password_count'],
+            "created_at": vault['created_at']
+        }), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Search passwords
+@app.route('/api/passwords/search', methods=['GET'])
+@require_auth
+def search_passwords():
+    try:
+        user_id = request.headers.get('X-User-ID')
+        if not user_id:
+            return jsonify({"error": "Authentication required"}), 401
+        
+        query = request.args.get('q', '')
+        if not query:
+            return jsonify({"error": "Search query required"}), 400
+        
+        conn = get_db()
+        c = conn.cursor()
+        
+        # Search passwords in user's vaults
+        c.execute('''
+            SELECT p.*, v.name as vault_name 
+            FROM passwords p 
+            JOIN vaults v ON p.vault_id = v.id 
+            WHERE v.user_id = ? AND (
+                p.title LIKE ? OR 
+                p.username LIKE ? OR 
+                p.url LIKE ? OR 
+                p.notes LIKE ?
+            )
+            ORDER BY p.updated_at DESC
+        ''', (user_id, f'%{query}%', f'%{query}%', f'%{query}%', f'%{query}%'))
+        
+        passwords = c.fetchall()
+        conn.close()
+        
+        password_list = []
+        for password in passwords:
+            password_list.append({
+                'id': password['id'],
+                'title': password['title'],
+                'username': password['username'],
+                'password': password['password'],
+                'url': password['url'],
+                'notes': password['notes'],
+                'vault_name': password['vault_name'],
+                'created_at': password['created_at'],
+                'updated_at': password['updated_at']
+            })
+        
+        return jsonify(password_list), 200
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500

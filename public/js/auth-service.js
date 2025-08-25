@@ -245,6 +245,106 @@ class AuthService {
         }
     }
 
+    // Add password to vault
+    async addPassword(vaultId, passwordData) {
+        try {
+            const response = await fetch(`/api/vaults/${vaultId}/passwords`, {
+                method: 'POST',
+                headers: this.getAuthHeaders(),
+                body: JSON.stringify(passwordData)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to add password');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Add password error:', error);
+            throw error;
+        }
+    }
+
+    // Update password
+    async updatePassword(passwordId, passwordData) {
+        try {
+            const response = await fetch(`/api/passwords/${passwordId}`, {
+                method: 'PUT',
+                headers: this.getAuthHeaders(),
+                body: JSON.stringify(passwordData)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to update password');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Update password error:', error);
+            throw error;
+        }
+    }
+
+    // Delete password
+    async deletePassword(passwordId) {
+        try {
+            const response = await fetch(`/api/passwords/${passwordId}`, {
+                method: 'DELETE',
+                headers: this.getAuthHeaders()
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to delete password');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Delete password error:', error);
+            throw error;
+        }
+    }
+
+    // Get vault details
+    async getVault(vaultId) {
+        try {
+            const response = await fetch(`/api/vaults/${vaultId}`, {
+                method: 'GET',
+                headers: this.getAuthHeaders()
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to get vault');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Get vault error:', error);
+            throw error;
+        }
+    }
+
+    // Search passwords
+    async searchPasswords(query) {
+        try {
+            const response = await fetch(`/api/passwords/search?q=${encodeURIComponent(query)}`, {
+                method: 'GET',
+                headers: this.getAuthHeaders()
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to search passwords');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Search passwords error:', error);
+            throw error;
+        }
+    }
+
     // Redirect to dashboard if authenticated
     redirectIfAuthenticated() {
         if (this.isAuthenticated()) {
