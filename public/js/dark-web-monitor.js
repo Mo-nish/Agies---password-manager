@@ -200,6 +200,10 @@ class DarkWebMonitor {
         this.scanProgress = 0;
         
         console.log('🔍 Starting REAL breach scan...');
+        console.log('📊 Initial scan status:', this.scanStatus, 'Progress:', this.scanProgress);
+        
+        // Update the display immediately
+        this.updateScanProgress();
         
         const totalCredentials = this.credentials.length;
         
@@ -233,7 +237,9 @@ class DarkWebMonitor {
                 // Update progress
                 this.scanProgress = ((i + 1) / totalCredentials) * 100;
                 console.log(`📊 Scan progress: ${Math.round(this.scanProgress)}% (${i + 1}/${totalCredentials})`);
+                console.log('🔍 Calling updateScanProgress...');
                 this.updateScanProgress();
+                console.log('✅ updateScanProgress completed');
                 
                 // Small delay to prevent overwhelming APIs
                 await new Promise(resolve => setTimeout(resolve, 100));
@@ -367,22 +373,33 @@ class DarkWebMonitor {
 
     // Update scan progress display
     updateScanProgress() {
+        console.log('🔍 updateScanProgress called with:', this.scanProgress, this.scanStatus);
+        
         // Update progress percentage text
         const progressText = document.getElementById('scan-progress');
         if (progressText) {
             progressText.textContent = `${Math.round(this.scanProgress)}%`;
+            console.log('✅ Progress text updated to:', progressText.textContent);
+        } else {
+            console.log('❌ scan-progress element not found');
         }
         
         // Update progress bar width
         const progressBar = document.getElementById('scan-bar');
         if (progressBar) {
             progressBar.style.width = `${this.scanProgress}%`;
+            console.log('✅ Progress bar width updated to:', progressBar.style.width);
+        } else {
+            console.log('❌ scan-bar element not found');
         }
         
         // Update scan status
         const statusElement = document.getElementById('scan-status');
         if (statusElement) {
             statusElement.textContent = this.scanStatus;
+            console.log('✅ Scan status updated to:', statusElement.textContent);
+        } else {
+            console.log('❌ scan-status element not found');
         }
         
         // Update scan message
@@ -397,6 +414,9 @@ class DarkWebMonitor {
             } else {
                 scanMessage.textContent = 'Ready to scan';
             }
+            console.log('✅ Scan message updated to:', scanMessage.textContent);
+        } else {
+            console.log('❌ scan-message element not found');
         }
         
         console.log(`📊 Progress updated: ${Math.round(this.scanProgress)}% - Status: ${this.scanStatus}`);
