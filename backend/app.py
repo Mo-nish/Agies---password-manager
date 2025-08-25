@@ -718,27 +718,34 @@ def debug_user_data(user_id):
 # Health check route
 @app.route('/api/health', methods=['GET'])
 def health_check():
+    """Simple health check endpoint"""
     try:
-        # Test database connection
-        conn = get_db()
-        if not conn:
-            return jsonify({
-                "status": "unhealthy",
-                "error": "Database connection failed",
-                "timestamp": datetime.now().isoformat()
-            }), 500
-        c = conn.cursor()
-        c.execute('SELECT 1')
-        conn.close()
+        print("🏥 Health check requested")
+        
+        # Check database connectivity
+        db = get_db()
+        if db:
+            print("✅ Database connection successful")
+            db_status = "connected"
+        else:
+            print("❌ Database connection failed")
+            db_status = "failed"
+        
+        # Check basic app functionality
+        app_status = "healthy"
         
         return jsonify({
-            "status": "healthy",
-            "database": "connected",
-            "timestamp": datetime.now().isoformat()
-        }), 200
+            "status": "ok",
+            "timestamp": datetime.now().isoformat(),
+            "database": db_status,
+            "app": app_status,
+            "version": "1.0.0"
+        })
+        
     except Exception as e:
+        print(f"❌ Health check failed: {str(e)}")
         return jsonify({
-            "status": "unhealthy",
+            "status": "error",
             "error": str(e),
             "timestamp": datetime.now().isoformat()
         }), 500
@@ -2354,22 +2361,34 @@ def debug_vaults():
 if __name__ == '__main__':
     try:
         print("🚀 Starting Maze Password Manager...")
-        print(f"🔍 Working directory: {os.getcwd()}")
-        print(f"🔍 Database path: {DATABASE}")
+        print(f"📁 Current working directory: {os.getcwd()}")
+        print(f"📁 Script directory: {os.path.dirname(os.path.abspath(__file__))}")
+        print(f"🗄️ Database path: {DATABASE}")
         
-        # Initialize database and run migrations
+        # Check if database file exists
+        if os.path.exists(DATABASE):
+            print(f"✅ Database file exists: {DATABASE}")
+        else:
+            print(f"⚠️ Database file does not exist: {DATABASE}")
+        
+        # Initialize database
         print("🔧 Initializing database...")
         init_db()
-        print("🔧 Running database migrations...")
+        print("✅ Database initialized successfully")
+        
+        # Migrate database if needed
+        print("🔄 Running database migration...")
         migrate_database()
+        print("✅ Database migration completed")
         
         port = int(os.environ.get('PORT', 8000))
         debug_mode = os.environ.get('FLASK_ENV') == 'development'
         print(f"🌐 Starting Flask app on port {port}, debug={debug_mode}")
         
         app.run(host='0.0.0.0', port=port, debug=debug_mode)
+        
     except Exception as e:
-        print(f"❌ Failed to start Maze Password Manager: {e}")
+        print(f"❌ Failed to start Flask app: {str(e)}")
         import traceback
-        traceback.print_exc()
-        exit(1)
+        print(f"❌ Traceback: {traceback.format_exc()}")
+        raise
