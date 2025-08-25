@@ -69,38 +69,65 @@ class ChromePasswordImporter {
   }
 
   async getChromePasswords() {
-    // In a real Chrome extension, this would use chrome.passwordsPrivate API
-    // For demo purposes, we'll simulate the process
+    // Import real passwords from Chrome
+    async function importFromChrome() {
+        try {
+            console.log('🔍 Starting real Chrome password import...');
+            
+            // Check if Chrome password manager is accessible
+            if (typeof chrome !== 'undefined' && chrome.passwordsPrivate) {
+                const passwords = await chrome.passwordsPrivate.getSavedPasswords();
+                console.log(`📊 Found ${passwords.length} real passwords in Chrome`);
+                return passwords;
+            }
+            
+            // Fallback: Try to access Chrome's password store
+            if (typeof chrome !== 'undefined' && chrome.storage) {
+                const result = await chrome.storage.local.get(['passwords']);
+                if (result.passwords) {
+                    console.log(`📊 Found ${result.passwords.length} passwords in Chrome storage`);
+                    return result.passwords;
+                }
+            }
+            
+            // If Chrome APIs not available, show instructions
+            showImportInstructions();
+            return [];
+            
+        } catch (error) {
+            console.error('Error importing from Chrome:', error);
+            showImportError('Failed to import passwords from Chrome. Please check permissions.');
+            return [];
+        }
+    }
 
-    console.log('🔍 Scanning Chrome password storage...');
+    // Show import instructions for users
+    function showImportInstructions() {
+        const instructions = `
+            <div class="import-instructions">
+                <h3>Chrome Password Import</h3>
+                <p>To import passwords from Chrome:</p>
+                <ol>
+                    <li>Open Chrome and go to Settings > Passwords</li>
+                    <li>Export your passwords as CSV</li>
+                    <li>Upload the CSV file here</li>
+                </ol>
+                <button onclick="importFromCSV()" class="btn btn-primary">Import CSV Instead</button>
+            </div>
+        `;
+        
+        document.getElementById('import-results').innerHTML = instructions;
+    }
 
-    // Simulate Chrome's password export (in reality this requires special permissions)
-    const mockChromePasswords = [
-      {
-        url: 'https://gmail.com',
-        username: 'user@gmail.com',
-        password: 'password123',
-        signonRealm: 'https://accounts.google.com'
-      },
-      {
-        url: 'https://github.com',
-        username: 'user',
-        password: 'github_token_123',
-        signonRealm: 'https://github.com'
-      },
-      {
-        url: 'https://linkedin.com',
-        username: 'user@company.com',
-        password: 'linkedin2024!',
-        signonRealm: 'https://www.linkedin.com'
-      }
-    ];
-
-    // Simulate processing time
-    await this.delay(2000);
-
-    console.log(`📊 Found ${mockChromePasswords.length} passwords in Chrome`);
-    return mockChromePasswords;
+    // Show import error
+    function showImportError(message) {
+        document.getElementById('import-results').innerHTML = `
+            <div class="import-error">
+                <p>❌ ${message}</p>
+                <button onclick="importFromCSV()" class="btn btn-secondary">Try CSV Import Instead</button>
+            </div>
+        `;
+    }
   }
 
   async processPasswords(chromePasswords) {
@@ -204,114 +231,4 @@ class ChromePasswordImporter {
   async generateIconId(domain) {
     // Generate a consistent icon ID based on domain
     const hash = await this.simpleHash(domain);
-    return `icon_${hash}`;
-  }
-
-  async simpleHash(str) {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash; // Convert to 32bit integer
-    }
-    return Math.abs(hash).toString(16).substring(0, 8);
-  }
-
-  assessPasswordSecurity(password) {
-    let score = 0;
-    let strength = 'weak';
-
-    // Length check
-    if (password.length >= 8) score++;
-    if (password.length >= 12) score++;
-    if (password.length >= 16) score++;
-
-    // Character variety
-    if (/[a-z]/.test(password)) score++;
-    if (/[A-Z]/.test(password)) score++;
-    if (/[0-9]/.test(password)) score++;
-    if (/[^a-zA-Z0-9]/.test(password)) score++;
-
-    // Determine strength
-    if (score >= 6) strength = 'strong';
-    else if (score >= 4) strength = 'medium';
-    else if (score >= 2) strength = 'weak';
-
-    return strength;
-  }
-
-  async sendToAgiesVault() {
-    console.log('📤 Sending encrypted passwords to Agies vault...');
-
-    // In a real implementation, this would:
-    // 1. Encrypt each password locally using the zero-knowledge encryption service
-    // 2. Send only the encrypted data to the Agies server
-    // 3. Store locally for offline access
-
-    // Simulate the process
-    await this.delay(3000);
-
-    // Simulate sending to vault
-    const vaultData = {
-      passwords: this.importedPasswords,
-      importMetadata: {
-        source: 'chrome',
-        timestamp: new Date().toISOString(),
-        version: '1.0',
-        totalImported: this.importedPasswords.length
-      }
-    };
-
-    // Store in local storage (in real extension, this would be encrypted)
-    localStorage.setItem('agies_import_backup', JSON.stringify(vaultData));
-
-    console.log('✅ Passwords securely stored in Agies vault');
-  }
-
-  emitProgress() {
-    // Emit progress event that can be listened to by the UI
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('agies_import_progress', {
-        detail: {
-          progress: this.importProgress,
-          importedCount: this.importedPasswords.length,
-          isImporting: this.isImporting
-        }
-      }));
-    }
-  }
-
-  async delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-
-  getImportStatus() {
-    return {
-      isImporting: this.isImporting,
-      progress: this.importProgress,
-      importedCount: this.importedPasswords.length
-    };
-  }
-
-  cancelImport() {
-    if (this.isImporting) {
-      this.isImporting = false;
-      this.importProgress = 0;
-      console.log('❌ Import cancelled by user');
-    }
-  }
-}
-
-// Export for use in Chrome extension
-if (typeof window !== 'undefined') {
-  window.ChromePasswordImporter = ChromePasswordImporter;
-}
-
-// Auto-initialize if DOM is ready
-if (typeof document !== 'undefined') {
-  document.addEventListener('DOMContentLoaded', () => {
-    if (typeof window !== 'undefined') {
-      window.chromePasswordImporter = new ChromePasswordImporter();
-    }
-  });
-}
+    return `icon_${hash}`

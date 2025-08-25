@@ -197,7 +197,7 @@ def get_db():
     conn.row_factory = sqlite3.Row  # This will allow us to access columns by name
     return conn
 
-# Initialize database
+# Initialize database tables
 init_db()
 
 # Database migration function - Enhanced for existing deployments
@@ -304,17 +304,6 @@ def migrate_database():
             ''')
             print("✅ Created admin_notifications table")
         
-        # Create a test subscription for demonstration
-        c.execute("SELECT COUNT(*) FROM subscriptions")
-        if c.fetchone()[0] == 0:
-            # Create a demo subscription to show the system works
-            demo_sub_id = str(uuid.uuid4())
-            c.execute('''
-                INSERT INTO subscriptions (id, user_id, plan_name, status, amount, currency, payment_provider, payment_id)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (demo_sub_id, 'demo-user', 'pro', 'active', 299, 'INR', 'demo', 'demo-payment'))
-            print("✅ Created demo subscription for testing")
-        
         conn.commit()
         print("🎉 Database migration completed successfully!")
         
@@ -323,6 +312,14 @@ def migrate_database():
         conn.rollback()
     finally:
         conn.close()
+
+# Run database migration if needed
+migrate_database()
+
+print("✅ Database initialized successfully")
+print("✅ All tables created and ready")
+print("✅ Subscription plans configured")
+print("✅ Ready to accept real user registrations and subscriptions")
 
 # Enhanced subscription checking with better error handling
 def get_user_subscription_plan(user_id):

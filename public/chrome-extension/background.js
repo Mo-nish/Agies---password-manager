@@ -216,7 +216,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 // This would fetch passwords from storage/backend
                 sendResponse({
                     success: true,
-                    passwords: getMockPasswords()
+                    passwords: getRealPasswords()
                 });
                 break;
                 
@@ -249,35 +249,28 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
 });
 
-// Get mock passwords for testing
-function getMockPasswords() {
-    return [
-        {
-            id: '1',
-            title: 'Gmail',
-            username: 'user@example.com',
-            password: 'secure123',
-            url: 'https://gmail.com',
-            domain: 'gmail.com'
-        },
-        {
-            id: '2',
-            title: 'GitHub',
-            username: 'developer',
-            password: 'github456',
-            url: 'https://github.com',
-            domain: 'github.com'
-        },
-        {
-            id: '3',
-            title: 'Bank Account',
-            username: 'customer123',
-            password: 'bank789',
-            url: 'https://mybank.com',
-            domain: 'mybank.com'
+    // Get real passwords from the password manager
+    function getRealPasswords() {
+        try {
+            // Get passwords from the main application's storage
+            if (window.authService && window.authService.getPasswords) {
+                return window.authService.getPasswords();
+            }
+            
+            // Fallback to local storage
+            const storedPasswords = localStorage.getItem('agies_passwords');
+            if (storedPasswords) {
+                return JSON.parse(storedPasswords);
+            }
+            
+            // Return empty array if no passwords found
+            return [];
+            
+        } catch (error) {
+            console.error('Error retrieving passwords:', error);
+            return [];
         }
-    ];
-}
+    }
 
 // Load extension state from storage
 async function loadExtensionState() {

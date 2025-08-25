@@ -318,7 +318,7 @@
             // Google Analytics
             if (window.gtag) {
                 window.gtag('event', 'purchase', {
-                    transaction_id: 'demo_' + Date.now(),
+                    transaction_id: window.location.searchParams.get('transaction_id') || 'TXN_' + Date.now(),
                     value: 3.99,
                     currency: 'USD',
                     items: [{
