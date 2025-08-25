@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌐 Dark Web Monitor - Maze Password Manager</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            background: rgba(15, 15, 35, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem 2rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #6366f1, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .main-container {
+            margin-top: 80px;
+            padding: 2rem;
+        }
+
+        .monitor-overview {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, #6366f1, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        .monitoring-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .breach-alerts {
+            max-height: 400px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+
+        .breach-entry {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.02);
+            margin-bottom: 0.5rem;
+            border-radius: 0.5rem;
+        }
+
+        .breach-entry:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .breach-severity {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .breach-severity.low { background: #10b981; }
+        .breach-severity.medium { background: #f59e0b; }
+        .breach-severity.high { background: #ef4444; }
+        .breach-severity.critical { background: #dc2626; }
+
+        .breach-content {
+            flex: 1;
+        }
+
+        .breach-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .breach-details {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 0.5rem;
+        }
+
+        .breach-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            font-size: 0.875rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #6366f1, #8b5cf6);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #ef4444, #dc2626);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #10b981, #059669);
+            color: white;
+        }
+
+        .monitoring-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .scan-status {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .scan-progress {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .scan-bar {
+            height: 100%;
+            background: linear-gradient(45deg, #6366f1, #8b5cf6);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .credentials-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .credential-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .credential-card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .credential-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .credential-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .credential-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-safe {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status-breached {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .status-warning {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .auto-rotation {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .rotation-settings {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .setting-card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .setting-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #8b5cf6;
+        }
+
+        .setting-description {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 1rem;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.2);
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background: linear-gradient(45deg, #6366f1, #8b5cf6);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .monitoring-controls {
+                flex-direction: column;
+            }
+            
+            .navbar {
+                padding: 1rem;
+            }
+            
+            .nav-links {
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-brand">🌐 Dark Web Monitor</div>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/dashboard">Dashboard</a>
+            <a href="/security-dashboard">Security</a>
+            <a href="/vaults">Vaults</a>
+            <a href="/pricing">Pricing</a>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Monitor Overview -->
+        <div class="monitor-overview">
+            <h1 class="text-4xl font-bold mb-6 text-center">🌐 Dark Web Monitor</h1>
+            <p class="text-center text-gray-300 mb-8">Real-time monitoring of credential breaches and automatic threat response</p>
+            
+            <!-- Statistics Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="total-credentials">1,247</div>
+                    <div class="stat-label">Monitored Credentials</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-value" id="breaches-detected">3</div>
+                    <div class="stat-label">Breaches Detected</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-value" id="auto-rotated">12</div>
+                    <div class="stat-label">Auto-Rotated Passwords</div>
+                </div>
+                
+                <div class="stat-value" id="last-scan">2 min ago</div>
+                    <div class="stat-label">Last Scan</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-value" id="scan-status">ACTIVE</div>
+                    <div class="stat-label">Monitoring Status</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monitoring Controls -->
+        <div class="monitoring-section">
+            <h2 class="text-2xl font-bold mb-6">🔍 Monitoring Controls</h2>
+            
+            <div class="monitoring-controls">
+                <button class="btn btn-primary" onclick="startScan()">🚀 Start Full Scan</button>
+                <button class="btn btn-secondary" onclick="scanSpecificEmail()">📧 Scan Email</button>
+                <button class="btn btn-secondary" onclick="scanSpecificDomain()">🌐 Scan Domain</button>
+                <button class="btn btn-secondary" onclick="viewScanHistory()">📋 Scan History</button>
+                <button class="btn btn-success" onclick="enableAutoRotation()">🔄 Enable Auto-Rotation</button>
+                <button class="btn btn-danger" onclick="emergencyLockdown()">🚨 Emergency Lockdown</button>
+            </div>
+            
+            <div class="scan-status">
+                <div class="flex justify-between items-center mb-2">
+                    <span>Scan Progress</span>
+                    <span id="scan-percentage">0%</span>
+                </div>
+                <div class="scan-progress">
+                    <div class="scan-bar" id="scan-bar"></div>
+                </div>
+                <div class="text-sm text-gray-400" id="scan-message">Ready to scan</div>
+            </div>
+        </div>
+
+        <!-- Breach Alerts -->
+        <div class="monitoring-section">
+            <h2 class="text-2xl font-bold mb-6">🚨 Breach Alerts</h2>
+            <div class="breach-alerts" id="breach-alerts">
+                <!-- Breach entries will be populated here -->
+            </div>
+        </div>
+
+        <!-- Credential Monitoring -->
+        <div class="credentials-section">
+            <h2 class="text-2xl font-bold mb-6">🔐 Credential Monitoring</h2>
+            <div class="credential-grid" id="credential-grid">
+                <!-- Credential cards will be populated here -->
+            </div>
+        </div>
+
+        <!-- Auto-Rotation Settings -->
+        <div class="auto-rotation">
+            <h2 class="text-2xl font-bold mb-6">🔄 Automatic Password Rotation</h2>
+            <div class="rotation-settings">
+                <div class="setting-card">
+                    <div class="setting-title">Auto-Rotation</div>
+                    <div class="setting-description">
+                        Automatically rotate passwords when breaches are detected
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="auto-rotation-toggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <div class="setting-card">
+                    <div class="setting-title">Immediate Response</div>
+                    <div class="setting-description">
+                        Rotate passwords immediately upon breach detection
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="immediate-response-toggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <div class="setting-card">
+                    <div class="setting-title">Notification Alerts</div>
+                    <div class="setting-description">
+                        Send notifications for all security events
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="notification-toggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <div class="setting-card">
+                    <div class="setting-title">Backup Verification</div>
+                    <div class="setting-description">
+                        Verify backup systems before rotation
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="backup-verify-toggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/dark-web-monitor.js"></script>
+</body>
+</html>
