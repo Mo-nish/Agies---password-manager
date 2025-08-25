@@ -6,20 +6,30 @@
     <title>Maze Password Manager - Chakravyuham Vault</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/TextPlugin.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/MotionPathPlugin.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #24243e 50%, #302b63 100%);
+            color: white;
+            overflow-x: hidden;
+        }
+        
         .maze-bg {
             background: linear-gradient(135deg, #0f0c29 0%, #24243e 50%, #302b63 100%);
+            min-height: 100vh;
         }
         
         .maze-layer {
-            position: absolute;
+            position: fixed;
             border-radius: 50%;
             border: 2px solid rgba(255, 255, 255, 0.1);
             animation: rotate 30s linear infinite;
+            z-index: 1;
         }
         
         .maze-layer:nth-child(1) { width: 300px; height: 300px; animation-duration: 30s; }
@@ -47,35 +57,22 @@
         
         .btn-primary {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.4s ease;
             box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .btn-primary::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
-        }
-        
-        .btn-primary:hover::before {
-            left: 100%;
+            border: none;
+            cursor: pointer;
         }
         
         .btn-primary:hover {
-            transform: translateY(-3px) scale(1.05);
+            transform: translateY(-3px);
             box-shadow: 0 15px 35px rgba(102, 126, 234, 0.6);
         }
         
         .btn-google {
             background: linear-gradient(135deg, #4285f4 0%, #34a853 100%);
             transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
         }
         
         .btn-google:hover {
@@ -86,6 +83,8 @@
         .btn-premium {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
         }
         
         .btn-premium:hover {
@@ -97,36 +96,15 @@
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .feature-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(147, 51, 234, 0.1), rgba(79, 70, 229, 0.1));
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        
-        .feature-card:hover::before {
-            opacity: 1;
+            transition: all 0.4s ease;
+            border-radius: 16px;
+            padding: 2rem;
         }
         
         .feature-card:hover {
-            transform: translateY(-10px) scale(1.02);
+            transform: translateY(-10px);
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
             border-color: rgba(147, 51, 234, 0.3);
-        }
-        
-        .security-feature {
-            opacity: 0;
-            transform: translateY(50px);
         }
         
         .hero-section {
@@ -134,11 +112,15 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 120px 0 60px 0;
+            position: relative;
+            z-index: 10;
         }
         
         .section {
-            padding: 100px 0;
+            padding: 80px 0;
             position: relative;
+            z-index: 10;
         }
         
         .gradient-text {
@@ -148,54 +130,169 @@
             background-clip: text;
         }
         
-        .maze-particles {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            z-index: 1;
-        }
-        
-        .particle {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: rgba(147, 51, 234, 0.6);
-            border-radius: 50%;
-            animation: particle-float 6s infinite linear;
-        }
-        
-        @keyframes particle-float {
-            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
-        }
-        
         .navbar {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             z-index: 1000;
-            background: rgba(15, 12, 41, 0.9);
+            background: rgba(15, 12, 41, 0.95);
             backdrop-filter: blur(20px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-        }
-        
-        .navbar.scrolled {
-            background: rgba(15, 12, 41, 0.95);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            padding: 1rem 0;
         }
         
         .cta-section {
             background: linear-gradient(135deg, rgba(147, 51, 234, 0.1), rgba(79, 70, 229, 0.1));
             border: 1px solid rgba(147, 51, 234, 0.2);
+            border-radius: 16px;
+            margin: 40px 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .mb-8 { margin-bottom: 2rem; }
+        .mb-12 { margin-bottom: 3rem; }
+        .mb-16 { margin-bottom: 4rem; }
+        
+        .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+        .px-8 { padding-left: 2rem; padding-right: 2rem; }
+        .px-12 { padding-left: 3rem; padding-right: 3rem; }
+        
+        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+        .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+        .py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+        .py-6 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+        
+        .rounded-full { border-radius: 9999px; }
+        .rounded-2xl { border-radius: 1rem; }
+        
+        .text-white { color: white; }
+        .text-gray-300 { color: #d1d5db; }
+        .text-gray-400 { color: #9ca3af; }
+        .text-blue-200 { color: #bfdbfe; }
+        .text-blue-100 { color: #dbeafe; }
+        
+        .font-bold { font-weight: 700; }
+        .font-semibold { font-weight: 600; }
+        
+        .text-sm { font-size: 0.875rem; }
+        .text-lg { font-size: 1.125rem; }
+        .text-xl { font-size: 1.25rem; }
+        .text-2xl { font-size: 1.5rem; }
+        .text-3xl { font-size: 1.875rem; }
+        .text-4xl { font-size: 2.25rem; }
+        .text-5xl { font-size: 3rem; }
+        .text-6xl { font-size: 3.75rem; }
+        .text-7xl { font-size: 4.5rem; }
+        .text-8xl { font-size: 6rem; }
+        .text-9xl { font-size: 8rem; }
+        
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .flex-row { flex-direction: row; }
+        .items-center { align-items: center; }
+        .justify-center { justify-content: center; }
+        .justify-between { justify-content: space-between; }
+        
+        .gap-4 { gap: 1rem; }
+        .gap-6 { gap: 1.5rem; }
+        .gap-8 { gap: 2rem; }
+        
+        .space-x-3 > * + * { margin-left: 0.75rem; }
+        .space-x-4 > * + * { margin-left: 1rem; }
+        .space-x-8 > * + * { margin-left: 2rem; }
+        
+        .space-y-2 > * + * { margin-top: 0.5rem; }
+        .space-y-3 > * + * { margin-top: 0.75rem; }
+        .space-y-6 > * + * { margin-top: 1.5rem; }
+        
+        .grid { display: grid; }
+        .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+        .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        
+        .lg\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .md\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        
+        .hidden { display: none; }
+        .md\:flex { display: flex; }
+        
+        .max-w-3xl { max-width: 48rem; }
+        .max-w-4xl { max-width: 56rem; }
+        .mx-auto { margin-left: auto; margin-right: auto; }
+        
+        .border { border-width: 1px; }
+        .border-2 { border-width: 2px; }
+        .border-white\/30 { border-color: rgba(255, 255, 255, 0.3); }
+        .border-white\/10 { border-color: rgba(255, 255, 255, 0.1); }
+        .border-purple-500\/50 { border-color: rgba(147, 51, 234, 0.5); }
+        
+        .bg-white\/20 { background-color: rgba(255, 255, 255, 0.2); }
+        .bg-white\/10 { background-color: rgba(255, 255, 255, 0.1); }
+        .bg-black { background-color: black; }
+        .bg-gray-800 { background-color: #1f2937; }
+        
+        .hover\:bg-white\/30:hover { background-color: rgba(255, 255, 255, 0.3); }
+        .hover\:bg-white\/10:hover { background-color: rgba(255, 255, 255, 0.1); }
+        .hover\:bg-gray-800:hover { background-color: #1f2937; }
+        
+        .hover\:text-white:hover { color: white; }
+        
+        .transition-all { transition-property: all; }
+        .transition-colors { transition-property: color, background-color, border-color; }
+        .duration-300 { transition-duration: 300ms; }
+        .duration-400 { transition-duration: 400ms; }
+        
+        .w-full { width: 100%; }
+        .h-full { height: 100%; }
+        .min-h-screen { min-height: 100vh; }
+        
+        .relative { position: relative; }
+        .absolute { position: absolute; }
+        .fixed { position: fixed; }
+        .z-10 { z-index: 10; }
+        .z-1000 { z-index: 1000; }
+        
+        .top-1\/2 { top: 50%; }
+        .left-1\/2 { left: 50%; }
+        .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
+        .inset-4 { top: 1rem; right: 1rem; bottom: 1rem; left: 1rem; }
+        .inset-8 { top: 2rem; right: 2rem; bottom: 2rem; left: 2rem; }
+        .inset-12 { top: 3rem; right: 3rem; bottom: 3rem; left: 3rem; }
+        
+        .transform { transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)); }
+        .-translate-x-1\/2 { --tw-translate-x: -50%; }
+        .-translate-y-1\/2 { --tw-translate-y: -50%; }
+        
+        .py-16 { padding-top: 4rem; padding-bottom: 4rem; }
+        .border-t { border-top-width: 1px; }
+        .border-white\/10 { border-color: rgba(255, 255, 255, 0.1); }
+        
+        .text-left { text-align: left; }
+        
+        @media (min-width: 768px) {
+            .md\:text-4xl { font-size: 2.25rem; }
+            .md\:text-8xl { font-size: 6rem; }
+            .md\:flex-row { flex-direction: row; }
+        }
+        
+        @media (min-width: 1024px) {
+            .lg\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         }
     </style>
 </head>
-<body class="maze-bg text-white overflow-x-hidden">
+<body>
     <!-- Animated Maze Background -->
     <div class="fixed inset-0 overflow-hidden">
         <div class="maze-layer top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
@@ -204,12 +301,9 @@
         <div class="maze-layer top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
     </div>
 
-    <!-- Maze Particles -->
-    <div class="maze-particles" id="mazeParticles"></div>
-
     <!-- Navigation Bar -->
-    <nav class="navbar" id="navbar">
-        <div class="container mx-auto px-6 py-4">
+    <nav class="navbar">
+        <div class="container">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
                     <div class="text-3xl floating">🔐</div>
@@ -239,8 +333,8 @@
     </nav>
 
     <!-- Hero Section -->
-    <section class="hero-section relative z-10">
-        <div class="container mx-auto px-6 text-center">
+    <section class="hero-section">
+        <div class="container text-center">
             <!-- Main Logo and Title -->
             <div class="mb-16">
                 <div class="text-9xl mb-8 floating">🔐</div>
@@ -252,7 +346,7 @@
             </div>
 
             <!-- Main Action Buttons -->
-            <div class="flex flex-col sm:flex-row gap-6 justify-center mb-16">
+            <div class="flex flex-col md:flex-row gap-6 justify-center mb-16">
                 <button onclick="window.location.href='/login'" class="btn-primary px-12 py-6 text-2xl font-semibold rounded-full text-white">
                     🔐 Login to Vault
                 </button>
@@ -264,7 +358,7 @@
             <!-- Social Login Options -->
             <div class="mb-16">
                 <p class="text-lg text-gray-300 mb-6">Quick Access with</p>
-                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <div class="flex flex-col md:flex-row gap-4 justify-center">
                     <button onclick="handleGoogleLogin()" class="btn-google px-8 py-4 text-lg font-semibold rounded-full text-white flex items-center justify-center space-x-3">
                         <i class="fab fa-google text-xl"></i>
                         <span>Continue with Google</span>
@@ -295,15 +389,15 @@
     </section>
 
     <!-- Features Section -->
-    <section id="features" class="section relative z-10">
-        <div class="container mx-auto px-6">
+    <section id="features" class="section">
+        <div class="container">
             <div class="text-center mb-20">
                 <h2 class="text-5xl font-bold mb-6 gradient-text">Revolutionary Security Features</h2>
                 <p class="text-xl text-gray-300 max-w-3xl mx-auto">Experience the future of password management with our cutting-edge Chakravyuham security system</p>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-                <div class="feature-card text-center p-8 rounded-2xl">
+                <div class="feature-card text-center">
                     <div class="text-6xl mb-6">🔄</div>
                     <h3 class="text-2xl font-semibold mb-4">Adaptive AI Defense</h3>
                     <p class="text-gray-300 mb-6">Real-time maze shifting and intrusion detection with machine learning algorithms</p>
@@ -314,7 +408,7 @@
                     </ul>
                 </div>
                 
-                <div class="feature-card text-center p-8 rounded-2xl">
+                <div class="feature-card text-center">
                     <div class="text-6xl mb-6">🌐</div>
                     <h3 class="text-2xl font-semibold mb-4">Dark Web Monitor</h3>
                     <p class="text-gray-300 mb-6">Continuous monitoring with automatic password rotation and threat alerts</p>
@@ -325,7 +419,7 @@
                     </ul>
                 </div>
                 
-                <div class="feature-card text-center p-8 rounded-2xl">
+                <div class="feature-card text-center">
                     <div class="text-6xl mb-6">🔒</div>
                     <h3 class="text-2xl font-semibold mb-4">Zero-Knowledge Encryption</h3>
                     <p class="text-gray-300 mb-6">End-to-end encryption with honeytoken protection and quantum resistance</p>
@@ -340,8 +434,8 @@
     </section>
 
     <!-- Security Deep Dive Section -->
-    <section id="security" class="section relative z-10">
-        <div class="container mx-auto px-6">
+    <section id="security" class="section">
+        <div class="container">
             <div class="text-center mb-20">
                 <h2 class="text-5xl font-bold mb-6 gradient-text">Multi-Layer Security Architecture</h2>
                 <p class="text-xl text-gray-300 max-w-3xl mx-auto">Our Chakravyuham system creates an impenetrable fortress around your data</p>
@@ -393,15 +487,15 @@
     </section>
 
     <!-- Premium Features Section -->
-    <section id="pricing" class="section relative z-10">
-        <div class="container mx-auto px-6">
+    <section id="pricing" class="section">
+        <div class="container">
             <div class="text-center mb-20">
                 <h2 class="text-5xl font-bold mb-6 gradient-text">Premium Security Features</h2>
                 <p class="text-xl text-gray-300 max-w-3xl mx-auto">Unlock advanced security capabilities with our premium plans</p>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-                <div class="feature-card text-center p-8 rounded-2xl">
+                <div class="feature-card text-center">
                     <div class="text-5xl mb-4">⭐</div>
                     <h3 class="text-2xl font-semibold mb-4">Free Plan</h3>
                     <p class="text-3xl font-bold mb-6">$0<span class="text-lg text-gray-400">/month</span></p>
@@ -416,7 +510,7 @@
                     </button>
                 </div>
                 
-                <div class="feature-card text-center p-8 rounded-2xl border-2 border-purple-500/50">
+                <div class="feature-card text-center border-2 border-purple-500/50">
                     <div class="text-5xl mb-4">🚀</div>
                     <h3 class="text-2xl font-semibold mb-4">Pro Plan</h3>
                     <p class="text-3xl font-bold mb-6">$9.99<span class="text-lg text-gray-400">/month</span></p>
@@ -432,7 +526,7 @@
                     </button>
                 </div>
                 
-                <div class="feature-card text-center p-8 rounded-2xl">
+                <div class="feature-card text-center">
                     <div class="text-5xl mb-4">👑</div>
                     <h3 class="text-2xl font-semibold mb-4">Enterprise</h3>
                     <p class="text-3xl font-bold mb-6">$29.99<span class="text-lg text-gray-400">/month</span></p>
@@ -452,12 +546,12 @@
     </section>
 
     <!-- Call to Action Section -->
-    <section class="cta-section section relative z-10">
-        <div class="container mx-auto px-6 text-center">
+    <section class="cta-section section">
+        <div class="container text-center">
             <h2 class="text-5xl font-bold mb-6">Ready to Secure Your Digital Life?</h2>
             <p class="text-xl text-gray-300 mb-12 max-w-3xl mx-auto">Join thousands of users who trust Maze Password Manager for their most sensitive data</p>
             
-            <div class="flex flex-col sm:flex-row gap-6 justify-center mb-8">
+            <div class="flex flex-col md:flex-row gap-6 justify-center mb-8">
                 <button onclick="window.location.href='/login#signup'" class="btn-primary px-12 py-6 text-2xl font-semibold rounded-full text-white">
                     🚀 Start Free Trial
                 </button>
@@ -471,8 +565,8 @@
     </section>
 
     <!-- Footer -->
-    <footer class="py-16 border-t border-white/10 relative z-10">
-        <div class="container mx-auto px-6">
+    <footer class="py-16 border-t border-white/10">
+        <div class="container">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
                 <div>
                     <div class="flex items-center space-x-3 mb-4">
@@ -526,26 +620,15 @@
         // GSAP Animations
         gsap.registerPlugin(TextPlugin, MotionPathPlugin, ScrollTrigger);
         
-        // Create maze particles
-        function createParticles() {
-            const container = document.getElementById('mazeParticles');
-            for (let i = 0; i < 50; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.animationDelay = Math.random() * 6 + 's';
-                particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
-                container.appendChild(particle);
-            }
-        }
-        
         // Navbar scroll effect
         window.addEventListener('scroll', () => {
-            const navbar = document.getElementById('navbar');
+            const navbar = document.querySelector('.navbar');
             if (window.scrollY > 100) {
-                navbar.classList.add('scrolled');
+                navbar.style.background = 'rgba(15, 12, 41, 0.98)';
+                navbar.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.3)';
             } else {
-                navbar.classList.remove('scrolled');
+                navbar.style.background = 'rgba(15, 12, 41, 0.95)';
+                navbar.style.boxShadow = 'none';
             }
         });
         
@@ -674,39 +757,16 @@
             });
         });
         
-        // Initialize particles
-        createParticles();
-        
         // Social login handlers
         function handleGoogleLogin() {
-            // Google OAuth implementation
             console.log('Google login clicked');
-            // Redirect to Google OAuth or show login modal
             window.location.href = '/login?provider=google';
         }
         
         function handleAppleLogin() {
-            // Apple OAuth implementation
             console.log('Apple login clicked');
-            // Redirect to Apple OAuth or show login modal
             window.location.href = '/login?provider=apple';
         }
-        
-        // Add scroll-triggered animations
-        gsap.utils.toArray('.feature-card').forEach(card => {
-            gsap.from(card, {
-                scrollTrigger: {
-                    trigger: card,
-                    start: "top 85%",
-                    end: "bottom 15%",
-                    toggleActions: "play none none reverse"
-                },
-                y: 50,
-                opacity: 0,
-                duration: 0.8,
-                ease: "power2.out"
-            });
-        });
     </script>
 </body>
 </html>
