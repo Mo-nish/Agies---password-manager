@@ -164,9 +164,27 @@ def init_db():
             payment_id TEXT NOT NULL,
             status TEXT NOT NULL,
             payment_method TEXT,
+            upi_transaction_id TEXT,
+            payment_screenshot TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users (id),
             FOREIGN KEY (subscription_id) REFERENCES subscriptions (id)
+        )
+    ''')
+    
+    # Create admin notifications table
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS admin_notifications (
+            id TEXT PRIMARY KEY,
+            type TEXT NOT NULL,
+            user_id TEXT NOT NULL,
+            payment_id TEXT,
+            message TEXT NOT NULL,
+            status TEXT DEFAULT 'pending',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id),
+            FOREIGN KEY (payment_id) REFERENCES payments (id)
         )
     ''')
     
@@ -1282,6 +1300,244 @@ def admin_migrate():
         return jsonify({"message": "Database migration completed successfully"}), 200
     except Exception as e:
         return jsonify({"error": f"Migration failed: {str(e)}"}), 500
+
+# UPI Payment Integration - Easy Setup for India
+UPI_PAYMENT_METHODS = {
+    'phonepe': {
+        'name': 'PhonePe',
+        'icon': '📱',
+        'description': 'Pay with PhonePe UPI',
+        'setup_required': False,
+        'instant_settlement': True
+    },
+    'googlepay': {
+        'name': 'Google Pay',
+        'icon': '📱',
+        'description': 'Pay with Google Pay UPI',
+        'setup_required': False,
+        'instant_settlement': True
+    },
+    'paytm': {
+        'name': 'Paytm',
+        'icon': '📱',
+        'description': 'Pay with Paytm UPI',
+        'setup_required': False,
+        'instant_settlement': True
+    },
+    'bhim': {
+        'name': 'BHIM UPI',
+        'icon': '🏦',
+        'description': 'Direct UPI transfer',
+        'setup_required': False,
+        'instant_settlement': True
+    },
+    'amazonpay': {
+        'name': 'Amazon Pay',
+        'icon': '📦',
+        'description': 'Pay with Amazon Pay UPI',
+        'setup_required': False,
+        'instant_settlement': True
+    }
+}
+
+# Create UPI payment order
+@app.route('/api/payments/upi/create-order', methods=['POST'])
+@require_auth
+def create_upi_order():
+    try:
+        user_id = request.headers.get('X-User-ID')
+        if not user_id:
+            return jsonify({"error": "Authentication required"}), 401
+        
+        data = request.get_json()
+        plan_name = data.get('plan')
+        payment_method = data.get('payment_method')  # phonepe, googlepay, paytm, etc.
+        
+        if plan_name not in SUBSCRIPTION_PLANS:
+            return jsonify({"error": "Invalid plan"}), 400
+        
+        if payment_method not in UPI_PAYMENT_METHODS:
+            return jsonify({"error": "Invalid payment method"}), 400
+        
+        plan = SUBSCRIPTION_PLANS[plan_name]
+        
+        # Generate unique order ID
+        order_id = f"order_{str(uuid.uuid4()).replace('-', '')}"
+        
+        # Create payment order
+        conn = get_db()
+        c = conn.cursor()
+        
+        # Insert payment order
+        c.execute('''
+            INSERT INTO payments (id, user_id, amount, currency, payment_provider, payment_id, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', (order_id, user_id, plan['price'], plan['currency'], payment_method, order_id, 'pending'))
+        
+        conn.commit()
+        conn.close()
+        
+        # Generate UPI payment link
+        upi_payment_link = generate_upi_payment_link(order_id, plan['price'], plan['name'])
+        
+        return jsonify({
+            "order_id": order_id,
+            "amount": plan['price'],
+            "currency": plan['currency'],
+            "plan": plan_name,
+            "payment_method": payment_method,
+            "upi_payment_link": upi_payment_link,
+            "qr_code_data": f"upi://pay?pa=your-upi-id@bank&pn=MazePasswordManager&tn={plan['name']}Subscription&am={plan['price']}&cu=INR&ref={order_id}",
+            "instructions": f"Pay ₹{plan['price']} using {UPI_PAYMENT_METHODS[payment_method]['name']} to complete your subscription"
+        }), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Generate UPI payment link
+def generate_upi_payment_link(order_id, amount, plan_name):
+    # Replace 'your-upi-id@bank' with your actual UPI ID
+    # Example: monishreddy@sbicard, monishreddy@ybl, etc.
+    upi_id = "monishreddy@sbicard"  # Change this to your actual UPI ID
+    
+    upi_link = f"upi://pay?pa={upi_id}&pn=MazePasswordManager&tn={plan_name}Subscription&am={amount}&cu=INR&ref={order_id}"
+    
+    return upi_link
+
+# Verify UPI payment (manual verification)
+@app.route('/api/payments/upi/verify', methods=['POST'])
+@require_auth
+def verify_upi_payment():
+    try:
+        user_id = request.headers.get('X-User-ID')
+        if not user_id:
+            return jsonify({"error": "Authentication required"}), 401
+        
+        data = request.get_json()
+        order_id = data.get('order_id')
+        upi_transaction_id = data.get('upi_transaction_id')
+        payment_screenshot = data.get('payment_screenshot')  # Base64 encoded image
+        
+        if not order_id or not upi_transaction_id:
+            return jsonify({"error": "Order ID and UPI transaction ID required"}), 400
+        
+        conn = get_db()
+        c = conn.cursor()
+        
+        # Get payment order
+        c.execute('SELECT * FROM payments WHERE id = ? AND user_id = ?', (order_id, user_id))
+        payment = c.fetchone()
+        
+        if not payment:
+            conn.close()
+            return jsonify({"error": "Payment order not found"}), 404
+        
+        if payment['status'] == 'completed':
+            conn.close()
+            return jsonify({"error": "Payment already completed"}), 400
+        
+        # Update payment with UPI transaction details
+        c.execute('''
+            UPDATE payments 
+            SET status = 'pending_verification', 
+                payment_method = 'upi',
+                upi_transaction_id = ?,
+                payment_screenshot = ?,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+        ''', (upi_transaction_id, payment_screenshot, order_id))
+        
+        # Create admin notification for manual verification
+        notification_id = str(uuid.uuid4())
+        c.execute('''
+            INSERT INTO admin_notifications (id, type, user_id, payment_id, message, status)
+            VALUES (?, 'payment_verification', ?, ?, ?, 'pending')
+        ''', (notification_id, user_id, order_id, f"UPI payment verification required for order {order_id}"))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            "message": "Payment verification submitted successfully",
+            "status": "pending_verification",
+            "instructions": "Your payment will be verified within 24 hours. You'll receive an email confirmation once verified."
+        }), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Get available UPI payment methods
+@app.route('/api/payments/upi/methods', methods=['GET'])
+def get_upi_payment_methods():
+    try:
+        return jsonify(UPI_PAYMENT_METHODS), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Admin route to verify payments manually
+@app.route('/api/admin/verify-payment/<payment_id>', methods=['POST'])
+def admin_verify_payment(payment_id):
+    try:
+        data = request.get_json()
+        admin_key = data.get('admin_key')  # Simple admin authentication
+        
+        # In production, use proper admin authentication
+        if admin_key != "maze_admin_2024":
+            return jsonify({"error": "Unauthorized"}), 401
+        
+        conn = get_db()
+        c = conn.cursor()
+        
+        # Get payment details
+        c.execute('SELECT * FROM payments WHERE id = ?', (payment_id,))
+        payment = c.fetchone()
+        
+        if not payment:
+            conn.close()
+            return jsonify({"error": "Payment not found"}), 404
+        
+        # Update payment status to completed
+        c.execute('UPDATE payments SET status = "completed" WHERE id = ?', (payment_id,))
+        
+        # Get user details
+        user_id = payment['user_id']
+        
+        # Get plan from payment amount
+        plan_name = None
+        for plan, details in SUBSCRIPTION_PLANS.items():
+            if details['price'] == payment['amount']:
+                plan_name = plan
+                break
+        
+        if plan_name:
+            # Update user subscription
+            c.execute('''
+                UPDATE users 
+                SET subscription_plan = ?, subscription_status = 'active', 
+                    subscription_start_date = CURRENT_TIMESTAMP,
+                    payment_provider = 'upi'
+                WHERE id = ?
+            ''', (plan_name, user_id))
+            
+            # Create subscription record
+            subscription_id = str(uuid.uuid4())
+            c.execute('''
+                INSERT INTO subscriptions (id, user_id, plan_name, status, amount, currency, payment_provider, payment_id)
+                VALUES (?, ?, ?, 'active', ?, ?, 'upi', ?)
+            ''', (subscription_id, user_id, plan_name, payment['amount'], payment['currency'], payment_id))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            "message": "Payment verified successfully",
+            "user_id": user_id,
+            "plan": plan_name,
+            "status": "completed"
+        }), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # Get user subscription info
 @app.route('/api/user/subscription', methods=['GET'])

@@ -400,30 +400,85 @@
 
             <!-- Payment Options -->
             <div class="glass-card rounded-2xl p-8 mb-12">
-                <h2 class="text-3xl font-bold mb-6 text-center">Secure Payment Options</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <h2 class="text-3xl font-bold mb-6 text-center">Easy UPI Payment Options</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div class="text-center">
-                        <div class="text-6xl mb-4">💳</div>
-                        <h3 class="text-xl font-semibold mb-3">Stripe</h3>
-                        <p class="text-gray-300 mb-4">International payments with 128-bit SSL encryption</p>
+                        <div class="text-6xl mb-4">📱</div>
+                        <h3 class="text-xl font-semibold mb-3">PhonePe</h3>
+                        <p class="text-gray-300 mb-4">Most popular UPI app in India</p>
                         <ul class="text-left text-gray-300 space-y-2">
-                            <li>• Accepts all major credit cards</li>
-                            <li>• 256-bit encryption</li>
-                            <li>• PCI DSS compliant</li>
-                            <li>• Instant payment processing</li>
+                            <li>• Instant payments</li>
+                            <li>• Zero setup fees</li>
+                            <li>• Direct to your SBI account</li>
+                            <li>• 24/7 availability</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="text-6xl mb-4">📱</div>
+                        <h3 class="text-xl font-semibold mb-3">Google Pay</h3>
+                        <p class="text-gray-300 mb-4">Secure Google-powered payments</p>
+                        <ul class="text-left text-gray-300 space-y-2">
+                            <li>• Google security</li>
+                            <li>• Instant transfers</li>
+                            <li>• Rewards & cashback</li>
+                            <li>• Easy verification</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="text-6xl mb-4">📱</div>
+                        <h3 class="text-xl font-semibold mb-3">Paytm</h3>
+                        <p class="text-gray-300 mb-4">India's leading digital wallet</p>
+                        <ul class="text-left text-gray-300 space-y-2">
+                            <li>• Digital wallet</li>
+                            <li>• UPI integration</li>
+                            <li>• Instant settlements</li>
+                            <li>• Wide acceptance</li>
                         </ul>
                     </div>
                     
                     <div class="text-center">
                         <div class="text-6xl mb-4">🏦</div>
-                        <h3 class="text-xl font-semibold mb-3">Razorpay</h3>
-                        <p class="text-gray-300 mb-4">India's leading payment gateway with UPI support</p>
+                        <h3 class="text-xl font-semibold mb-3">BHIM UPI</h3>
+                        <p class="text-gray-300 mb-4">Direct bank transfers</p>
                         <ul class="text-left text-gray-300 space-y-2">
-                            <li>• UPI, cards, net banking</li>
-                            <li>• 256-bit encryption</li>
-                            <li>• RBI compliant</li>
-                            <li>• Instant Indian payments</li>
+                            <li>• Government backed</li>
+                            <li>• Direct bank transfer</li>
+                            <li>• No app required</li>
+                            <li>• Instant settlement</li>
                         </ul>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="text-6xl mb-4">📦</div>
+                        <h3 class="text-xl font-semibold mb-3">Amazon Pay</h3>
+                        <p class="text-gray-300 mb-4">Amazon's secure payment</p>
+                        <ul class="text-left text-gray-300 space-y-2">
+                            <li>• Amazon security</li>
+                            <li>• UPI integration</li>
+                            <li>• Instant transfers</li>
+                            <li>• Reliable service</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="text-6xl mb-4">💳</div>
+                        <h3 class="text-xl font-semibold mb-3">Other Methods</h3>
+                        <p class="text-gray-300 mb-4">Cards, net banking, wallets</p>
+                        <ul class="text-left text-gray-300 space-y-2">
+                            <li>• Credit/Debit cards</li>
+                            <li>• Net banking</li>
+                            <li>• Digital wallets</li>
+                            <li>• Multiple options</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="mt-8 text-center">
+                    <div class="bg-green-900/20 border border-green-500/30 rounded-lg p-6">
+                        <h3 class="text-xl font-semibold text-green-400 mb-3">💰 Money Goes Directly to Your SBI Account!</h3>
+                        <p class="text-gray-300">No middlemen, no delays. UPI payments are settled instantly to your bank account.</p>
                     </div>
                 </div>
             </div>
@@ -468,7 +523,7 @@
     <!-- Payment Modal -->
     <div id="payment-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
         <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="glass-card rounded-2xl p-8 max-w-md w-full">
+            <div class="glass-card rounded-2xl p-8 max-w-2xl w-full">
                 <h2 id="payment-title" class="text-2xl font-bold mb-6">Complete Payment</h2>
                 
                 <div class="mb-6">
@@ -476,14 +531,60 @@
                     <p class="text-gray-300">Amount: <span id="selected-plan-price" class="text-white font-semibold"></span></p>
                 </div>
                 
-                <div class="space-y-4 mb-6">
-                    <button onclick="processPayment('stripe')" class="w-full btn-primary py-3 rounded-lg text-white font-semibold">
-                        💳 Pay with Stripe
-                    </button>
-                    
-                    <button onclick="processPayment('razorpay')" class="w-full btn-premium py-3 rounded-lg text-white font-semibold">
-                        🏦 Pay with Razorpay
-                    </button>
+                <!-- UPI Payment Options -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold mb-4 text-center">Choose UPI Payment Method</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+                        <button onclick="selectUPIMethod('phonepe')" class="upi-method-btn p-4 border border-white/20 rounded-lg text-center hover:border-blue-500 transition-colors" data-method="phonepe">
+                            <div class="text-3xl mb-2">📱</div>
+                            <div class="font-semibold">PhonePe</div>
+                        </button>
+                        
+                        <button onclick="selectUPIMethod('googlepay')" class="upi-method-btn p-4 border border-white/20 rounded-lg text-center hover:border-blue-500 transition-colors" data-method="googlepay">
+                            <div class="text-3xl mb-2">📱</div>
+                            <div class="font-semibold">Google Pay</div>
+                        </button>
+                        
+                        <button onclick="selectUPIMethod('paytm')" class="upi-method-btn p-4 border border-white/20 rounded-lg text-center hover:border-blue-500 transition-colors" data-method="paytm">
+                            <div class="text-3xl mb-2">📱</div>
+                            <div class="font-semibold">Paytm</div>
+                        </button>
+                        
+                        <button onclick="selectUPIMethod('bhim')" class="upi-method-btn p-4 border border-white/20 rounded-lg text-center hover:border-blue-500 transition-colors" data-method="bhim">
+                            <div class="text-3xl mb-2">🏦</div>
+                            <div class="font-semibold">BHIM UPI</div>
+                        </button>
+                        
+                        <button onclick="selectUPIMethod('amazonpay')" class="upi-method-btn p-4 border border-white/20 rounded-lg text-center hover:border-blue-500 transition-colors" data-method="amazonpay">
+                            <div class="text-3xl mb-2">📦</div>
+                            <div class="font-semibold">Amazon Pay</div>
+                        </button>
+                        
+                        <button onclick="showOtherPaymentMethods()" class="upi-method-btn p-4 border border-white/20 rounded-lg text-center hover:border-blue-500 transition-colors" data-method="other">
+                            <div class="text-3xl mb-2">💳</div>
+                            <div class="font-semibold">Other</div>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- UPI Payment Instructions -->
+                <div id="upi-instructions" class="hidden mb-6 p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg">
+                    <h4 class="font-semibold text-blue-400 mb-2">Payment Instructions:</h4>
+                    <div id="upi-instructions-content" class="text-gray-300 text-sm space-y-2">
+                        <!-- Instructions will be populated here -->
+                    </div>
+                </div>
+                
+                <!-- Payment Verification Form -->
+                <div id="payment-verification" class="hidden mb-6">
+                    <h4 class="font-semibold mb-3">Payment Verification</h4>
+                    <div class="space-y-3">
+                        <input type="text" id="upi-transaction-id" placeholder="Enter UPI Transaction ID" class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500">
+                        <textarea id="payment-notes" placeholder="Add any payment notes (optional)" class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500" rows="2"></textarea>
+                        <button onclick="submitPaymentVerification()" class="w-full btn-primary py-3 rounded-lg text-white font-semibold">
+                            Submit Payment Verification
+                        </button>
+                    </div>
                 </div>
                 
                 <button onclick="closePaymentModal()" class="w-full px-4 py-3 border border-white/20 rounded-lg text-white hover:bg-white/10 transition-colors">
@@ -498,6 +599,8 @@
     <script>
         let selectedPlan = null;
         let plans = {};
+        let selectedUPIMethod = null;
+        let currentOrderId = null;
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
@@ -600,67 +703,118 @@
             document.getElementById('selected-plan-name').textContent = plan.name;
             document.getElementById('selected-plan-price').textContent = `₹${plan.price}/month`;
             document.getElementById('payment-modal').classList.remove('hidden');
+            
+            // Reset UPI selection
+            selectedUPIMethod = null;
+            document.getElementById('upi-instructions').classList.add('hidden');
+            document.getElementById('payment-verification').classList.add('hidden');
+            resetUPISelection();
         }
 
         function closePaymentModal() {
             document.getElementById('payment-modal').classList.add('hidden');
             selectedPlan = null;
+            selectedUPIMethod = null;
+            currentOrderId = null;
+            resetUPISelection();
         }
 
-        async function processPayment(provider) {
-            if (!selectedPlan) {
-                alert('Please select a plan first');
+        function selectUPIMethod(method) {
+            selectedUPIMethod = method;
+            resetUPISelection();
+            
+            // Highlight selected method
+            const selectedBtn = document.querySelector(`[data-method="${method}"]`);
+            if (selectedBtn) {
+                selectedBtn.classList.add('border-blue-500', 'bg-blue-500/20');
+            }
+            
+            // Show payment instructions
+            showUPIInstructions(method);
+        }
+
+        function resetUPISelection() {
+            // Reset all UPI method buttons
+            document.querySelectorAll('.upi-method-btn').forEach(btn => {
+                btn.classList.remove('border-blue-500', 'bg-blue-500/20');
+            });
+        }
+
+        function showUPIInstructions(method) {
+            const instructionsDiv = document.getElementById('upi-instructions');
+            const contentDiv = document.getElementById('upi-instructions-content');
+            
+            const instructions = {
+                'phonepe': [
+                    '1. Open PhonePe app',
+                    '2. Tap on "Pay" or "Send Money"',
+                    '3. Enter UPI ID: monishreddy@sbicard',
+                    '4. Enter amount and add note: "Maze Password Manager Subscription"',
+                    '5. Complete payment and note the transaction ID'
+                ],
+                'googlepay': [
+                    '1. Open Google Pay app',
+                    '2. Tap on "New Payment"',
+                    '3. Enter UPI ID: monishreddy@sbicard',
+                    '4. Enter amount and add note: "Maze Password Manager Subscription"',
+                    '5. Complete payment and note the transaction ID'
+                ],
+                'paytm': [
+                    '1. Open Paytm app',
+                    '2. Tap on "Send Money"',
+                    '3. Enter UPI ID: monishreddy@sbicard',
+                    '4. Enter amount and add note: "Maze Password Manager Subscription"',
+                    '5. Complete payment and note the transaction ID'
+                ],
+                'bhim': [
+                    '1. Open BHIM app or any UPI app',
+                    '2. Tap on "Send Money"',
+                    '3. Enter UPI ID: monishreddy@sbicard',
+                    '4. Enter amount and add note: "Maze Password Manager Subscription"',
+                    '5. Complete payment and note the transaction ID'
+                ],
+                'amazonpay': [
+                    '1. Open Amazon Pay app',
+                    '2. Tap on "Send Money"',
+                    '3. Enter UPI ID: monishreddy@sbicard',
+                    '4. Enter amount and add note: "Maze Password Manager Subscription"',
+                    '5. Complete payment and note the transaction ID'
+                ]
+            };
+            
+            if (instructions[method]) {
+                contentDiv.innerHTML = instructions[method].map(instruction => 
+                    `<div>${instruction}</div>`
+                ).join('');
+                
+                instructionsDiv.classList.remove('hidden');
+                
+                // Show payment verification form
+                document.getElementById('payment-verification').classList.remove('hidden');
+            }
+        }
+
+        function showOtherPaymentMethods() {
+            alert('For other payment methods (cards, net banking), please contact support or use UPI methods for instant setup.');
+        }
+
+        async function submitPaymentVerification() {
+            if (!selectedPlan || !selectedUPIMethod) {
+                alert('Please select a plan and payment method first');
+                return;
+            }
+            
+            const transactionId = document.getElementById('upi-transaction-id').value.trim();
+            const notes = document.getElementById('payment-notes').value.trim();
+            
+            if (!transactionId) {
+                alert('Please enter the UPI transaction ID');
                 return;
             }
             
             try {
-                let paymentData;
-                
-                if (provider === 'stripe') {
-                    // Create Stripe payment intent
-                    const response = await fetch('/api/payments/stripe/create-intent', {
-                        method: 'POST',
-                        headers: {
-                            ...window.authService.getAuthHeaders(),
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ plan: selectedPlan })
-                    });
-                    
-                    if (response.ok) {
-                        paymentData = await response.json();
-                        // In production, you would redirect to Stripe Checkout
-                        alert('Stripe payment will be implemented in production. For now, simulating successful payment.');
-                        await confirmPayment(provider, paymentData.id);
-                    }
-                } else if (provider === 'razorpay') {
-                    // Create Razorpay order
-                    const response = await fetch('/api/payments/razorpay/create-order', {
-                        method: 'POST',
-                        headers: {
-                            ...window.authService.getAuthHeaders(),
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ plan: selectedPlan })
-                    });
-                    
-                    if (response.ok) {
-                        paymentData = await response.json();
-                        // In production, you would open Razorpay modal
-                        alert('Razorpay payment will be implemented in production. For now, simulating successful payment.');
-                        await confirmPayment(provider, paymentData.id);
-                    }
-                }
-                
-            } catch (error) {
-                console.error('Payment error:', error);
-                alert('Payment failed: ' + error.message);
-            }
-        }
-
-        async function confirmPayment(provider, paymentId) {
-            try {
-                const response = await fetch('/api/payments/confirm', {
+                // Create UPI payment order first
+                const orderResponse = await fetch('/api/payments/upi/create-order', {
                     method: 'POST',
                     headers: {
                         ...window.authService.getAuthHeaders(),
@@ -668,14 +822,35 @@
                     },
                     body: JSON.stringify({
                         plan: selectedPlan,
-                        payment_provider: provider,
-                        payment_id: paymentId
+                        payment_method: selectedUPIMethod
                     })
                 });
                 
-                if (response.ok) {
-                    const result = await response.json();
-                    alert('Payment successful! Your subscription has been upgraded.');
+                if (!orderResponse.ok) {
+                    throw new Error('Failed to create payment order');
+                }
+                
+                const orderData = await orderResponse.json();
+                currentOrderId = orderData.order_id;
+                
+                // Submit payment verification
+                const verifyResponse = await fetch('/api/payments/upi/verify', {
+                    method: 'POST',
+                    headers: {
+                        ...window.authService.getAuthHeaders(),
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        order_id: currentOrderId,
+                        upi_transaction_id: transactionId,
+                        payment_screenshot: '', // Could add image upload later
+                        notes: notes
+                    })
+                });
+                
+                if (verifyResponse.ok) {
+                    const result = await verifyResponse.json();
+                    alert('Payment verification submitted successfully! Your subscription will be activated within 24 hours after verification.');
                     closePaymentModal();
                     
                     // Reload user subscription
@@ -684,19 +859,21 @@
                     // Redirect to dashboard
                     window.location.href = '/dashboard';
                 } else {
-                    const error = await response.json();
-                    alert('Payment confirmation failed: ' + error.error);
+                    const error = await verifyResponse.json();
+                    alert('Payment verification failed: ' + error.error);
                 }
                 
             } catch (error) {
-                console.error('Payment confirmation error:', error);
-                alert('Payment confirmation failed: ' + error.message);
+                console.error('Payment verification error:', error);
+                alert('Payment verification failed: ' + error.message);
             }
         }
 
         // Global functions for onclick handlers
         window.selectPlan = selectPlan;
-        window.processPayment = processPayment;
+        window.selectUPIMethod = selectUPIMethod;
+        window.showOtherPaymentMethods = showOtherPaymentMethods;
+        window.submitPaymentVerification = submitPaymentVerification;
         window.closePaymentModal = closePaymentModal;
     </script>
 </body>
