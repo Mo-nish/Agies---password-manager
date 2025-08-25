@@ -252,7 +252,7 @@
 
             // Get vault ID from URL
             const urlParams = new URLSearchParams(window.location.search);
-            currentVaultId = urlParams.get('vault');
+            currentVaultId = urlParams.get('id') || urlParams.get('vault');
             
             if (!currentVaultId) {
                 window.location.href = '/vaults';
@@ -296,18 +296,34 @@
 
         async function loadVaultData() {
             try {
+                console.log('🔍 Loading vault data for ID:', currentVaultId);
+                console.log('🔐 Auth service available:', !!window.authService);
+                console.log('🔐 User authenticated:', window.authService?.isAuthenticated());
+                console.log('🔐 Current user:', window.authService?.getCurrentUser());
+                
                 // Load vault info
+                console.log('📦 Calling getVault...');
                 currentVault = await window.authService.getVault(currentVaultId);
+                console.log('✅ Vault loaded:', currentVault);
+                
                 displayVaultInfo(currentVault);
                 
                 // Load passwords
+                console.log('🔐 Loading passwords...');
                 await loadPasswords();
                 
                 // Hide loading state
                 document.getElementById('loading-state').classList.add('hidden');
                 
             } catch (error) {
-                console.error('Error loading vault data:', error);
+                console.error('❌ Error loading vault data:', error);
+                console.error('❌ Error details:', {
+                    message: error.message,
+                    stack: error.stack,
+                    vaultId: currentVaultId,
+                    authService: !!window.authService,
+                    isAuthenticated: window.authService?.isAuthenticated()
+                });
                 alert('Error loading vault: ' + error.message);
                 window.location.href = '/vaults';
             }
