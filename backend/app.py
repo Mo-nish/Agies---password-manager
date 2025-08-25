@@ -1022,6 +1022,122 @@ def create_vault():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# Get a specific vault by ID
+@app.route('/api/vaults/<int:vault_id>', methods=['GET'])
+@require_auth
+def get_vault(vault_id):
+    """Get a specific vault by ID"""
+    try:
+        user_id = request.headers.get('X-User-ID')
+        print(f"🔍 GET_VAULT: Request for vault_id={vault_id}, user_id={user_id}")
+        print(f"🔍 GET_VAULT: Headers received: {dict(request.headers)}")
+        
+        if not user_id:
+            print("❌ GET_VAULT: No user_id in headers")
+            return jsonify({"error": "Authentication required"}), 401
+        
+        db = get_db()
+        if not db:
+            print("❌ GET_VAULT: Database connection failed")
+            return jsonify({"error": "Database connection failed"}), 500
+        
+        print(f"🔍 GET_VAULT: Querying database for vault_id={vault_id}, user_id={user_id}")
+        
+        vault = db.execute(
+            'SELECT * FROM vaults WHERE id = ? AND user_id = ?',
+            (vault_id, user_id)
+        ).fetchone()
+        
+        if not vault:
+            print(f"❌ GET_VAULT: Vault not found - vault_id={vault_id}, user_id={user_id}")
+            # Let's check what vaults exist for this user
+            all_vaults = db.execute('SELECT id, name, user_id FROM vaults WHERE user_id = ?', (user_id,)).fetchall()
+            print(f"🔍 GET_VAULT: User's vaults: {[dict(v) for v in all_vaults]}")
+            return jsonify({"error": "Vault not found"}), 404
+        
+        print(f"✅ GET_VAULT: Vault found: {dict(vault)}")
+        return jsonify(dict(vault))
+        
+    except Exception as e:
+        print(f"❌ GET_VAULT: Exception occurred: {str(e)}")
+        print(f"❌ GET_VAULT: Exception type: {type(e)}")
+        import traceback
+        print(f"❌ GET_VAULT: Traceback: {traceback.format_exc()}")
+        return jsonify({"error": f"Error retrieving vault: {str(e)}"}), 500
+
+# Update a vault
+@app.route('/api/vaults/<int:vault_id>', methods=['PUT'])
+@require_auth
+def update_vault(vault_id):
+    """Update a vault"""
+    try:
+        user_id = request.headers.get('X-User-ID')
+        data = request.get_json()
+        
+        if not data or 'name' not in data:
+            return jsonify({"error": "Vault name is required"}), 400
+            
+        db = get_db()
+        if not db:
+            return jsonify({"error": "Database connection failed"}), 500
+        
+        # Check if vault exists and belongs to user
+        vault = db.execute(
+            'SELECT * FROM vaults WHERE id = ? AND user_id = ?',
+            (vault_id, user_id)
+        ).fetchone()
+        
+        if not vault:
+            return jsonify({"error": "Vault not found"}), 404
+            
+        # Update vault
+        db.execute(
+            '''UPDATE vaults 
+               SET name = ?, description = ?, icon = ?, updated_at = CURRENT_TIMESTAMP
+               WHERE id = ? AND user_id = ?''',
+            (data['name'], data.get('description', ''), data.get('icon', '🔐'), vault_id, user_id)
+        )
+        
+        db.commit()
+        
+        return jsonify({"message": "Vault updated successfully"})
+        
+    except Exception as e:
+        return jsonify({"error": f"Error updating vault: {str(e)}"}), 500
+
+# Delete a vault
+@app.route('/api/vaults/<int:vault_id>', methods=['DELETE'])
+@require_auth
+def delete_vault(vault_id):
+    """Delete a vault and all its passwords"""
+    try:
+        user_id = request.headers.get('X-User-ID')
+        db = get_db()
+        if not db:
+            return jsonify({"error": "Database connection failed"}), 500
+        
+        # Check if vault exists and belongs to user
+        vault = db.execute(
+            'SELECT * FROM vaults WHERE id = ? AND user_id = ?',
+            (vault_id, user_id)
+        ).fetchone()
+        
+        if not vault:
+            return jsonify({"error": "Vault not found"}), 404
+            
+        # Delete all passwords in the vault first
+        db.execute('DELETE FROM passwords WHERE vault_id = ?', (vault_id,))
+        
+        # Delete the vault
+        db.execute('DELETE FROM vaults WHERE id = ? AND user_id = ?', (vault_id, user_id))
+        
+        db.commit()
+        
+        return jsonify({"message": "Vault deleted successfully"})
+        
+    except Exception as e:
+        return jsonify({"error": f"Error deleting vault: {str(e)}"}), 500
+
 # Get passwords for a vault
 @app.route('/api/vaults/<vault_id>/passwords', methods=['GET'])
 @require_auth
@@ -1222,119 +1338,6 @@ def delete_password(password_id):
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-@app.route('/api/vaults/<int:vault_id>', methods=['GET'])
-@require_auth
-def get_vault(vault_id):
-    """Get a specific vault by ID"""
-    try:
-        user_id = request.headers.get('X-User-ID')
-        print(f"🔍 GET_VAULT: Request for vault_id={vault_id}, user_id={user_id}")
-        print(f"🔍 GET_VAULT: Headers received: {dict(request.headers)}")
-        
-        if not user_id:
-            print("❌ GET_VAULT: No user_id in headers")
-            return jsonify({"error": "Authentication required"}), 401
-        
-        db = get_db()
-        if not db:
-            print("❌ GET_VAULT: Database connection failed")
-            return jsonify({"error": "Database connection failed"}), 500
-        
-        print(f"🔍 GET_VAULT: Querying database for vault_id={vault_id}, user_id={user_id}")
-        
-        vault = db.execute(
-            'SELECT * FROM vaults WHERE id = ? AND user_id = ?',
-            (vault_id, user_id)
-        ).fetchone()
-        
-        if not vault:
-            print(f"❌ GET_VAULT: Vault not found - vault_id={vault_id}, user_id={user_id}")
-            # Let's check what vaults exist for this user
-            all_vaults = db.execute('SELECT id, name, user_id FROM vaults WHERE user_id = ?', (user_id,)).fetchall()
-            print(f"🔍 GET_VAULT: User's vaults: {[dict(v) for v in all_vaults]}")
-            return jsonify({"error": "Vault not found"}), 404
-        
-        print(f"✅ GET_VAULT: Vault found: {dict(vault)}")
-        return jsonify(dict(vault))
-        
-    except Exception as e:
-        print(f"❌ GET_VAULT: Exception occurred: {str(e)}")
-        print(f"❌ GET_VAULT: Exception type: {type(e)}")
-        import traceback
-        print(f"❌ GET_VAULT: Traceback: {traceback.format_exc()}")
-        return jsonify({"error": f"Error retrieving vault: {str(e)}"}), 500
-
-@app.route('/api/vaults/<int:vault_id>', methods=['PUT'])
-@require_auth
-def update_vault(vault_id):
-    """Update a vault"""
-    try:
-        user_id = request.headers.get('X-User-ID')
-        data = request.get_json()
-        
-        if not data or 'name' not in data:
-            return jsonify({"error": "Vault name is required"}), 400
-            
-        db = get_db()
-        if not db:
-            return jsonify({"error": "Database connection failed"}), 500
-        
-        # Check if vault exists and belongs to user
-        vault = db.execute(
-            'SELECT * FROM vaults WHERE id = ? AND user_id = ?',
-            (vault_id, user_id)
-        ).fetchone()
-        
-        if not vault:
-            return jsonify({"error": "Vault not found"}), 404
-            
-        # Update vault
-        db.execute(
-            '''UPDATE vaults 
-               SET name = ?, description = ?, icon = ?, updated_at = CURRENT_TIMESTAMP
-               WHERE id = ? AND user_id = ?''',
-            (data['name'], data.get('description', ''), data.get('icon', '🔐'), vault_id, user_id)
-        )
-        
-        db.commit()
-        
-        return jsonify({"message": "Vault updated successfully"})
-        
-    except Exception as e:
-        return jsonify({"error": f"Error updating vault: {str(e)}"}), 500
-
-@app.route('/api/vaults/<int:vault_id>', methods=['DELETE'])
-@require_auth
-def delete_vault(vault_id):
-    """Delete a vault and all its passwords"""
-    try:
-        user_id = request.headers.get('X-User-ID')
-        db = get_db()
-        if not db:
-            return jsonify({"error": "Database connection failed"}), 500
-        
-        # Check if vault exists and belongs to user
-        vault = db.execute(
-            'SELECT * FROM vaults WHERE id = ? AND user_id = ?',
-            (vault_id, user_id)
-        ).fetchone()
-        
-        if not vault:
-            return jsonify({"error": "Vault not found"}), 404
-            
-        # Delete all passwords in the vault first
-        db.execute('DELETE FROM passwords WHERE vault_id = ?', (vault_id,))
-        
-        # Delete the vault
-        db.execute('DELETE FROM vaults WHERE id = ? AND user_id = ?', (vault_id, user_id))
-        
-        db.commit()
-        
-        return jsonify({"message": "Vault deleted successfully"})
-        
-    except Exception as e:
-        return jsonify({"error": f"Error deleting vault: {str(e)}"}), 500
 
 # Search passwords
 @app.route('/api/passwords/search', methods=['GET'])
