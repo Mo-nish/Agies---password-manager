@@ -1539,6 +1539,240 @@ def admin_verify_payment(payment_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# Admin route to reject payments
+@app.route('/api/admin/reject-payment/<payment_id>', methods=['POST'])
+def admin_reject_payment(payment_id):
+    try:
+        data = request.get_json()
+        admin_key = data.get('admin_key')
+        reason = data.get('reason', 'No reason provided')
+        
+        if admin_key != "maze_admin_2024":
+            return jsonify({"error": "Unauthorized"}), 401
+        
+        conn = get_db()
+        c = conn.cursor()
+        
+        # Update payment status to rejected
+        c.execute('''
+            UPDATE payments 
+            SET status = 'rejected', 
+                updated_at = CURRENT_TIMESTAMP 
+            WHERE id = ?
+        ''', (payment_id,))
+        
+        # Create admin notification
+        notification_id = str(uuid.uuid4())
+        c.execute('''
+            INSERT INTO admin_notifications (id, type, user_id, payment_id, message, status)
+            VALUES (?, 'payment_rejected', ?, ?, ?, 'completed')
+        ''', (notification_id, payment_id, payment_id, f"Payment rejected: {reason}"))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            "message": "Payment rejected successfully",
+            "status": "rejected"
+        }), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Get pending payments for admin
+@app.route('/api/admin/pending-payments', methods=['GET'])
+def get_pending_payments():
+    try:
+        conn = get_db()
+        c = conn.cursor()
+        
+        # Get pending payments with user details
+        c.execute('''
+            SELECT p.*, u.email as user_email 
+            FROM payments p 
+            JOIN users u ON p.user_id = u.id 
+            WHERE p.status IN ('pending', 'pending_verification')
+            ORDER BY p.created_at DESC
+        ''')
+        
+        payments = c.fetchall()
+        conn.close()
+        
+        payment_list = []
+        for payment in payments:
+            payment_list.append({
+                'id': payment['id'],
+                'user_id': payment['user_id'],
+                'user_email': payment['user_email'],
+                'amount': payment['amount'],
+                'currency': payment['currency'],
+                'payment_provider': payment['payment_provider'],
+                'status': payment['status'],
+                'upi_transaction_id': payment.get('upi_transaction_id'),
+                'notes': payment.get('notes'),
+                'created_at': payment['created_at'],
+                'updated_at': payment.get('updated_at')
+            })
+        
+        return jsonify(payment_list), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Get admin statistics
+@app.route('/api/admin/statistics', methods=['GET'])
+def get_admin_statistics():
+    try:
+        conn = get_db()
+        c = conn.cursor()
+        
+        # Total revenue
+        c.execute('SELECT SUM(amount) as total FROM payments WHERE status = "completed"')
+        total_revenue = c.fetchone()['total'] or 0
+        
+        # Total users
+        c.execute('SELECT COUNT(*) as count FROM users')
+        total_users = c.fetchone()['count']
+        
+        # Pending payments
+        c.execute('SELECT COUNT(*) as count FROM payments WHERE status IN ("pending", "pending_verification")')
+        pending_payments = c.fetchone()['count']
+        
+        # Verified today
+        c.execute('''
+            SELECT COUNT(*) as count FROM payments 
+            WHERE status = "completed" 
+            AND DATE(updated_at) = DATE(CURRENT_TIMESTAMP)
+        ''')
+        verified_today = c.fetchone()['count']
+        
+        conn.close()
+        
+        return jsonify({
+            'total_revenue': total_revenue,
+            'total_users': total_users,
+            'pending_payments': pending_payments,
+            'verified_today': verified_today
+        }), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Get recent admin activity
+@app.route('/api/admin/recent-activity', methods=['GET'])
+def get_recent_activity():
+    try:
+        conn = get_db()
+        c = conn.cursor()
+        
+        # Get recent admin notifications
+        c.execute('''
+            SELECT * FROM admin_notifications 
+            ORDER BY created_at DESC 
+            LIMIT 10
+        ''')
+        
+        activities = c.fetchall()
+        conn.close()
+        
+        activity_list = []
+        for activity in activities:
+            activity_list.append({
+                'id': activity['id'],
+                'type': activity['type'],
+                'message': activity['message'],
+                'status': activity['status'],
+                'created_at': activity['created_at']
+            })
+        
+        return jsonify(activity_list), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Admin route to get user details
+@app.route('/api/admin/user/<user_id>', methods=['GET'])
+def get_user_details(user_id):
+    try:
+        conn = get_db()
+        c = conn.cursor()
+        
+        # Get user details
+        c.execute('SELECT * FROM users WHERE id = ?', (user_id,))
+        user = c.fetchone()
+        
+        if not user:
+            conn.close()
+            return jsonify({"error": "User not found"}), 404
+        
+        # Get user's vaults
+        c.execute('SELECT * FROM vaults WHERE user_id = ?', (user_id,))
+        vaults = c.fetchall()
+        
+        # Get user's passwords count
+        c.execute('''
+            SELECT COUNT(*) as count FROM passwords p 
+            JOIN vaults v ON p.vault_id = v.id 
+            WHERE v.user_id = ?
+        ''', (user_id,))
+        password_count = c.fetchone()['count']
+        
+        # Get user's payments
+        c.execute('SELECT * FROM payments WHERE user_id = ? ORDER BY created_at DESC', (user_id,))
+        payments = c.fetchall()
+        
+        conn.close()
+        
+        return jsonify({
+            'user': {
+                'id': user['id'],
+                'email': user['email'],
+                'subscription_plan': user.get('subscription_plan', 'free'),
+                'subscription_status': user.get('subscription_status', 'inactive'),
+                'created_at': user['created_at'],
+                'last_login': user.get('last_login')
+            },
+            'vaults': [{
+                'id': v['id'],
+                'name': v['name'],
+                'description': v['description'],
+                'created_at': v['created_at']
+            } for v in vaults],
+            'password_count': password_count,
+            'payments': [{
+                'id': p['id'],
+                'amount': p['amount'],
+                'status': p['status'],
+                'payment_provider': p['payment_provider'],
+                'created_at': p['created_at']
+            } for p in payments]
+        }), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Admin route to serve admin dashboard
+@app.route('/admin')
+def admin_dashboard():
+    try:
+        # Try multiple possible paths for the public directory
+        possible_paths = [
+            'public',
+            '../public', 
+            './public',
+            os.path.join(os.getcwd(), 'public'),
+            os.path.join(os.path.dirname(__file__), '..', 'public')
+        ]
+        
+        for path in possible_paths:
+            if os.path.exists(os.path.join(path, 'admin-dashboard.html')):
+                return send_from_directory(path, 'admin-dashboard.html')
+        
+        return jsonify({"error": "admin-dashboard.html not found"}), 404
+        
+    except Exception as e:
+        return jsonify({"error": f"Error serving admin dashboard: {str(e)}"}), 500
+
 # Get user subscription info
 @app.route('/api/user/subscription', methods=['GET'])
 @require_auth

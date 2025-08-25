@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maze Password Manager - Admin Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            border: none;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(17, 153, 142, 0.4);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+            border: none;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255, 65, 108, 0.4);
+        }
+        
+        .status-pending {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-verified {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-rejected {
+            background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .payment-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .payment-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ff416c;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="glass-card mx-4 mt-4 p-6">
+        <div class="flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                    🔐 Maze Password Manager - Admin Dashboard
+                </h1>
+                <p class="text-gray-300 mt-2">Payment Verification & User Management</p>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="text-right">
+                    <p class="text-sm text-gray-400">Admin</p>
+                    <p class="font-semibold">Monish Reddy</p>
+                </div>
+                <button onclick="logout()" class="btn-danger px-6 py-2 rounded-lg">
+                    🚪 Logout
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Stats Overview -->
+    <div class="mx-4 mt-6 grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="stats-card glass-card p-6 text-center">
+            <div class="text-3xl mb-2">💰</div>
+            <h3 class="text-xl font-semibold mb-2">Total Revenue</h3>
+            <p class="text-2xl font-bold text-green-400" id="total-revenue">₹0</p>
+        </div>
+        
+        <div class="stats-card glass-card p-6 text-center">
+            <div class="text-3xl mb-2">👥</div>
+            <h3 class="text-xl font-semibold mb-2">Total Users</h3>
+            <p class="text-2xl font-bold text-blue-400" id="total-users">0</p>
+        </div>
+        
+        <div class="stats-card glass-card p-6 text-center">
+            <div class="text-3xl mb-2">⏳</div>
+            <h3 class="text-xl font-semibold mb-2">Pending Payments</h3>
+            <p class="text-2xl font-bold text-yellow-400" id="pending-payments">0</p>
+        </div>
+        
+        <div class="stats-card glass-card p-6 text-center">
+            <div class="text-3xl mb-2">✅</div>
+            <h3 class="text-xl font-semibold mb-2">Verified Today</h3>
+            <p class="text-2xl font-bold text-green-400" id="verified-today">0</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="mx-4 mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Pending Payments -->
+        <div class="lg:col-span-2">
+            <div class="glass-card p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold">⏳ Pending Payment Verifications</h2>
+                    <button onclick="refreshPayments()" class="btn-primary px-4 py-2 rounded-lg">
+                        🔄 Refresh
+                    </button>
+                </div>
+                
+                <div id="pending-payments-list" class="space-y-4">
+                    <!-- Payments will be loaded here -->
+                    <div class="text-center text-gray-400 py-8">
+                        <div class="text-4xl mb-4">⏳</div>
+                        <p>Loading pending payments...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="space-y-6">
+            <!-- Admin Actions -->
+            <div class="glass-card p-6">
+                <h3 class="text-xl font-bold mb-4">🛠️ Quick Actions</h3>
+                <div class="space-y-3">
+                    <button onclick="showManualVerification()" class="w-full btn-primary py-3 rounded-lg">
+                        ✅ Manual Payment Verification
+                    </button>
+                    <button onclick="showUserManagement()" class="w-full btn-success py-3 rounded-lg">
+                        👥 User Management
+                    </button>
+                    <button onclick="showSystemStats()" class="w-full btn-primary py-3 rounded-lg">
+                        📊 System Statistics
+                    </button>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="glass-card p-6">
+                <h3 class="text-xl font-bold mb-4">📋 Recent Activity</h3>
+                <div id="recent-activity" class="space-y-3 text-sm">
+                    <div class="text-gray-400 text-center py-4">
+                        Loading activity...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manual Verification Modal -->
+    <div id="manual-verification-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="glass-card rounded-2xl p-8 max-w-md w-full">
+                <h2 class="text-2xl font-bold mb-6">✅ Manual Payment Verification</h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Payment ID</label>
+                        <input type="text" id="manual-payment-id" placeholder="Enter payment ID" 
+                               class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Admin Key</label>
+                        <input type="password" id="admin-key" placeholder="Enter admin key" 
+                               class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500">
+                    </div>
+                    
+                    <div class="flex space-x-3">
+                        <button onclick="verifyPayment()" class="flex-1 btn-success py-3 rounded-lg">
+                            ✅ Verify Payment
+                        </button>
+                        <button onclick="closeManualVerification()" class="flex-1 px-4 py-3 border border-white/20 rounded-lg text-white hover:bg-white/10 transition-colors">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Details Modal -->
+    <div id="payment-details-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="glass-card rounded-2xl p-8 max-w-2xl w-full">
+                <h2 class="text-2xl font-bold mb-6">💰 Payment Details</h2>
+                
+                <div id="payment-details-content" class="space-y-4">
+                    <!-- Payment details will be loaded here -->
+                </div>
+                
+                <div class="flex space-x-3 mt-6">
+                    <button onclick="approvePayment()" class="flex-1 btn-success py-3 rounded-lg">
+                        ✅ Approve Payment
+                    </button>
+                    <button onclick="rejectPayment()" class="flex-1 btn-danger py-3 rounded-lg">
+                        ❌ Reject Payment
+                    </button>
+                    <button onclick="closePaymentDetails()" class="flex-1 px-4 py-3 border border-white/20 rounded-lg text-white hover:bg-white/10 transition-colors">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth-service.js"></script>
+    <script>
+        let currentPayments = [];
+        let selectedPayment = null;
+
+        // Initialize admin dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is admin (simple check for now)
+            checkAdminAccess();
+            
+            // Load initial data
+            loadDashboardData();
+            
+            // Set up auto-refresh
+            setInterval(loadDashboardData, 30000); // Refresh every 30 seconds
+            
+            // Initialize animations
+            initializeAnimations();
+        });
+
+        function checkAdminAccess() {
+            // Simple admin check - in production, use proper authentication
+            const adminKey = prompt("Enter Admin Key:");
+            if (adminKey !== "maze_admin_2024") {
+                alert("Access Denied!");
+                window.location.href = '/';
+                return;
+            }
+        }
+
+        async function loadDashboardData() {
+            try {
+                // Load pending payments
+                await loadPendingPayments();
+                
+                // Load statistics
+                await loadStatistics();
+                
+                // Load recent activity
+                await loadRecentActivity();
+                
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        async function loadPendingPayments() {
+            try {
+                const response = await fetch('/api/admin/pending-payments');
+                if (response.ok) {
+                    const payments = await response.json();
+                    currentPayments = payments;
+                    displayPendingPayments(payments);
+                } else {
+                    console.error('Failed to load pending payments');
+                }
+            } catch (error) {
+                console.error('Error loading pending payments:', error);
+            }
+        }
+
+        function displayPendingPayments(payments) {
+            const container = document.getElementById('pending-payments-list');
+            
+            if (payments.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-gray-400 py-8">
+                        <div class="text-4xl mb-4">✅</div>
+                        <p>No pending payments to verify!</p>
+                        <p class="text-sm mt-2">All payments have been processed.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = payments.map(payment => `
+                <div class="payment-card glass-card p-4 cursor-pointer" onclick="showPaymentDetails('${payment.id}')">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h4 class="font-semibold text-lg">${payment.user_email || 'Unknown User'}</h4>
+                            <p class="text-gray-300 text-sm">Order: ${payment.id}</p>
+                            <p class="text-gray-300 text-sm">Amount: ₹${payment.amount}</p>
+                            <p class="text-gray-300 text-sm">Method: ${payment.payment_provider}</p>
+                            <p class="text-gray-300 text-sm">Date: ${new Date(payment.created_at).toLocaleString()}</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="status-pending">Pending</span>
+                            <p class="text-xs text-gray-400 mt-2">Click to verify</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadStatistics() {
+            try {
+                const response = await fetch('/api/admin/statistics');
+                if (response.ok) {
+                    const stats = await response.json();
+                    
+                    document.getElementById('total-revenue').textContent = `₹${stats.total_revenue || 0}`;
+                    document.getElementById('total-users').textContent = stats.total_users || 0;
+                    document.getElementById('pending-payments').textContent = stats.pending_payments || 0;
+                    document.getElementById('verified-today').textContent = stats.verified_today || 0;
+                }
+            } catch (error) {
+                console.error('Error loading statistics:', error);
+            }
+        }
+
+        async function loadRecentActivity() {
+            try {
+                const response = await fetch('/api/admin/recent-activity');
+                if (response.ok) {
+                    const activities = await response.json();
+                    displayRecentActivity(activities);
+                }
+            } catch (error) {
+                console.error('Error loading recent activity:', error);
+            }
+        }
+
+        function displayRecentActivity(activities) {
+            const container = document.getElementById('recent-activity');
+            
+            if (activities.length === 0) {
+                container.innerHTML = '<p class="text-gray-400 text-center">No recent activity</p>';
+                return;
+            }
+            
+            container.innerHTML = activities.map(activity => `
+                <div class="border-l-2 border-blue-500 pl-3 py-2">
+                    <p class="text-sm">${activity.message}</p>
+                    <p class="text-xs text-gray-400">${new Date(activity.created_at).toLocaleString()}</p>
+                </div>
+            `).join('');
+        }
+
+        function showPaymentDetails(paymentId) {
+            const payment = currentPayments.find(p => p.id === paymentId);
+            if (!payment) return;
+            
+            selectedPayment = payment;
+            
+            const content = document.getElementById('payment-details-content');
+            content.innerHTML = `
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <h4 class="font-semibold text-gray-400">User Email</h4>
+                        <p>${payment.user_email || 'Unknown'}</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-gray-400">Order ID</h4>
+                        <p>${payment.id}</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-gray-400">Amount</h4>
+                        <p>₹${payment.amount}</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-gray-400">Payment Method</h4>
+                        <p>${payment.payment_provider}</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-gray-400">Transaction ID</h4>
+                        <p>${payment.upi_transaction_id || 'Not provided'}</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-gray-400">Date</h4>
+                        <p>${new Date(payment.created_at).toLocaleString()}</p>
+                    </div>
+                </div>
+                
+                ${payment.notes ? `
+                <div class="mt-4">
+                    <h4 class="font-semibold text-gray-400">User Notes</h4>
+                    <p class="bg-white/10 p-3 rounded-lg">${payment.notes}</p>
+                </div>
+                ` : ''}
+            `;
+            
+            document.getElementById('payment-details-modal').classList.remove('hidden');
+        }
+
+        async function approvePayment() {
+            if (!selectedPayment) return;
+            
+            try {
+                const response = await fetch(`/api/admin/verify-payment/${selectedPayment.id}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        admin_key: 'maze_admin_2024'
+                    })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    alert('Payment verified successfully! User subscription activated.');
+                    closePaymentDetails();
+                    loadDashboardData(); // Refresh data
+                } else {
+                    const error = await response.json();
+                    alert('Verification failed: ' + error.error);
+                }
+            } catch (error) {
+                console.error('Error verifying payment:', error);
+                alert('Error verifying payment: ' + error.message);
+            }
+        }
+
+        async function rejectPayment() {
+            if (!selectedPayment) return;
+            
+            const reason = prompt('Enter rejection reason:');
+            if (!reason) return;
+            
+            try {
+                const response = await fetch(`/api/admin/reject-payment/${selectedPayment.id}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        admin_key: 'maze_admin_2024',
+                        reason: reason
+                    })
+                });
+                
+                if (response.ok) {
+                    alert('Payment rejected successfully.');
+                    closePaymentDetails();
+                    loadDashboardData(); // Refresh data
+                } else {
+                    const error = await response.json();
+                    alert('Rejection failed: ' + error.error);
+                }
+            } catch (error) {
+                console.error('Error rejecting payment:', error);
+                alert('Error rejecting payment: ' + error.message);
+            }
+        }
+
+        function showManualVerification() {
+            document.getElementById('manual-verification-modal').classList.remove('hidden');
+        }
+
+        function closeManualVerification() {
+            document.getElementById('manual-verification-modal').classList.add('hidden');
+            document.getElementById('manual-payment-id').value = '';
+            document.getElementById('admin-key').value = '';
+        }
+
+        async function verifyPayment() {
+            const paymentId = document.getElementById('manual-payment-id').value.trim();
+            const adminKey = document.getElementById('admin-key').value.trim();
+            
+            if (!paymentId || !adminKey) {
+                alert('Please fill in all fields');
+                return;
+            }
+            
+            if (adminKey !== 'maze_admin_2024') {
+                alert('Invalid admin key');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/admin/verify-payment/${paymentId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ admin_key: adminKey })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    alert('Payment verified successfully! User subscription activated.');
+                    closeManualVerification();
+                    loadDashboardData(); // Refresh data
+                } else {
+                    const error = await response.json();
+                    alert('Verification failed: ' + error.error);
+                }
+            } catch (error) {
+                console.error('Error verifying payment:', error);
+                alert('Error verifying payment: ' + error.message);
+            }
+        }
+
+        function closePaymentDetails() {
+            document.getElementById('payment-details-modal').classList.add('hidden');
+            selectedPayment = null;
+        }
+
+        function refreshPayments() {
+            loadDashboardData();
+        }
+
+        function showUserManagement() {
+            alert('User Management feature coming soon!');
+        }
+
+        function showSystemStats() {
+            alert('System Statistics feature coming soon!');
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = '/';
+            }
+        }
+
+        function initializeAnimations() {
+            gsap.registerPlugin(ScrollTrigger);
+            
+            // Animate stats cards
+            gsap.from(".stats-card", {
+                duration: 1,
+                opacity: 0,
+                y: 50,
+                ease: "power2.out",
+                stagger: 0.2,
+                scrollTrigger: {
+                    trigger: ".stats-card",
+                    start: "top 80%"
+                }
+            });
+            
+            // Animate payment cards
+            gsap.from(".payment-card", {
+                duration: 0.8,
+                opacity: 0,
+                x: -50,
+                ease: "power2.out",
+                stagger: 0.1,
+                scrollTrigger: {
+                    trigger: ".payment-card",
+                    start: "top 80%"
+                }
+            });
+        }
+    </script>
+</body>
+</html>
