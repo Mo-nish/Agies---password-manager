@@ -300,8 +300,12 @@
             .lg\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         }
 
-        /* FORCE ALL CONTENT TO BE VISIBLE */
-        body * {
+        /* FORCE ALL CONTENT TO BE VISIBLE - TARGETED APPROACH */
+        .hero-section,
+        .section,
+        .navbar,
+        .feature-card,
+        .cta-section {
             display: block !important;
             visibility: visible !important;
             opacity: 1 !important;
@@ -318,6 +322,29 @@
         
         .text-center {
             text-align: center;
+        }
+        
+        /* ENSURE NAVIGATION BUTTONS ARE VISIBLE */
+        .navbar button,
+        .navbar a {
+            display: inline-block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+        
+        /* ENSURE HERO SECTION CONTENT IS VISIBLE */
+        .hero-section button,
+        .hero-section div {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+        
+        /* ENSURE FEATURE CARDS ARE VISIBLE */
+        .feature-card {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
         }
     </style>
 </head>
@@ -354,10 +381,10 @@
                 </div>
                 
                 <div class="flex items-center space-x-4">
-                    <button onclick="window.location.href='/login'" class="px-6 py-2 text-white border border-white/30 rounded-full hover:bg-white/10 transition-all duration-300">
+                    <button onclick="window.location.href='/login'" class="px-6 py-2 text-white border border-white/30 rounded-full hover:bg-white/10 transition-all duration-300" style="display: inline-block !important; visibility: visible !important; opacity: 1 !important;">
                         Sign In
                     </button>
-                    <button onclick="window.location.href='/login#signup'" class="btn-primary px-6 py-2 rounded-full text-white">
+                    <button onclick="window.location.href='/login#signup'" class="btn-primary px-6 py-2 rounded-full text-white" style="display: inline-block !important; visibility: visible !important; opacity: 1 !important;">
                         Get Started
                     </button>
                 </div>
@@ -366,24 +393,24 @@
     </nav>
 
     <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="container text-center">
+    <section class="hero-section" style="display: block !important; visibility: visible !important; opacity: 1 !important;">
+        <div class="container text-center" style="display: block !important; visibility: visible !important;">
             <!-- Main Logo and Title -->
-            <div class="mb-16">
-                <div class="text-9xl mb-8 floating">🔐</div>
-                <h1 class="text-7xl md:text-8xl font-bold mb-6 glow-text">
+            <div class="mb-16" style="display: block !important; visibility: visible !important;">
+                <div class="text-9xl mb-8 floating" style="display: block !important; visibility: visible !important;">🔐</div>
+                <h1 class="text-7xl md:text-8xl font-bold mb-6 glow-text" style="display: block !important; visibility: visible !important;">
                     Maze Password Manager
                 </h1>
-                <p class="text-3xl md:text-4xl text-blue-200 mb-4">Chakravyuham Vault</p>
-                <p class="text-xl md:text-2xl text-blue-100 mb-12">Revolutionary Multi-Layer Security</p>
+                <p class="text-3xl md:text-4xl text-blue-200 mb-4" style="display: block !important; visibility: visible !important;">Chakravyuham Vault</p>
+                <p class="text-xl md:text-2xl text-blue-100 mb-12" style="display: block !important; visibility: visible !important;">Revolutionary Multi-Layer Security</p>
             </div>
 
             <!-- Main Action Buttons -->
-            <div class="flex flex-col md:flex-row gap-6 justify-center mb-16">
-                <button onclick="window.location.href='/login'" class="btn-primary px-12 py-6 text-2xl font-semibold rounded-full text-white">
+            <div class="flex flex-col md:flex-row gap-6 justify-center mb-16" style="display: flex !important; visibility: visible !important;">
+                <button onclick="window.location.href='/login'" class="btn-primary px-12 py-6 text-2xl font-semibold rounded-full text-white" style="display: inline-block !important; visibility: visible !important;">
                     🔐 Login to Vault
                 </button>
-                <button onclick="window.location.href='/login#signup'" class="px-12 py-6 text-2xl font-semibold rounded-full text-white border-2 border-white/30 hover:bg-white/10 transition-all duration-300">
+                <button onclick="window.location.href='/login#signup'" class="px-12 py-6 text-2xl font-semibold rounded-full text-white border-2 border-white/30 hover:bg-white/10 transition-all duration-300" style="display: inline-block !important; visibility: visible !important;">
                     ✨ Create Account
                 </button>
             </div>
