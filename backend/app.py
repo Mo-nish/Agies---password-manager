@@ -6,6 +6,7 @@ import json
 import uuid
 from datetime import datetime
 import bcrypt
+import time
 
 app = Flask(__name__)
 CORS(app)
@@ -98,7 +99,8 @@ def init_db():
             subscription_end_date TIMESTAMP,
             payment_provider TEXT,
             payment_customer_id TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            last_login TIMESTAMP
         )
     ''')
     
@@ -536,26 +538,90 @@ def vaults():
     except Exception as e:
         return jsonify({"error": f"Error serving vaults page: {str(e)}"}), 500
 
-@app.route('/api/health')
-def health():
-    return jsonify({"status": "healthy", "timestamp": datetime.now().isoformat()})
-
-@app.route('/debug')
-def debug():
-    import os
+# Debug route to check data persistence
+@app.route('/api/debug/user-data/<user_id>', methods=['GET'])
+def debug_user_data(user_id):
     try:
-        public_dir = os.path.join(os.getcwd(), 'public')
-        files = os.listdir(public_dir) if os.path.exists(public_dir) else []
+        conn = get_db()
+        c = conn.cursor()
+        
+        # Get user info
+        c.execute('SELECT * FROM users WHERE id = ?', (user_id,))
+        user = c.fetchone()
+        
+        if not user:
+            conn.close()
+            return jsonify({"error": "User not found"}), 404
+        
+        # Get user's vaults
+        c.execute('SELECT * FROM vaults WHERE user_id = ?', (user_id,))
+        vaults = c.fetchall()
+        
+        # Get total password count
+        c.execute('''
+            SELECT COUNT(*) as count FROM passwords p 
+            JOIN vaults v ON p.vault_id = v.id 
+            WHERE v.user_id = ?
+        ''', (user_id,))
+        total_passwords = c.fetchone()['count']
+        
+        # Get passwords by vault
+        vault_passwords = {}
+        for vault in vaults:
+            c.execute('SELECT * FROM passwords WHERE vault_id = ?', (vault['id'],))
+            passwords = c.fetchall()
+            vault_passwords[vault['name']] = passwords
+        
+        conn.close()
+        
         return jsonify({
-            "current_dir": os.getcwd(),
-            "public_dir": public_dir,
-            "public_dir_exists": os.path.exists(public_dir),
-            "files_in_public": files,
-            "index_html_exists": os.path.exists(os.path.join(public_dir, 'index.html')),
-            "login_html_exists": os.path.exists(os.path.join(public_dir, 'login.html'))
-        })
+            "user": {
+                "id": user['id'],
+                "email": user['email'],
+                "subscription_plan": user.get('subscription_plan', 'free'),
+                "created_at": user['created_at'],
+                "last_login": user.get('last_login')
+            },
+            "vaults": [{
+                "id": v['id'],
+                "name": v['name'],
+                "description": v['description'],
+                "icon": v['icon'],
+                "password_count": v['password_count'],
+                "created_at": v['created_at']
+            } for v in vaults],
+            "total_passwords": total_passwords,
+            "passwords_by_vault": vault_passwords,
+            "debug_info": {
+                "vault_count": len(vaults),
+                "timestamp": datetime.now().isoformat()
+            }
+        }), 200
+        
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+# Health check route
+@app.route('/api/health', methods=['GET'])
+def health_check():
+    try:
+        # Test database connection
+        conn = get_db()
+        c = conn.cursor()
+        c.execute('SELECT 1')
+        conn.close()
+        
+        return jsonify({
+            "status": "healthy",
+            "database": "connected",
+            "timestamp": datetime.now().isoformat()
+        }), 200
+    except Exception as e:
+        return jsonify({
+            "status": "unhealthy",
+            "error": str(e),
+            "timestamp": datetime.now().isoformat()
+        }), 500
 
 # User registration
 @app.route('/api/auth/register', methods=['POST'])
@@ -617,22 +683,42 @@ def login_api():
         conn = get_db()
         c = conn.cursor()
         
-        # Get user
-        c.execute('SELECT id, password_hash FROM users WHERE email = ?', (email,))
+        # Get user with subscription info
+        c.execute('''
+            SELECT id, password_hash, subscription_plan, subscription_status 
+            FROM users WHERE email = ?
+        ''', (email,))
         user = c.fetchone()
-        conn.close()
         
         if not user:
+            conn.close()
             return jsonify({"error": "Invalid credentials"}), 401
         
         # Check password
         if bcrypt.checkpw(password.encode('utf-8'), user['password_hash'].encode('utf-8')):
+            # Generate a more secure token
+            token = str(uuid.uuid4()) + '_' + str(int(time.time()))
+            
+            # Update user's last login time (add this column if needed)
+            try:
+                c.execute('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?', (user['id'],))
+            except:
+                # Column might not exist, that's okay
+                pass
+            
+            conn.commit()
+            conn.close()
+            
             return jsonify({
                 "message": "Login successful",
                 "user_id": user['id'],
-                "token": str(uuid.uuid4())  # Simple token for demo
+                "email": email,
+                "token": token,
+                "subscription_plan": user['subscription_plan'],
+                "subscription_status": user['subscription_status']
             }), 200
         else:
+            conn.close()
             return jsonify({"error": "Invalid credentials"}), 401
             
     except Exception as e:

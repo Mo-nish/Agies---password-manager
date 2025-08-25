@@ -14,16 +14,27 @@ class AuthService {
         console.log('🔐 Auth Service initialized');
     }
 
-    // Load user data from localStorage
+    // Load user data from localStorage - Enhanced
     loadUserData() {
         try {
             this.token = localStorage.getItem('auth_token');
             const userId = localStorage.getItem('user_id');
             const userEmail = localStorage.getItem('user_email');
+            const loginTimestamp = localStorage.getItem('login_timestamp');
             
             if (this.token && userId && userEmail) {
                 this.user = { id: userId, email: userEmail };
-                console.log('✅ User data loaded from localStorage');
+                
+                // Check if login is recent (within 24 hours)
+                const loginTime = parseInt(loginTimestamp || '0');
+                const now = Date.now();
+                const isRecent = (now - loginTime) < (24 * 60 * 60 * 1000); // 24 hours
+                
+                if (isRecent) {
+                    console.log('✅ User data loaded from localStorage (recent login)');
+                } else {
+                    console.log('⚠️ User data loaded but login is old, consider re-authentication');
+                }
             } else {
                 console.log('ℹ️ No stored user data found');
             }
@@ -102,10 +113,20 @@ class AuthService {
             }
 
             const data = await response.json();
+            console.log('📊 Login response:', data);
             
-            // Store user data
-            this.storeUserData(data.user_id, data.token, email);
-            console.log('✅ Login successful');
+            // Store user data with all available information
+            this.storeUserData(data.user_id, data.token, data.email || email);
+            
+            // Store additional user info if available
+            if (data.subscription_plan) {
+                localStorage.setItem('user_subscription_plan', data.subscription_plan);
+            }
+            if (data.subscription_status) {
+                localStorage.setItem('user_subscription_status', data.subscription_status);
+            }
+            
+            console.log('✅ Login successful, user data stored');
             
             return data;
         } catch (error) {
@@ -133,18 +154,19 @@ class AuthService {
         }
     }
 
-    // Store user data in localStorage
+    // Store user data in localStorage - Enhanced
     storeUserData(userId, token, email) {
         try {
             localStorage.setItem('user_id', userId);
             localStorage.setItem('auth_token', token);
             localStorage.setItem('user_email', email);
+            localStorage.setItem('login_timestamp', Date.now().toString());
             
             // Update current state
             this.user = { id: userId, email };
             this.token = token;
             
-            console.log('💾 User data stored');
+            console.log('💾 User data stored:', { userId, email, tokenLength: token?.length });
         } catch (error) {
             console.error('Error storing user data:', error);
         }
@@ -186,21 +208,47 @@ class AuthService {
         }
     }
 
-    // Get user vaults
+    // Enhanced vault loading with better error handling
     async getVaults() {
         try {
+            console.log('🔍 Fetching vaults for user:', this.user?.id);
+            
             const response = await fetch('/api/vaults', {
                 method: 'GET',
                 headers: this.getAuthHeaders()
             });
 
             if (!response.ok) {
-                throw new Error('Failed to get vaults');
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to get vaults');
             }
 
-            return await response.json();
+            const vaults = await response.json();
+            console.log('📦 Vaults loaded:', vaults.length, 'vaults');
+            
+            // Store vaults in localStorage for offline access
+            try {
+                localStorage.setItem('user_vaults', JSON.stringify(vaults));
+                localStorage.setItem('vaults_timestamp', Date.now().toString());
+            } catch (e) {
+                console.warn('Could not cache vaults:', e);
+            }
+            
+            return vaults;
         } catch (error) {
-            console.error('Get vaults error:', error);
+            console.error('❌ Get vaults error:', error);
+            
+            // Try to return cached vaults if available
+            try {
+                const cachedVaults = localStorage.getItem('user_vaults');
+                if (cachedVaults) {
+                    console.log('📦 Returning cached vaults due to API error');
+                    return JSON.parse(cachedVaults);
+                }
+            } catch (e) {
+                console.warn('Could not load cached vaults:', e);
+            }
+            
             throw error;
         }
     }
@@ -226,21 +274,47 @@ class AuthService {
         }
     }
 
-    // Get passwords for a vault
+    // Enhanced password loading with better error handling
     async getPasswords(vaultId) {
         try {
+            console.log('🔍 Fetching passwords for vault:', vaultId);
+            
             const response = await fetch(`/api/vaults/${vaultId}/passwords`, {
                 method: 'GET',
                 headers: this.getAuthHeaders()
             });
 
             if (!response.ok) {
-                throw new Error('Failed to get passwords');
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to get passwords');
             }
 
-            return await response.json();
+            const passwords = await response.json();
+            console.log('🔐 Passwords loaded:', passwords.length, 'passwords');
+            
+            // Store passwords in localStorage for offline access
+            try {
+                localStorage.setItem(`passwords_${vaultId}`, JSON.stringify(passwords));
+                localStorage.setItem(`passwords_${vaultId}_timestamp`, Date.now().toString());
+            } catch (e) {
+                console.warn('Could not cache passwords:', e);
+            }
+            
+            return passwords;
         } catch (error) {
-            console.error('Get passwords error:', error);
+            console.error('❌ Get passwords error:', error);
+            
+            // Try to return cached passwords if available
+            try {
+                const cachedPasswords = localStorage.getItem(`passwords_${vaultId}`);
+                if (cachedPasswords) {
+                    console.log('🔐 Returning cached passwords due to API error');
+                    return JSON.parse(cachedPasswords);
+                }
+            } catch (e) {
+                console.warn('Could not load cached passwords:', e);
+            }
+            
             throw error;
         }
     }
