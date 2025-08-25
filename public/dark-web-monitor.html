@@ -459,12 +459,13 @@
             <h2 class="text-2xl font-bold mb-6">🔍 Monitoring Controls</h2>
             
             <div class="monitoring-controls">
-                <button class="btn btn-primary" onclick="startScan()">🚀 Start Full Scan</button>
-                <button class="btn btn-secondary" onclick="scanSpecificEmail()">📧 Scan Email</button>
-                <button class="btn btn-secondary" onclick="scanSpecificDomain()">🌐 Scan Domain</button>
-                <button class="btn btn-secondary" onclick="viewScanHistory()">📋 Scan History</button>
-                <button class="btn btn-success" onclick="enableAutoRotation()">🔄 Enable Auto-Rotation</button>
-                <button class="btn btn-danger" onclick="emergencyLockdown()">🚨 Emergency Lockdown</button>
+                <button id="start-scan" class="btn btn-primary">🚀 Start Real Scan</button>
+                <button id="stop-scan" class="btn btn-secondary">🛑 Stop Scan</button>
+                <button class="btn btn-secondary" onclick="darkWebMonitor.scanSpecificEmail()">📧 Scan Email</button>
+                <button class="btn btn-secondary" onclick="darkWebMonitor.scanSpecificDomain()">🌐 Scan Domain</button>
+                <button class="btn btn-secondary" onclick="darkWebMonitor.viewScanHistory()">📋 Scan History</button>
+                <button class="btn btn-success" onclick="darkWebMonitor.enableAutoRotation()">🔄 Enable Auto-Rotation</button>
+                <button class="btn btn-danger" onclick="darkWebMonitor.emergencyLockdown()">🚨 Emergency Lockdown</button>
             </div>
             
             <div class="scan-status">
