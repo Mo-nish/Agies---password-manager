@@ -314,7 +314,7 @@ def migrate_database():
         conn.close()
 
 # Run database migration if needed
-migrate_database()
+# migrate_database()  # Moved to main execution block
 
 print("✅ Database initialized successfully")
 print("✅ All tables created and ready")
@@ -2081,4 +2081,5 @@ if __name__ == '__main__':
     migrate_database()
     
     port = int(os.environ.get('PORT', 8000))
-    app.run(host='0.0.0.0', port=port, debug=True)
+    debug_mode = os.environ.get('FLASK_ENV') == 'development'
+    app.run(host='0.0.0.0', port=port, debug=debug_mode)
