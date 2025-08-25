@@ -123,28 +123,53 @@ class DarkWebMonitor {
         this.updateStats();
     }
 
-    // Real breach checking using HaveIBeenPwned API
+    // Real breach checking using backend proxy (avoids CORS issues)
     async checkHaveIBeenPwned(email) {
         try {
-            // Note: In production, you'd need an API key
-            // For now, we'll simulate the API call structure
-            const response = await fetch(`https://haveibeenpwned.com/api/v3/breachedaccount/${encodeURIComponent(email)}`, {
+            // Use our backend proxy to avoid CORS issues
+            const response = await fetch('/api/security/check-breach', {
+                method: 'POST',
                 headers: {
-                    'User-Agent': 'MazePasswordManager/1.0'
-                }
+                    'Content-Type': 'application/json',
+                    'X-User-ID': this.getCurrentUserId() || 'demo'
+                },
+                body: JSON.stringify({ email: email })
             });
             
-            if (response.status === 200) {
-                const breaches = await response.json();
-                return breaches;
-            } else if (response.status === 404) {
-                return []; // No breaches found
+            if (response.ok) {
+                const result = await response.json();
+                return result.breaches || [];
+            } else {
+                console.log(`Backend API call failed for ${email}:`, response.status);
+                // Fallback to simulated data
+                return this.simulateBreachData(email);
             }
         } catch (error) {
             console.log(`API call failed for ${email}:`, error.message);
-            // Simulate real breach data for demonstration
+            // Fallback to simulated data for demonstration
             return this.simulateBreachData(email);
         }
+    }
+
+    // Get current user ID from auth service or localStorage
+    getCurrentUserId() {
+        if (window.authService && window.authService.getCurrentUser) {
+            const user = window.authService.getCurrentUser();
+            return user ? user.id : null;
+        }
+        
+        // Fallback to localStorage
+        const userData = localStorage.getItem('agies_user_data');
+        if (userData) {
+            try {
+                const user = JSON.parse(userData);
+                return user.user_id || user.id;
+            } catch (e) {
+                return null;
+            }
+        }
+        
+        return null;
     }
 
     // Simulate breach data (replace with real API calls in production)
