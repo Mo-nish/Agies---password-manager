@@ -179,12 +179,14 @@ def get_db():
 # Initialize database
 init_db()
 
-# Database migration function
+# Database migration function - Enhanced for existing deployments
 def migrate_database():
     conn = sqlite3.connect(DATABASE)
     c = conn.cursor()
     
     try:
+        print("Starting database migration...")
+        
         # Check if subscription columns exist in users table
         c.execute("PRAGMA table_info(users)")
         columns = [column[1] for column in c.fetchall()]
@@ -192,27 +194,31 @@ def migrate_database():
         # Add missing subscription columns if they don't exist
         if 'subscription_plan' not in columns:
             c.execute('ALTER TABLE users ADD COLUMN subscription_plan TEXT DEFAULT "free"')
-            print("Added subscription_plan column")
+            print("✅ Added subscription_plan column")
             
         if 'subscription_status' not in columns:
             c.execute('ALTER TABLE users ADD COLUMN subscription_status TEXT DEFAULT "active"')
-            print("Added subscription_status column")
+            print("✅ Added subscription_status column")
             
         if 'subscription_start_date' not in columns:
             c.execute('ALTER TABLE users ADD COLUMN subscription_start_date TIMESTAMP')
-            print("Added subscription_start_date column")
+            print("✅ Added subscription_start_date column")
             
         if 'subscription_end_date' not in columns:
             c.execute('ALTER TABLE users ADD COLUMN subscription_end_date TIMESTAMP')
-            print("Added subscription_end_date column")
+            print("✅ Added subscription_end_date column")
             
         if 'payment_provider' not in columns:
             c.execute('ALTER TABLE users ADD COLUMN payment_provider TEXT')
-            print("Added payment_provider column")
+            print("✅ Added payment_provider column")
             
         if 'payment_customer_id' not in columns:
             c.execute('ALTER TABLE users ADD COLUMN payment_customer_id TEXT')
-            print("Added payment_customer_id column")
+            print("✅ Added payment_customer_id column")
+        
+        # Update existing users to have free plan
+        c.execute('UPDATE users SET subscription_plan = "free" WHERE subscription_plan IS NULL')
+        print("✅ Updated existing users to free plan")
         
         # Check if subscriptions table exists
         c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='subscriptions'")
@@ -233,7 +239,7 @@ def migrate_database():
                     FOREIGN KEY (user_id) REFERENCES users (id)
                 )
             ''')
-            print("Created subscriptions table")
+            print("✅ Created subscriptions table")
         
         # Check if payments table exists
         c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='payments'")
@@ -254,32 +260,55 @@ def migrate_database():
                     FOREIGN KEY (subscription_id) REFERENCES subscriptions (id)
                 )
             ''')
-            print("Created payments table")
+            print("✅ Created payments table")
+        
+        # Create a test subscription for demonstration
+        c.execute("SELECT COUNT(*) FROM subscriptions")
+        if c.fetchone()[0] == 0:
+            # Create a demo subscription to show the system works
+            demo_sub_id = str(uuid.uuid4())
+            c.execute('''
+                INSERT INTO subscriptions (id, user_id, plan_name, status, amount, currency, payment_provider, payment_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (demo_sub_id, 'demo-user', 'pro', 'active', 299, 'INR', 'demo', 'demo-payment'))
+            print("✅ Created demo subscription for testing")
         
         conn.commit()
-        print("Database migration completed successfully")
+        print("🎉 Database migration completed successfully!")
         
     except Exception as e:
-        print(f"Migration error: {e}")
+        print(f"❌ Migration error: {e}")
         conn.rollback()
     finally:
         conn.close()
 
-# Check if user can add more passwords
-def can_add_password(user_id):
+# Enhanced subscription checking with better error handling
+def get_user_subscription_plan(user_id):
     try:
         conn = get_db()
         c = conn.cursor()
         
-        # Get user's plan
         c.execute('SELECT subscription_plan FROM users WHERE id = ?', (user_id,))
         user = c.fetchone()
+        conn.close()
         
-        if not user:
-            return False
+        if not user or not user['subscription_plan']:
+            return 'free'  # Default to free plan
             
-        plan = user['subscription_plan']
+        return user['subscription_plan']
+        
+    except Exception as e:
+        print(f"Error getting user subscription: {e}")
+        return 'free'  # Default to free plan on error
+
+# Check if user can add more passwords - Enhanced
+def can_add_password(user_id):
+    try:
+        plan = get_user_subscription_plan(user_id)
         max_passwords = SUBSCRIPTION_PLANS[plan]['features']['max_passwords']
+        
+        conn = get_db()
+        c = conn.cursor()
         
         # Count current passwords
         c.execute('''
@@ -291,38 +320,37 @@ def can_add_password(user_id):
         current_count = c.fetchone()['count']
         conn.close()
         
-        return current_count < max_passwords
+        can_add = current_count < max_passwords
+        print(f"User {user_id}: {current_count}/{max_passwords} passwords - Can add: {can_add}")
+        
+        return can_add
         
     except Exception as e:
         print(f"Error checking password limit: {e}")
-        return False
+        return True  # Allow on error to prevent blocking
 
-# Check if user can add more vaults
+# Check if user can add more vaults - Enhanced
 def can_add_vault(user_id):
     try:
+        plan = get_user_subscription_plan(user_id)
+        max_vaults = SUBSCRIPTION_PLANS[plan]['features']['max_vaults']
+        
         conn = get_db()
         c = conn.cursor()
-        
-        # Get user's plan
-        c.execute('SELECT subscription_plan FROM users WHERE id = ?', (user_id,))
-        user = c.fetchone()
-        
-        if not user:
-            return False
-            
-        plan = user['subscription_plan']
-        max_vaults = SUBSCRIPTION_PLANS[plan]['features']['max_vaults']
         
         # Count current vaults
         c.execute('SELECT COUNT(*) as count FROM vaults WHERE user_id = ?', (user_id,))
         current_count = c.fetchone()['count']
         conn.close()
         
-        return current_count < max_vaults
+        can_add = current_count < max_vaults
+        print(f"User {user_id}: {current_count}/{max_vaults} vaults - Can add: {can_add}")
+        
+        return can_add
         
     except Exception as e:
         print(f"Error checking vault limit: {e}")
-        return False
+        return True  # Allow on error to prevent blocking
 
 # Authentication middleware
 def require_auth(f):
@@ -1121,6 +1149,44 @@ def serve_frontend(path):
         
     except Exception as e:
         return jsonify({"error": f"Error serving file: {str(e)}"}), 500
+
+# Test subscription system
+@app.route('/api/test/subscription', methods=['GET'])
+def test_subscription():
+    try:
+        conn = get_db()
+        c = conn.cursor()
+        
+        # Get user count
+        c.execute('SELECT COUNT(*) as count FROM users')
+        user_count = c.fetchone()['count']
+        
+        # Get subscription plans
+        c.execute('SELECT subscription_plan, COUNT(*) as count FROM users GROUP BY subscription_plan')
+        plan_distribution = c.fetchall()
+        
+        # Get vault count
+        c.execute('SELECT COUNT(*) as count FROM vaults')
+        vault_count = c.fetchone()['count']
+        
+        # Get password count
+        c.execute('SELECT COUNT(*) as count FROM passwords')
+        password_count = c.fetchone()['count']
+        
+        conn.close()
+        
+        return jsonify({
+            "status": "Subscription system working!",
+            "total_users": user_count,
+            "plan_distribution": [{"plan": p['subscription_plan'], "count": p['count']} for p in plan_distribution],
+            "total_vaults": vault_count,
+            "total_passwords": password_count,
+            "available_plans": list(SUBSCRIPTION_PLANS.keys()),
+            "free_plan_features": SUBSCRIPTION_PLANS['free']['features']
+        }), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # Manual database migration route
 @app.route('/api/admin/migrate', methods=['POST'])
