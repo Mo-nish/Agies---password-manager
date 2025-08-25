@@ -233,6 +233,7 @@
     <nav class="navbar fixed top-0 left-0 right-0 z-50 px-6 py-4">
         <div class="max-w-7xl mx-auto flex items-center justify-between">
             <div class="flex items-center space-x-4">
+                <a href="/" class="text-2xl hover:scale-110 transition-transform" title="Back to Home">🏠</a>
                 <div class="text-3xl">🔐</div>
                 <div>
                     <h1 class="text-2xl font-bold gradient-text">Maze Password Manager</h1>
@@ -243,7 +244,7 @@
             <div class="flex items-center space-x-6">
                 <a href="/dashboard" class="text-gray-300 hover:text-white transition-colors">Dashboard</a>
                 <a href="/vaults" class="text-gray-300 hover:text-white transition-colors">Vaults</a>
-                <a href="/security" class="text-gray-300 hover:text-white transition-colors">Security</a>
+                <a href="/admin" class="text-gray-300 hover:text-white transition-colors">Admin</a>
                 <a href="/pricing" class="text-white hover:text-blue-300 transition-colors">Pricing</a>
                 
                 <div class="flex items-center space-x-4">
@@ -258,12 +259,15 @@
     </nav>
 
     <!-- Main Content -->
-    <div class="pt-24 pb-12 px-6">
+    <div class="pt-24 pb-12 px-6 min-h-screen">
         <div class="max-w-7xl mx-auto">
-            <!-- Header -->
-            <div class="text-center mb-16">
-                <h1 class="text-5xl font-bold mb-6 gradient-text">Choose Your Security Level</h1>
-                <p class="text-xl text-gray-300">Select the perfect plan for your security needs</p>
+            <!-- Header with Back Button -->
+            <div class="flex items-center justify-center mb-8">
+                <a href="/" class="text-4xl hover:scale-110 transition-transform mr-6" title="Back to Home">🏠</a>
+                <div class="text-center">
+                    <h1 class="text-5xl font-bold mb-6 gradient-text">Choose Your Security Level</h1>
+                    <p class="text-xl text-gray-300">Select the perfect plan for your security needs</p>
+                </div>
             </div>
 
             <!-- Pricing Plans -->
@@ -320,11 +324,6 @@
                     <button onclick="selectPlan('pro')" class="w-full btn-premium py-3 rounded-lg text-white font-semibold">
                         Choose Pro
                     </button>
-                    
-                    <div class="payment-methods">
-                        <span class="payment-method">💳 Stripe</span>
-                        <span class="payment-method">🏦 Razorpay</span>
-                    </div>
                 </div>
 
                 <!-- Premium Plan -->
@@ -354,11 +353,6 @@
                     <button onclick="selectPlan('premium')" class="w-full btn-premium py-3 rounded-lg text-white font-semibold">
                         Choose Premium
                     </button>
-                    
-                    <div class="payment-methods">
-                        <span class="payment-method">💳 Stripe</span>
-                        <span class="payment-method">🏦 Razorpay</span>
-                    </div>
                 </div>
 
                 <!-- Enterprise Plan -->
@@ -366,7 +360,7 @@
                     <div class="text-center mb-6">
                         <h3 class="text-2xl font-bold mb-2">Enterprise</h3>
                         <div class="price">
-                            <span class="currency">₹</span>1,499
+                            <span class="currency">₹</span>999
                             <span class="period">/month</span>
                         </div>
                         <p class="text-gray-400 mt-2">For teams & businesses</p>
@@ -390,11 +384,6 @@
                     <button onclick="selectPlan('enterprise')" class="w-full btn-enterprise py-3 rounded-lg text-white font-semibold">
                         Choose Enterprise
                     </button>
-                    
-                    <div class="payment-methods">
-                        <span class="payment-method">💳 Stripe</span>
-                        <span class="payment-method">🏦 Razorpay</span>
-                    </div>
                 </div>
             </div>
 
@@ -521,10 +510,13 @@
     </div>
 
     <!-- Payment Modal -->
-    <div id="payment-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
-        <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="glass-card rounded-2xl p-8 max-w-2xl w-full">
-                <h2 id="payment-title" class="text-2xl font-bold mb-6">Complete Payment</h2>
+    <div id="payment-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 overflow-y-auto">
+        <div class="flex items-start justify-center min-h-screen p-4 py-8">
+            <div class="glass-card rounded-2xl p-8 max-w-2xl w-full my-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 id="payment-title" class="text-2xl font-bold">Complete Payment</h2>
+                    <button onclick="closePaymentModal()" class="text-2xl hover:text-red-400 transition-colors">✕</button>
+                </div>
                 
                 <div class="mb-6">
                     <p class="text-gray-300 mb-4">Selected Plan: <span id="selected-plan-name" class="text-white font-semibold"></span></p>
@@ -587,9 +579,14 @@
                     </div>
                 </div>
                 
-                <button onclick="closePaymentModal()" class="w-full px-4 py-3 border border-white/20 rounded-lg text-white hover:bg-white/10 transition-colors">
-                    Cancel
-                </button>
+                <div class="flex space-x-3 pt-4">
+                    <button onclick="closePaymentModal()" class="flex-1 px-4 py-3 border border-white/20 rounded-lg text-white hover:bg-white/10 transition-colors">
+                        Cancel
+                    </button>
+                    <button onclick="goBackToPricing()" class="flex-1 px-4 py-3 bg-gray-600 hover:bg-gray-700 rounded-lg text-white transition-colors">
+                        ← Back to Plans
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -869,12 +866,21 @@
             }
         }
 
+        function goBackToPricing() {
+            document.getElementById('payment-modal').classList.add('hidden');
+            selectedPlan = null;
+            selectedUPIMethod = null;
+            currentOrderId = null;
+            resetUPISelection();
+        }
+
         // Global functions for onclick handlers
         window.selectPlan = selectPlan;
         window.selectUPIMethod = selectUPIMethod;
         window.showOtherPaymentMethods = showOtherPaymentMethods;
         window.submitPaymentVerification = submitPaymentVerification;
         window.closePaymentModal = closePaymentModal;
+        window.goBackToPricing = goBackToPricing;
     </script>
 </body>
 </html>
