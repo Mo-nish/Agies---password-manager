@@ -528,13 +528,55 @@ def security():
         ]
         
         for path in possible_paths:
-            if os.path.exists(os.path.join(path, 'security-dashboard-working.html')):
-                return send_from_directory(path, 'security-dashboard-working.html')
+            if os.path.exists(os.path.join(path, 'security.html')):
+                return send_from_directory(path, 'security.html')
         
-        return jsonify({"error": "security-dashboard-working.html not found"}), 404
+        return jsonify({"error": "security.html not found"}), 404
         
     except Exception as e:
         return jsonify({"error": f"Error serving security page: {str(e)}"}), 500
+
+@app.route('/security-dashboard')
+def security_dashboard():
+    try:
+        # Try multiple possible paths for the public directory
+        possible_paths = [
+            'public',
+            '../public', 
+            './public',
+            os.path.join(os.getcwd(), 'public'),
+            os.path.join(os.path.dirname(__file__), '..', 'public')
+        ]
+        
+        for path in possible_paths:
+            if os.path.exists(os.path.join(path, 'security-dashboard.html')):
+                return send_from_directory(path, 'security-dashboard.html')
+        
+        return jsonify({"error": "security-dashboard.html not found"}), 404
+        
+    except Exception as e:
+        return jsonify({"error": f"Error serving security dashboard: {str(e)}"}), 500
+
+@app.route('/dark-web-monitor')
+def dark_web_monitor():
+    try:
+        # Try multiple possible paths for the public directory
+        possible_paths = [
+            'public',
+            '../public', 
+            './public',
+            os.path.join(os.getcwd(), 'public'),
+            os.path.join(os.path.dirname(__file__), '..', 'public')
+        ]
+        
+        for path in possible_paths:
+            if os.path.exists(os.path.join(path, 'dark-web-monitor.html')):
+                return send_from_directory(path, 'dark-web-monitor.html')
+        
+        return jsonify({"error": "dark-web-monitor.html not found"}), 404
+        
+    except Exception as e:
+        return jsonify({"error": f"Error serving dark web monitor: {str(e)}"}), 500
 
 @app.route('/pricing')
 def pricing():
@@ -1328,7 +1370,7 @@ def serve_frontend(path):
         return jsonify({"error": "API endpoint not found"}), 404
     
     # Skip specific routes we've already defined
-    if path in ['', 'login', 'dashboard', 'maze', 'security', 'vaults', 'index.html']:
+    if path in ['', 'login', 'dashboard', 'maze', 'security', 'security-dashboard', 'dark-web-monitor', 'vaults', 'index.html']:
         return jsonify({"error": "Route not found"}), 404
     
     # Serve static files from public directory
