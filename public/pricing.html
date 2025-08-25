@@ -217,6 +217,15 @@
             }
         }
         
+        /* FORCE VISIBILITY - Remove any hiding */
+        .plan-card {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            height: auto !important;
+            overflow: visible !important;
+        }
+        
         .payment-methods {
             display: flex;
             gap: 1rem;
@@ -337,12 +346,12 @@
                 </div>
             </div>
 
-            <!-- Pricing Plans -->
-            <div class="pricing-container mb-16">
+            <!-- Pricing Plans - FORCED VISIBLE LAYOUT -->
+            <div style="width: 100%; margin-bottom: 4rem;">
                 <!-- Row 1: Free and Pro Plans -->
-                <div class="pricing-row mb-8">
+                <div style="display: flex; justify-content: center; gap: 2rem; margin-bottom: 2rem; flex-wrap: wrap;">
                     <!-- Free Plan -->
-                    <div class="plan-card">
+                    <div class="plan-card" style="flex: 1; min-width: 280px; max-width: 320px;">
                         <div class="text-center mb-6">
                             <h3 class="text-2xl font-bold mb-2">Free Plan</h3>
                             <div class="price">
@@ -369,7 +378,7 @@
                     </div>
 
                     <!-- Pro Plan -->
-                    <div class="plan-card popular">
+                    <div class="plan-card popular" style="flex: 1; min-width: 280px; max-width: 320px;">
                         <div class="text-center mb-6">
                             <h3 class="text-2xl font-bold mb-2">Pro Plan</h3>
                             <div class="price">
@@ -396,10 +405,16 @@
                     </div>
                 </div>
 
-                <!-- Row 2: Premium and Enterprise Plans -->
-                <div class="pricing-row">
+                <!-- VISUAL SEPARATOR - ROW 2 BELOW -->
+                <div style="text-align: center; margin: 2rem 0; padding: 1rem; background: rgba(245, 158, 11, 0.2); border: 2px solid #F59E0B; border-radius: 10px;">
+                    <h3 style="color: #F59E0B; font-size: 1.5rem; font-weight: bold; margin-bottom: 0.5rem;">⬇️ ROW 2: PREMIUM & ENTERPRISE PLANS ⬇️</h3>
+                    <p style="color: #F59E0B; font-size: 1rem;">Scroll down to see Premium (₹599) and Enterprise (₹999) plans</p>
+                </div>
+
+                <!-- Row 2: Premium and Enterprise Plans - FORCED VISIBLE -->
+                <div style="display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap;">
                     <!-- Premium Plan -->
-                    <div class="plan-card">
+                    <div class="plan-card" style="flex: 1; min-width: 280px; max-width: 320px; border: 2px solid #10B981;">
                         <div class="text-center mb-6">
                             <h3 class="text-2xl font-bold mb-2">Premium Plan</h3>
                             <div class="price">
@@ -428,7 +443,7 @@
                     </div>
 
                     <!-- Enterprise Plan -->
-                    <div class="plan-card">
+                    <div class="plan-card" style="flex: 1; min-width: 280px; max-width: 320px; border: 2px solid #F59E0B;">
                         <div class="text-center mb-6">
                             <h3 class="text-2xl font-bold mb-2">Enterprise</h3>
                             <div class="price">
@@ -759,6 +774,38 @@
                     start: "top 80%"
                 }
             });
+            
+            // DEBUG: Force all plan cards to be visible
+            console.log("🔍 DEBUG: Checking plan card visibility...");
+            const allPlanCards = document.querySelectorAll('.plan-card');
+            console.log(`Found ${allPlanCards.length} plan cards`);
+            
+            allPlanCards.forEach((card, index) => {
+                const rect = card.getBoundingClientRect();
+                const isVisible = rect.width > 0 && rect.height > 0;
+                console.log(`Plan card ${index + 1}:`, {
+                    visible: isVisible,
+                    width: rect.width,
+                    height: rect.height,
+                    top: rect.top,
+                    left: rect.left
+                });
+                
+                // Force visibility
+                card.style.display = 'block';
+                card.style.visibility = 'visible';
+                card.style.opacity = '1';
+                card.style.height = 'auto';
+                card.style.overflow = 'visible';
+            });
+            
+            // Force Row 2 to be visible
+            const row2 = document.querySelector('.plan-card:nth-child(3), .plan-card:nth-child(4)');
+            if (row2) {
+                row2.style.display = 'block';
+                row2.style.visibility = 'visible';
+                console.log("✅ Forced Row 2 visibility");
+            }
         }
 
         function selectPlan(planName) {
