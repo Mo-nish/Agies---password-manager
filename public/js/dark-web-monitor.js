@@ -232,6 +232,7 @@ class DarkWebMonitor {
                 
                 // Update progress
                 this.scanProgress = ((i + 1) / totalCredentials) * 100;
+                console.log(`📊 Scan progress: ${Math.round(this.scanProgress)}% (${i + 1}/${totalCredentials})`);
                 this.updateScanProgress();
                 
                 // Small delay to prevent overwhelming APIs
@@ -366,16 +367,39 @@ class DarkWebMonitor {
 
     // Update scan progress display
     updateScanProgress() {
-        const progressBar = document.getElementById('scan-progress');
-        if (progressBar) {
-            progressBar.style.width = `${this.scanProgress}%`;
-            progressBar.textContent = `${Math.round(this.scanProgress)}%`;
+        // Update progress percentage text
+        const progressText = document.getElementById('scan-progress');
+        if (progressText) {
+            progressText.textContent = `${Math.round(this.scanProgress)}%`;
         }
         
+        // Update progress bar width
+        const progressBar = document.getElementById('scan-bar');
+        if (progressBar) {
+            progressBar.style.width = `${this.scanProgress}%`;
+        }
+        
+        // Update scan status
         const statusElement = document.getElementById('scan-status');
         if (statusElement) {
             statusElement.textContent = this.scanStatus;
         }
+        
+        // Update scan message
+        const scanMessage = document.getElementById('scan-message');
+        if (scanMessage) {
+            if (this.isScanning) {
+                scanMessage.textContent = `Scanning... ${Math.round(this.scanProgress)}% complete`;
+            } else if (this.scanStatus === 'COMPLETED') {
+                scanMessage.textContent = 'Scan completed successfully';
+            } else if (this.scanStatus === 'STOPPED') {
+                scanMessage.textContent = 'Scan stopped by user';
+            } else {
+                scanMessage.textContent = 'Ready to scan';
+            }
+        }
+        
+        console.log(`📊 Progress updated: ${Math.round(this.scanProgress)}% - Status: ${this.scanStatus}`);
     }
 
     // Update last scan time display
