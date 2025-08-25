@@ -179,6 +179,151 @@ def get_db():
 # Initialize database
 init_db()
 
+# Database migration function
+def migrate_database():
+    conn = sqlite3.connect(DATABASE)
+    c = conn.cursor()
+    
+    try:
+        # Check if subscription columns exist in users table
+        c.execute("PRAGMA table_info(users)")
+        columns = [column[1] for column in c.fetchall()]
+        
+        # Add missing subscription columns if they don't exist
+        if 'subscription_plan' not in columns:
+            c.execute('ALTER TABLE users ADD COLUMN subscription_plan TEXT DEFAULT "free"')
+            print("Added subscription_plan column")
+            
+        if 'subscription_status' not in columns:
+            c.execute('ALTER TABLE users ADD COLUMN subscription_status TEXT DEFAULT "active"')
+            print("Added subscription_status column")
+            
+        if 'subscription_start_date' not in columns:
+            c.execute('ALTER TABLE users ADD COLUMN subscription_start_date TIMESTAMP')
+            print("Added subscription_start_date column")
+            
+        if 'subscription_end_date' not in columns:
+            c.execute('ALTER TABLE users ADD COLUMN subscription_end_date TIMESTAMP')
+            print("Added subscription_end_date column")
+            
+        if 'payment_provider' not in columns:
+            c.execute('ALTER TABLE users ADD COLUMN payment_provider TEXT')
+            print("Added payment_provider column")
+            
+        if 'payment_customer_id' not in columns:
+            c.execute('ALTER TABLE users ADD COLUMN payment_customer_id TEXT')
+            print("Added payment_customer_id column")
+        
+        # Check if subscriptions table exists
+        c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='subscriptions'")
+        if not c.fetchone():
+            c.execute('''
+                CREATE TABLE subscriptions (
+                    id TEXT PRIMARY KEY,
+                    user_id TEXT NOT NULL,
+                    plan_name TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    amount INTEGER NOT NULL,
+                    currency TEXT DEFAULT 'INR',
+                    payment_provider TEXT,
+                    payment_id TEXT,
+                    start_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    end_date TIMESTAMP,
+                    auto_renew BOOLEAN DEFAULT 1,
+                    FOREIGN KEY (user_id) REFERENCES users (id)
+                )
+            ''')
+            print("Created subscriptions table")
+        
+        # Check if payments table exists
+        c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='payments'")
+        if not c.fetchone():
+            c.execute('''
+                CREATE TABLE payments (
+                    id TEXT PRIMARY KEY,
+                    user_id TEXT NOT NULL,
+                    subscription_id TEXT,
+                    amount INTEGER NOT NULL,
+                    currency TEXT DEFAULT 'INR',
+                    payment_provider TEXT NOT NULL,
+                    payment_id TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    payment_method TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users (id),
+                    FOREIGN KEY (subscription_id) REFERENCES subscriptions (id)
+                )
+            ''')
+            print("Created payments table")
+        
+        conn.commit()
+        print("Database migration completed successfully")
+        
+    except Exception as e:
+        print(f"Migration error: {e}")
+        conn.rollback()
+    finally:
+        conn.close()
+
+# Check if user can add more passwords
+def can_add_password(user_id):
+    try:
+        conn = get_db()
+        c = conn.cursor()
+        
+        # Get user's plan
+        c.execute('SELECT subscription_plan FROM users WHERE id = ?', (user_id,))
+        user = c.fetchone()
+        
+        if not user:
+            return False
+            
+        plan = user['subscription_plan']
+        max_passwords = SUBSCRIPTION_PLANS[plan]['features']['max_passwords']
+        
+        # Count current passwords
+        c.execute('''
+            SELECT COUNT(*) as count FROM passwords p 
+            JOIN vaults v ON p.vault_id = v.id 
+            WHERE v.user_id = ?
+        ''', (user_id,))
+        
+        current_count = c.fetchone()['count']
+        conn.close()
+        
+        return current_count < max_passwords
+        
+    except Exception as e:
+        print(f"Error checking password limit: {e}")
+        return False
+
+# Check if user can add more vaults
+def can_add_vault(user_id):
+    try:
+        conn = get_db()
+        c = conn.cursor()
+        
+        # Get user's plan
+        c.execute('SELECT subscription_plan FROM users WHERE id = ?', (user_id,))
+        user = c.fetchone()
+        
+        if not user:
+            return False
+            
+        plan = user['subscription_plan']
+        max_vaults = SUBSCRIPTION_PLANS[plan]['features']['max_vaults']
+        
+        # Count current vaults
+        c.execute('SELECT COUNT(*) as count FROM vaults WHERE user_id = ?', (user_id,))
+        current_count = c.fetchone()['count']
+        conn.close()
+        
+        return current_count < max_vaults
+        
+    except Exception as e:
+        print(f"Error checking vault limit: {e}")
+        return False
+
 # Authentication middleware
 def require_auth(f):
     def decorated_function(*args, **kwargs):
@@ -977,6 +1122,15 @@ def serve_frontend(path):
     except Exception as e:
         return jsonify({"error": f"Error serving file: {str(e)}"}), 500
 
+# Manual database migration route
+@app.route('/api/admin/migrate', methods=['POST'])
+def admin_migrate():
+    try:
+        migrate_database()
+        return jsonify({"message": "Database migration completed successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": f"Migration failed: {str(e)}"}), 500
+
 # Get user subscription info
 @app.route('/api/user/subscription', methods=['GET'])
 @require_auth
@@ -1187,5 +1341,9 @@ def cancel_subscription():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
+    # Initialize database and run migrations
+    init_db()
+    migrate_database()
+    
     port = int(os.environ.get('PORT', 8000))
-    app.run(host='0.0.0.0', port=port, debug=False)
+    app.run(host='0.0.0.0', port=port, debug=True)
