@@ -45,9 +45,14 @@ class DarkWebMonitor {
     // Load user's actual credentials from the password manager
     async loadUserCredentials() {
         try {
+            console.log('🔍 Loading user credentials...');
+            
             // Try to get credentials from the main app's storage
             if (window.authService && window.authService.getPasswords) {
+                console.log('📱 Using authService.getPasswords()...');
                 const passwords = window.authService.getPasswords();
+                console.log('📊 Found passwords from authService:', passwords?.length || 0);
+                
                 this.credentials = passwords.map(pwd => ({
                     id: pwd.id,
                     domain: this.extractDomain(pwd.url),
@@ -61,10 +66,13 @@ class DarkWebMonitor {
                     url: pwd.url
                 }));
             } else {
+                console.log('📱 authService not available, trying localStorage...');
                 // Fallback: Get from localStorage
                 const storedPasswords = localStorage.getItem('agies_passwords');
                 if (storedPasswords) {
                     const passwords = JSON.parse(storedPasswords);
+                    console.log('📊 Found passwords from localStorage:', passwords?.length || 0);
+                    
                     this.credentials = passwords.map(pwd => ({
                         id: pwd.id || Date.now(),
                         domain: this.extractDomain(pwd.url),
@@ -77,15 +85,19 @@ class DarkWebMonitor {
                         title: pwd.title,
                         url: pwd.url
                     }));
+                } else {
+                    console.log('📱 No passwords found in localStorage');
                 }
             }
             
             this.totalCredentials = this.credentials.length;
             console.log(`📊 Loaded ${this.totalCredentials} real credentials for monitoring`);
+            console.log('📋 Credential details:', this.credentials.map(c => ({ email: c.email, domain: c.domain })));
             
         } catch (error) {
-            console.error('Error loading user credentials:', error);
+            console.error('❌ Error loading user credentials:', error);
             // Fallback to sample data for demonstration
+            console.log('🔄 Using fallback sample data...');
             this.credentials = [
                 {
                     id: 1,
@@ -97,6 +109,8 @@ class DarkWebMonitor {
                     autoRotation: true
                 }
             ];
+            this.totalCredentials = this.credentials.length;
+            console.log(`📊 Using ${this.totalCredentials} sample credentials`);
         }
     }
 
@@ -201,14 +215,27 @@ class DarkWebMonitor {
         
         console.log('🔍 Starting REAL breach scan...');
         console.log('📊 Initial scan status:', this.scanStatus, 'Progress:', this.scanProgress);
+        console.log('📋 Total credentials to scan:', this.credentials.length);
         
         // Update the display immediately
         this.updateScanProgress();
         
         const totalCredentials = this.credentials.length;
         
+        // Check if we have credentials to scan
+        if (totalCredentials === 0) {
+            console.log('⚠️ No credentials found to scan!');
+            this.scanStatus = 'NO_CREDENTIALS';
+            this.isScanning = false;
+            this.updateScanProgress();
+            return;
+        }
+        
+        console.log('🚀 Starting scan of', totalCredentials, 'credentials...');
+        
         for (let i = 0; i < totalCredentials; i++) {
             const credential = this.credentials[i];
+            console.log(`🔍 Scanning credential ${i + 1}/${totalCredentials}:`, credential.email);
             
             try {
                 // Check for breaches
@@ -255,8 +282,10 @@ class DarkWebMonitor {
         this.scanStatus = 'COMPLETED';
         this.lastScan = new Date();
         
+        console.log('🎯 Scan loop completed, updating displays...');
         this.updateCredentialDisplay();
         this.updateStats();
+        this.updateScanProgress(); // Final progress update
         
         console.log('✅ REAL breach scan completed');
     }
