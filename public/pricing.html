@@ -227,6 +227,7 @@
             margin: 0 !important;
             position: relative !important;
             z-index: 1 !important;
+            box-sizing: border-box !important;
         }
         
         /* Prevent overlapping */
@@ -251,6 +252,33 @@
             display: block !important;
             visibility: visible !important;
             opacity: 1 !important;
+        }
+        
+        /* ADDITIONAL OVERLAP PREVENTION */
+        .plan-card {
+            transform: none !important;
+            left: auto !important;
+            right: auto !important;
+            top: auto !important;
+            bottom: auto !important;
+        }
+        
+        /* Ensure each card container is separate */
+        .plan-card-container {
+            width: 320px !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            float: none !important;
+            clear: both !important;
+        }
+        
+        /* Force proper flexbox behavior */
+        .pricing-row {
+            display: flex !important;
+            justify-content: center !important;
+            gap: 4rem !important;
+            flex-wrap: wrap !important;
+            align-items: flex-start !important;
         }
         
         .payment-methods {
@@ -387,9 +415,9 @@
             <!-- Pricing Plans - CLEAN LAYOUT -->
             <div style="width: 100%; margin-bottom: 4rem;">
                 <!-- Row 1: Free and Pro Plans -->
-                <div style="display: flex; justify-content: center; gap: 3rem; margin-bottom: 3rem; flex-wrap: wrap;">
+                <div style="display: flex; justify-content: center; gap: 4rem; margin-bottom: 4rem; flex-wrap: wrap;">
                     <!-- Free Plan -->
-                    <div class="plan-card" style="width: 300px; flex-shrink: 0;">
+                    <div class="plan-card" style="width: 320px; flex-shrink: 0; margin: 0;">
                         <div class="text-center mb-6">
                             <h3 class="text-2xl font-bold mb-2">Free Plan</h3>
                             <div class="price">
@@ -416,7 +444,7 @@
                     </div>
 
                     <!-- Pro Plan -->
-                    <div class="plan-card popular" style="width: 300px; flex-shrink: 0;">
+                    <div class="plan-card popular" style="width: 320px; flex-shrink: 0; margin: 0;">
                         <div class="text-center mb-6">
                             <h3 class="text-2xl font-bold mb-2">Pro Plan</h3>
                             <div class="price">
@@ -444,71 +472,75 @@
                 </div>
 
                 <!-- VISUAL SEPARATOR -->
-                <div style="text-align: center; margin: 3rem 0; padding: 1.5rem; background: rgba(245, 158, 11, 0.2); border: 2px solid #F59E0B; border-radius: 15px;">
-                    <h3 style="color: #F59E0B; font-size: 1.5rem; font-weight: bold; margin-bottom: 0.5rem;">⬇️ PREMIUM & ENTERPRISE PLANS BELOW ⬇️</h3>
-                    <p style="color: #F59E0B; font-size: 1rem;">Scroll down to see Premium (₹599) and Enterprise (₹999) plans</p>
+                <div style="text-align: center; margin: 4rem 0; padding: 2rem; background: rgba(245, 158, 11, 0.2); border: 3px solid #F59E0B; border-radius: 20px;">
+                    <h3 style="color: #F59E0B; font-size: 1.8rem; font-weight: bold; margin-bottom: 1rem;">⬇️ PREMIUM & ENTERPRISE PLANS BELOW ⬇️</h3>
+                    <p style="color: #F59E0B; font-size: 1.2rem;">Scroll down to see Premium (₹599) and Enterprise (₹999) plans</p>
                 </div>
 
-                <!-- Row 2: Premium and Enterprise Plans -->
-                <div style="display: flex; justify-content: center; gap: 3rem; flex-wrap: wrap;">
-                    <!-- Premium Plan -->
-                    <div class="plan-card" style="width: 300px; flex-shrink: 0; border: 3px solid #10B981;">
-                        <div class="text-center mb-6">
-                            <h3 class="text-2xl font-bold mb-2">Premium Plan</h3>
-                            <div class="price">
-                                <span class="currency">₹</span>599
-                                <span class="period">/month</span>
+                <!-- Row 2: Premium and Enterprise Plans - SEPARATE CONTAINERS -->
+                <div style="display: flex; justify-content: center; gap: 4rem; flex-wrap: wrap;">
+                    <!-- Premium Plan - SEPARATE CONTAINER -->
+                    <div style="width: 320px; margin: 0; padding: 0;">
+                        <div class="plan-card" style="width: 100%; border: 3px solid #10B981; margin: 0;">
+                            <div class="text-center mb-6">
+                                <h3 class="text-2xl font-bold mb-2">Premium Plan</h3>
+                                <div class="price">
+                                    <span class="currency">₹</span>599
+                                    <span class="period">/month</span>
+                                </div>
+                                <p class="text-gray-400 mt-2">For power users</p>
                             </div>
-                            <p class="text-gray-400 mt-2">For power users</p>
+                            
+                            <ul class="feature-list mb-8">
+                                <li>Up to 10,000 passwords</li>
+                                <li>50 vaults</li>
+                                <li>Military-grade encryption</li>
+                                <li>Advanced password generator</li>
+                                <li>24/7 priority support</li>
+                                <li>Dark web monitoring</li>
+                                <li>AI security</li>
+                                <li>Team sharing</li>
+                                <li>Advanced analytics</li>
+                                <li>Custom themes</li>
+                            </ul>
+                            
+                            <button onclick="selectPlan('premium')" class="w-full btn-premium py-3 rounded-lg text-white font-semibold">
+                                Choose Premium
+                            </button>
                         </div>
-                        
-                        <ul class="feature-list mb-8">
-                            <li>Up to 10,000 passwords</li>
-                            <li>50 vaults</li>
-                            <li>Military-grade encryption</li>
-                            <li>Advanced password generator</li>
-                            <li>24/7 priority support</li>
-                            <li>Dark web monitoring</li>
-                            <li>AI security</li>
-                            <li>Team sharing</li>
-                            <li>Advanced analytics</li>
-                            <li>Custom themes</li>
-                        </ul>
-                        
-                        <button onclick="selectPlan('premium')" class="w-full btn-premium py-3 rounded-lg text-white font-semibold">
-                            Choose Premium
-                        </button>
                     </div>
 
-                    <!-- Enterprise Plan -->
-                    <div class="plan-card" style="width: 300px; flex-shrink: 0; border: 3px solid #F59E0B;">
-                        <div class="text-center mb-6">
-                            <h3 class="text-2xl font-bold mb-2">Enterprise</h3>
-                            <div class="price">
-                                <span class="currency">₹</span>999
-                                <span class="period">/month</span>
+                    <!-- Enterprise Plan - SEPARATE CONTAINER -->
+                    <div style="width: 320px; margin: 0; padding: 0;">
+                        <div class="plan-card" style="width: 100%; border: 3px solid #F59E0B; margin: 0;">
+                            <div class="text-center mb-6">
+                                <h3 class="text-2xl font-bold mb-2">Enterprise</h3>
+                                <div class="price">
+                                    <span class="currency">₹</span>999
+                                    <span class="period">/month</span>
+                                </div>
+                                <p class="text-gray-400 mt-2">For teams & businesses</p>
                             </div>
-                            <p class="text-gray-400 mt-2">For teams & businesses</p>
-                        </div>
 
-                        <ul class="feature-list mb-8">
-                            <li>Up to 100,000 passwords</li>
-                            <li>100 vaults</li>
-                            <li>Quantum encryption</li>
-                            <li>Enterprise password generator</li>
-                            <li>Dedicated support</li>
-                            <li>Dark web monitoring</li>
-                            <li>AI security</li>
-                            <li>Team sharing</li>
-                            <li>Advanced analytics</li>
-                            <li>Custom themes</li>
-                            <li>SSO integration</li>
-                            <li>API access</li>
-                        </ul>
-                        
-                        <button onclick="selectPlan('enterprise')" class="w-full btn-enterprise py-3 rounded-lg text-white font-semibold">
-                            Choose Enterprise
-                        </button>
+                            <ul class="feature-list mb-8">
+                                <li>Up to 100,000 passwords</li>
+                                <li>100 vaults</li>
+                                <li>Quantum encryption</li>
+                                <li>Enterprise password generator</li>
+                                <li>Dedicated support</li>
+                                <li>Dark web monitoring</li>
+                                <li>AI security</li>
+                                <li>Team sharing</li>
+                                <li>Advanced analytics</li>
+                                <li>Custom themes</li>
+                                <li>SSO integration</li>
+                                <li>API access</li>
+                            </ul>
+                            
+                            <button onclick="selectPlan('enterprise')" class="w-full btn-enterprise py-3 rounded-lg text-white font-semibold">
+                                Choose Enterprise
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -767,15 +799,43 @@
             }
         }
 
+        // Load user subscription data
         async function loadUserSubscription() {
             try {
-                const response = await fetch('/api/user/subscription', {
-                    headers: window.authService.getAuthHeaders()
+                const token = localStorage.getItem('authToken');
+                if (!token) {
+                    console.log('No auth token found');
+                    return;
+                }
+
+                const response = await fetch('/api/user/subscription-plan', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
                 });
-                
+
                 if (response.ok) {
-                    const subscription = await response.json();
-                    updatePlanBadge(subscription.plan);
+                    const data = await response.json();
+                    console.log('User subscription data:', data);
+                    
+                    // Update UI based on subscription
+                    if (data.subscription_plan && data.subscription_plan !== 'free') {
+                        // User has a paid plan
+                        document.querySelectorAll('.plan-card').forEach(card => {
+                            const planType = card.querySelector('button')?.getAttribute('onclick')?.match(/selectPlan\('(\w+)'\)/)?.[1];
+                            if (planType && planType === data.subscription_plan) {
+                                const button = card.querySelector('button');
+                                button.textContent = 'Current Plan';
+                                button.disabled = true;
+                                button.classList.remove('btn-premium', 'btn-enterprise');
+                                button.classList.add('btn-primary');
+                            }
+                        });
+                    }
+                } else {
+                    console.log('Failed to load subscription data:', response.status);
                 }
             } catch (error) {
                 console.error('Error loading subscription:', error);
