@@ -309,14 +309,14 @@ class LoginManager {
 
         try {
             // Use real API instead of simulation
-            const result = await this.loginAPI(email, password);
+            const result = await window.authService.login(email, password);
             
             // Show success message
             this.showSuccess('Login successful! Redirecting to dashboard...');
             
             // Redirect to dashboard after a short delay
             setTimeout(() => {
-                this.redirectToDashboard();
+                window.location.href = '/dashboard';
             }, 1500);
             
         } catch (error) {
@@ -343,7 +343,7 @@ class LoginManager {
 
         try {
             // Use real API instead of simulation
-            const result = await this.signupAPI(formData);
+            const result = await window.authService.register(formData.email, formData.password);
             
             // Show success message
             this.showSuccess('Account created successfully! Please log in.');
@@ -378,7 +378,7 @@ class LoginManager {
 
         try {
             // Use real API instead of simulation
-            const result = await this.forgotPasswordAPI(email);
+            const result = await window.authService.forgotPasswordAPI(email);
             
             // Show success message
             this.showSuccess('Password reset link sent to your email!');

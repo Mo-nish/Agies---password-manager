@@ -676,14 +676,30 @@ def serve_frontend(path):
         return jsonify({"error": "API endpoint not found"}), 404
     
     # Skip specific routes we've already defined
-    if path in ['', 'login', 'dashboard', 'maze', 'index.html']:
+    if path in ['', 'login', 'dashboard', 'maze', 'security', 'vaults', 'index.html']:
         return jsonify({"error": "Route not found"}), 404
     
     # Serve static files from public directory
     try:
-        return send_from_directory('public', path)
-    except FileNotFoundError:
-        return jsonify({"error": "File not found"}), 404
+        # Check if file exists in public directory
+        possible_paths = [
+            'public',
+            '../public', 
+            './public',
+            os.path.join(os.getcwd(), 'public'),
+            os.path.join(os.path.dirname(__file__), '..', 'public')
+        ]
+        
+        for base_path in possible_paths:
+            file_path = os.path.join(base_path, path)
+            if os.path.exists(file_path) and os.path.isfile(file_path):
+                return send_from_directory(base_path, path)
+        
+        # If file not found, return 404
+        return jsonify({"error": f"File not found: {path}"}), 404
+        
+    except Exception as e:
+        return jsonify({"error": f"Error serving file: {str(e)}"}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8000))

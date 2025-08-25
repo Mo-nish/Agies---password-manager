@@ -3,244 +3,326 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vault Management - Padhma Vyuham</title>
+    <title>Vaults - Maze Password Manager</title>
+    
+    <!-- External Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <!-- Custom CSS -->
     <style>
-        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+            color: #F8FAFC;
+            min-height: 100vh;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #6366F1, #8B5CF6, #06B6D4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #6366F1, #8B5CF6);
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+        }
+        
+        .navbar {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .vault-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s ease;
+            border-radius: 16px;
+            padding: 2rem;
+        }
+        
+        .vault-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
     </style>
 </head>
-<body class="bg-gray-900 text-white min-h-screen">
-    <!-- Header -->
-    <header class="gradient-bg p-6">
-        <div class="flex items-center justify-between">
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar fixed top-0 left-0 right-0 z-50 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
             <div class="flex items-center space-x-4">
-                <div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center">
-                    <span class="text-2xl">🛡️</span>
+                <div class="text-3xl">🔐</div>
+                <div>
+                    <h1 class="text-2xl font-bold gradient-text">Maze Password Manager</h1>
+                    <p class="text-sm text-gray-300">Chakravyuham Vault</p>
                 </div>
-                <h1 class="text-3xl font-bold text-white">Padhma Vyuham</h1>
             </div>
-            <nav class="flex items-center space-x-6">
-                <a href="/dashboard" class="text-white hover:text-purple-200 transition-colors">Dashboard</a>
-                <a href="/vaults" class="text-purple-200 font-semibold">Vaults</a>
-                <a href="/security" class="text-white hover:text-purple-200 transition-colors">Security</a>
-                <button id="logout-btn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-colors">
-                    Sign Out
-                </button>
-            </nav>
+            
+            <div class="flex items-center space-x-6">
+                <a href="/dashboard" class="text-gray-300 hover:text-white transition-colors">Dashboard</a>
+                <a href="/maze" class="text-gray-300 hover:text-white transition-colors">Maze Vault</a>
+                <a href="/security" class="text-gray-300 hover:text-white transition-colors">Security</a>
+                <a href="/vaults" class="text-white hover:text-blue-300 transition-colors">Vaults</a>
+                
+                <div class="flex items-center space-x-4">
+                    <span id="user-email" class="text-gray-300"></span>
+                    <button id="logout-btn" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-full text-white transition-colors">
+                        Logout
+                    </button>
+                </div>
+            </div>
         </div>
-    </header>
+    </nav>
 
     <!-- Main Content -->
-    <main class="container mx-auto px-6 py-8">
-        <!-- Page Header -->
-        <div class="flex items-center justify-between mb-8">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                    <span class="text-xl">🔐</span>
-                </div>
-                <h2 class="text-2xl font-bold">Vault Management</h2>
-            </div>
-            <a href="/dashboard" class="text-blue-400 hover:text-blue-300 transition-colors flex items-center space-x-2">
-                <span>←</span>
-                <span>Back to Dashboard</span>
-            </a>
-        </div>
-
-        <!-- Your Secure Vaults Banner -->
-        <div class="bg-blue-600 rounded-xl p-8 mb-8">
-            <div class="flex items-center space-x-4">
-                <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                    <span class="text-3xl">🔐</span>
-                </div>
+    <div class="pt-24 pb-12 px-6">
+        <div class="max-w-7xl mx-auto">
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-12">
                 <div>
-                    <h3 class="text-2xl font-bold text-white">Your Secure Vaults</h3>
-                    <p class="text-blue-100">Organize and manage your passwords with military-grade security.</p>
+                    <h1 class="text-5xl font-bold mb-4 gradient-text">Your Vaults</h1>
+                    <p class="text-xl text-gray-300">Organize and secure your passwords</p>
                 </div>
-            </div>
-        </div>
-
-        <!-- Your Vaults Section -->
-        <div class="mb-8">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-xl font-semibold">Your Vaults</h3>
-                <button id="create-vault-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors">
+                
+                <button id="create-vault-btn" class="btn-primary px-8 py-4 rounded-full text-white text-lg font-semibold">
                     + Create New Vault
                 </button>
             </div>
-            
-            <div id="vaults-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Vault cards will be loaded here -->
-            </div>
-        </div>
 
-        <!-- Passwords Section -->
-        <div id="passwords-section" class="hidden">
-            <div class="flex items-center justify-between mb-6">
-                <h3 id="passwords-title" class="text-xl font-semibold">Passwords in <span id="current-vault-name">Personal Vault</span></h3>
-                <div class="flex space-x-3">
-                    <button id="add-password-btn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
-                        + Add Password
-                    </button>
-                    <button id="import-passwords-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
-                        📥 Import
-                    </button>
-                </div>
+            <!-- Vaults Grid -->
+            <div id="vaults-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Vaults will be loaded here -->
             </div>
-            <div id="passwords-container" class="space-y-4">
-                <!-- Passwords will be loaded here -->
+
+            <!-- Empty State -->
+            <div id="empty-state" class="text-center py-16 hidden">
+                <div class="text-8xl mb-6">🔐</div>
+                <h2 class="text-3xl font-bold mb-4">No Vaults Yet</h2>
+                <p class="text-xl text-gray-300 mb-8">Create your first vault to start organizing passwords</p>
+                <button onclick="createVault()" class="btn-primary px-8 py-4 rounded-full text-white text-lg font-semibold">
+                    Create Your First Vault
+                </button>
             </div>
         </div>
-    </main>
+    </div>
 
     <!-- Create Vault Modal -->
-    <div id="create-vault-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-gray-800 rounded-xl p-8 w-full max-w-md mx-4">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-xl font-semibold text-white">Create New Vault</h3>
-                <button id="close-create-modal" class="text-gray-400 hover:text-white transition-colors">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
-            <form id="create-vault-form" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-2">Vault Name</label>
-                    <input type="text" id="vault-name" required
-                           class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., Personal Vault, Work Vault">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-2">Description (Optional)</label>
-                    <textarea id="vault-description" rows="3"
-                              class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              placeholder="Describe what this vault is for..."></textarea>
-                </div>
-                <div class="flex space-x-3 pt-4">
-                    <button type="submit" 
-                            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
-                        Create Vault
-                    </button>
-                    <button type="button" id="cancel-create-vault"
-                            class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
-                        Cancel
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Add Password Modal -->
-    <div id="add-password-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-gray-800 rounded-xl p-8 w-full max-w-md mx-4">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-xl font-semibold text-white">Add New Password</h3>
-                <button id="close-password-modal" class="text-gray-400 hover:text-white transition-colors">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
-            <form id="add-password-form" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-2">Title</label>
-                    <input type="text" id="password-title" required
-                           class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., Gmail, Facebook, Bank Account">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-2">Username/Email</label>
-                    <input type="text" id="password-username" required
-                           class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="your.email@example.com">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
-                    <div class="relative">
-                        <input type="password" id="password-value" required
-                               class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                               placeholder="Enter your password">
-                        <button type="button" id="toggle-password" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white">
-                            👁️
+    <div id="create-vault-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="glass-card rounded-2xl p-8 max-w-md w-full">
+                <h2 class="text-2xl font-bold mb-6">Create New Vault</h2>
+                
+                <form id="create-vault-form" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Vault Name</label>
+                        <input type="text" id="vault-name" class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500" placeholder="e.g., Personal, Work, Finance" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Description (Optional)</label>
+                        <textarea id="vault-description" class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500" placeholder="Describe what this vault contains" rows="3"></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Icon</label>
+                        <select id="vault-icon" class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-blue-500">
+                            <option value="🔐">🔐 Default</option>
+                            <option value="💼">💼 Work</option>
+                            <option value="🏠">🏠 Personal</option>
+                            <option value="💳">💳 Finance</option>
+                            <option value="🎮">🎮 Gaming</option>
+                            <option value="🛒">🛒 Shopping</option>
+                            <option value="📧">📧 Email</option>
+                            <option value="🌐">🌐 Social</option>
+                        </select>
+                    </div>
+                    
+                    <div class="flex space-x-4 pt-4">
+                        <button type="button" onclick="closeCreateVaultModal()" class="flex-1 px-4 py-3 border border-white/20 rounded-lg text-white hover:bg-white/10 transition-colors">
+                            Cancel
+                        </button>
+                        <button type="submit" class="flex-1 btn-primary px-4 py-3 rounded-lg text-white">
+                            Create Vault
                         </button>
                     </div>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-2">Website URL (Optional)</label>
-                    <input type="url" id="password-url"
-                           class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="https://example.com">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-2">Notes (Optional)</label>
-                    <textarea id="password-notes" rows="3"
-                              class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              placeholder="Additional information..."></textarea>
-                </div>
-                <div class="flex space-x-3 pt-4">
-                    <button type="submit" 
-                            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
-                        Add Password
-                    </button>
-                    <button type="button" id="cancel-add-password"
-                            class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
-                        Cancel
-                    </button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
 
-    <!-- Import Modal -->
-    <div id="import-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-gray-800 rounded-xl p-8 w-full max-w-md mx-4">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-xl font-semibold text-white">Import Passwords</h3>
-                <button id="close-import-modal" class="text-gray-400 hover:text-white transition-colors">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
-            <div class="space-y-4">
-                <div>
-                    <h4 class="text-lg font-medium text-white mb-3">Choose Import Method</h4>
-                    <div class="space-y-3">
-                        <button id="import-chrome-btn" 
-                                class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg transition-colors text-left">
-                            <span class="text-lg mr-3">🌐</span>
-                            Import from Chrome
-                        </button>
-                        <button id="import-csv-btn" 
-                                class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg transition-colors text-left">
-                            <span class="text-lg mr-3">📄</span>
-                            Import from CSV File
-                        </button>
-                        <button id="manual-import-btn" 
-                                class="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-lg transition-colors text-left">
-                            <span class="text-lg mr-3">✏️</span>
-                            Add Manually
-                        </button>
+    <!-- Scripts -->
+    <script src="js/auth-service.js"></script>
+    <script>
+        // Vaults functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check authentication
+            if (!window.authService || !window.authService.isAuthenticated()) {
+                window.location.href = '/login';
+                return;
+            }
+
+            // Display user info
+            const user = window.authService.getCurrentUser();
+            document.getElementById('user-email').textContent = user.email;
+
+            // Setup logout button
+            document.getElementById('logout-btn').addEventListener('click', async function() {
+                await window.authService.logout();
+                window.location.href = '/';
+            });
+
+            // Setup create vault button
+            document.getElementById('create-vault-btn').addEventListener('click', showCreateVaultModal);
+
+            // Setup create vault form
+            document.getElementById('create-vault-form').addEventListener('submit', handleCreateVault);
+
+            // Load vaults
+            loadVaults();
+        });
+
+        // Show create vault modal
+        function showCreateVaultModal() {
+            document.getElementById('create-vault-modal').classList.remove('hidden');
+        }
+
+        // Close create vault modal
+        function closeCreateVaultModal() {
+            document.getElementById('create-vault-modal').classList.add('hidden');
+            document.getElementById('create-vault-form').reset();
+        }
+
+        // Handle create vault form submission
+        async function handleCreateVault(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('vault-name').value;
+            const description = document.getElementById('vault-description').value;
+            const icon = document.getElementById('vault-icon').value;
+            
+            if (!name.trim()) {
+                alert('Please enter a vault name');
+                return;
+            }
+            
+            try {
+                const result = await window.authService.createVault(name, description, icon);
+                alert('Vault created successfully!');
+                closeCreateVaultModal();
+                loadVaults(); // Reload vaults
+            } catch (error) {
+                alert('Error creating vault: ' + error.message);
+            }
+        }
+
+        // Load user vaults
+        async function loadVaults() {
+            try {
+                const vaults = await window.authService.getVaults();
+                displayVaults(vaults);
+            } catch (error) {
+                console.error('Error loading vaults:', error);
+                showEmptyState();
+            }
+        }
+
+        // Display vaults in the grid
+        function displayVaults(vaults) {
+            const container = document.getElementById('vaults-container');
+            const emptyState = document.getElementById('empty-state');
+            
+            if (!vaults || vaults.length === 0) {
+                container.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            
+            container.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+            
+            container.innerHTML = vaults.map(vault => `
+                <div class="vault-card">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="text-4xl">${vault.icon}</div>
+                        <div class="flex space-x-2">
+                            <button onclick="editVault('${vault.id}')" class="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-white text-sm">
+                                Edit
+                            </button>
+                            <button onclick="deleteVault('${vault.id}')" class="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-white text-sm">
+                                Delete
+                            </button>
+                        </div>
                     </div>
-                </div>
-                <div class="pt-4">
-                    <button type="button" id="cancel-import"
-                            class="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
-                        Cancel
+                    
+                    <h3 class="text-xl font-semibold mb-2">${vault.name}</h3>
+                    <p class="text-gray-300 mb-4">${vault.description || 'No description'}</p>
+                    
+                    <div class="flex items-center justify-between text-sm text-gray-400">
+                        <span>${vault.password_count || 0} passwords</span>
+                        <span>Created ${new Date(vault.created_at).toLocaleDateString()}</span>
+                    </div>
+                    
+                    <button onclick="openVault('${vault.id}')" class="w-full mt-4 btn-primary px-4 py-2 rounded-lg text-white">
+                        Open Vault
                     </button>
                 </div>
-            </div>
-        </div>
-    </div>
+            `).join('');
+        }
 
-    <!-- Hidden file input for CSV import -->
-    <input type="file" id="csv-file-input" accept=".csv,.json" class="hidden">
+        // Show empty state
+        function showEmptyState() {
+            document.getElementById('vaults-container').classList.add('hidden');
+            document.getElementById('empty-state').classList.remove('hidden');
+        }
 
-    <!-- Loading Spinner -->
-    <div id="loading" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-    </div>
+        // Open vault (placeholder)
+        function openVault(vaultId) {
+            alert('Opening vault: ' + vaultId + '\n\nThis feature will be implemented next!');
+        }
 
-    <!-- Note: Vault management is now integrated into the main dashboard -->
+        // Edit vault (placeholder)
+        function editVault(vaultId) {
+            alert('Edit vault: ' + vaultId + '\n\nThis feature will be implemented next!');
+        }
+
+        // Delete vault (placeholder)
+        function deleteVault(vaultId) {
+            if (confirm('Are you sure you want to delete this vault? This action cannot be undone.')) {
+                alert('Delete vault: ' + vaultId + '\n\nThis feature will be implemented next!');
+            }
+        }
+
+        // Global create vault function
+        function createVault() {
+            showCreateVaultModal();
+        }
+    </script>
 </body>
 </html>

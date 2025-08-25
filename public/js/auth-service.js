@@ -1,9 +1,8 @@
-// 🔐 Authentication Service - Maze Password Manager
+// 🔐 Simple Authentication Service - Maze Password Manager
 // Handles user authentication, session management, and API calls
 
 class AuthService {
     constructor() {
-        this.baseURL = '';
         this.user = null;
         this.token = null;
         this.init();
@@ -12,23 +11,25 @@ class AuthService {
     init() {
         // Load user data from localStorage
         this.loadUserData();
-        
-        // Check if user is authenticated
-        if (this.isAuthenticated()) {
-            this.user = {
-                id: localStorage.getItem('user_id'),
-                email: localStorage.getItem('user_email')
-            };
-        }
+        console.log('🔐 Auth Service initialized');
     }
 
     // Load user data from localStorage
     loadUserData() {
-        this.token = localStorage.getItem('auth_token');
-        this.user = {
-            id: localStorage.getItem('user_id'),
-            email: localStorage.getItem('user_email')
-        };
+        try {
+            this.token = localStorage.getItem('auth_token');
+            const userId = localStorage.getItem('user_id');
+            const userEmail = localStorage.getItem('user_email');
+            
+            if (this.token && userId && userEmail) {
+                this.user = { id: userId, email: userEmail };
+                console.log('✅ User data loaded from localStorage');
+            } else {
+                console.log('ℹ️ No stored user data found');
+            }
+        } catch (error) {
+            console.error('Error loading user data:', error);
+        }
     }
 
     // Check if user is authenticated
@@ -58,6 +59,8 @@ class AuthService {
     // User registration
     async register(email, password) {
         try {
+            console.log('📝 Registering user:', email);
+            
             const response = await fetch('/api/auth/register', {
                 method: 'POST',
                 headers: {
@@ -72,9 +75,10 @@ class AuthService {
             }
 
             const data = await response.json();
+            console.log('✅ Registration successful');
             return data;
         } catch (error) {
-            console.error('Registration error:', error);
+            console.error('❌ Registration error:', error);
             throw error;
         }
     }
@@ -82,6 +86,8 @@ class AuthService {
     // User login
     async login(email, password) {
         try {
+            console.log('🔓 Logging in user:', email);
+            
             const response = await fetch('/api/auth/login', {
                 method: 'POST',
                 headers: {
@@ -99,10 +105,11 @@ class AuthService {
             
             // Store user data
             this.storeUserData(data.user_id, data.token, email);
+            console.log('✅ Login successful');
             
             return data;
         } catch (error) {
-            console.error('Login error:', error);
+            console.error('❌ Login error:', error);
             throw error;
         }
     }
@@ -110,6 +117,8 @@ class AuthService {
     // User logout
     async logout() {
         try {
+            console.log('🚪 Logging out user');
+            
             // Call logout API
             await fetch('/api/auth/logout', {
                 method: 'POST',
@@ -120,29 +129,42 @@ class AuthService {
         } finally {
             // Clear local data
             this.clearUserData();
+            console.log('✅ Logout completed');
         }
     }
 
     // Store user data in localStorage
     storeUserData(userId, token, email) {
-        localStorage.setItem('user_id', userId);
-        localStorage.setItem('auth_token', token);
-        localStorage.setItem('user_email', email);
-        
-        // Update current state
-        this.user = { id: userId, email };
-        this.token = token;
+        try {
+            localStorage.setItem('user_id', userId);
+            localStorage.setItem('auth_token', token);
+            localStorage.setItem('user_email', email);
+            
+            // Update current state
+            this.user = { id: userId, email };
+            this.token = token;
+            
+            console.log('💾 User data stored');
+        } catch (error) {
+            console.error('Error storing user data:', error);
+        }
     }
 
     // Clear user data
     clearUserData() {
-        localStorage.removeItem('user_id');
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('user_email');
-        
-        // Clear current state
-        this.user = null;
-        this.token = null;
+        try {
+            localStorage.removeItem('user_id');
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('user_email');
+            
+            // Clear current state
+            this.user = null;
+            this.token = null;
+            
+            console.log('🗑️ User data cleared');
+        } catch (error) {
+            console.error('Error clearing user data:', error);
+        }
     }
 
     // Get user profile
@@ -245,10 +267,46 @@ class AuthService {
     canAccessPage() {
         return this.isAuthenticated();
     }
+
+    // Forgot password API
+    async forgotPasswordAPI(email) {
+        try {
+            // For now, simulate success (implement real password reset later)
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            return { success: true, message: 'Reset link sent' };
+        } catch (error) {
+            console.error('Forgot password API error:', error);
+            throw error;
+        }
+    }
+
+    // Test API connection
+    async testConnection() {
+        try {
+            const response = await fetch('/api/health');
+            if (response.ok) {
+                console.log('✅ Backend connection successful');
+                return true;
+            } else {
+                console.error('❌ Backend connection failed');
+                return false;
+            }
+        } catch (error) {
+            console.error('❌ Backend connection error:', error);
+            return false;
+        }
+    }
 }
 
-// Create global instance
+// Create global instance immediately
 window.authService = new AuthService();
+
+// Test connection on load
+window.addEventListener('DOMContentLoaded', () => {
+    if (window.authService) {
+        window.authService.testConnection();
+    }
+});
 
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {
