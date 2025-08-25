@@ -427,18 +427,33 @@
 
         function setupEventListeners() {
             // Logout button
-            document.getElementById('logout-btn').addEventListener('click', async function() {
-                await window.authService.logout();
-                window.location.href = '/';
-            });
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', async function() {
+                    await window.authService.logout();
+                    window.location.href = '/';
+                });
+            } else {
+                console.warn('⚠️ logout-btn element not found');
+            }
 
             // Upgrade button
-            document.getElementById('upgrade-btn').addEventListener('click', function() {
-                window.location.href = '/pricing';
-            });
+            const upgradeBtn = document.getElementById('upgrade-btn');
+            if (upgradeBtn) {
+                upgradeBtn.addEventListener('click', function() {
+                    window.location.href = '/pricing';
+                });
+            } else {
+                console.warn('⚠️ upgrade-btn element not found');
+            }
 
             // Create vault form
-            document.getElementById('create-vault-form').addEventListener('submit', handleCreateVault);
+            const createVaultForm = document.getElementById('create-vault-form');
+            if (createVaultForm) {
+                createVaultForm.addEventListener('submit', handleCreateVault);
+            } else {
+                console.warn('⚠️ create-vault-form element not found');
+            }
         }
 
         async function loadUserData() {
@@ -486,20 +501,37 @@
         function updateSubscriptionUI() {
             if (!userSubscription) return;
             
-            document.getElementById('current-plan').textContent = userSubscription.plan_name;
-            document.getElementById('plan-badge').textContent = userSubscription.plan_name;
+            const currentPlan = document.getElementById('current-plan');
+            if (currentPlan) {
+                currentPlan.textContent = userSubscription.plan_name;
+            }
+            
+            const planBadge = document.getElementById('plan-badge');
+            if (planBadge) {
+                planBadge.textContent = userSubscription.plan_name;
+            }
             
             // Update usage stats
             const maxPasswords = userSubscription.features.max_passwords;
             const maxVaults = userSubscription.features.max_vaults;
             
             // For now, show current usage (you'd get this from actual data)
-            document.getElementById('password-usage').textContent = `0/${maxPasswords}`;
-            document.getElementById('vault-usage').textContent = `${userVaults.length}/${maxVaults}`;
+            const passwordUsage = document.getElementById('password-usage');
+            if (passwordUsage) {
+                passwordUsage.textContent = `0/${maxPasswords}`;
+            }
+            
+            const vaultUsage = document.getElementById('vault-usage');
+            if (vaultUsage) {
+                vaultUsage.textContent = `${userVaults.length}/${maxVaults}`;
+            }
             
             // Count enabled security features
             const enabledFeatures = Object.values(userSubscription.features).filter(f => f === true).length;
-            document.getElementById('security-features').textContent = `${enabledFeatures}/6`;
+            const securityFeatures = document.getElementById('security-features');
+            if (securityFeatures) {
+                securityFeatures.textContent = `${enabledFeatures}/6`;
+            }
         }
 
         function updateFeatureAccess() {
@@ -509,24 +541,39 @@
             
             // Update feature access based on subscription
             if (features.dark_web_monitoring) {
-                document.getElementById('feature-dark-web').classList.remove('feature-locked');
+                const darkWebFeature = document.getElementById('feature-dark-web');
+                if (darkWebFeature) {
+                    darkWebFeature.classList.remove('feature-locked');
+                }
             }
             
             if (features.ai_security) {
-                document.getElementById('feature-ai').classList.remove('feature-locked');
+                const aiFeature = document.getElementById('feature-ai');
+                if (aiFeature) {
+                    aiFeature.classList.remove('feature-locked');
+                }
             }
             
             if (features.advanced_analytics) {
-                document.getElementById('feature-analytics').classList.remove('feature-locked');
+                const analyticsFeature = document.getElementById('feature-analytics');
+                if (analyticsFeature) {
+                    analyticsFeature.classList.remove('feature-locked');
+                }
             }
             
             if (features.team_sharing) {
-                document.getElementById('feature-team').classList.remove('feature-locked');
+                const teamFeature = document.getElementById('feature-team');
+                if (teamFeature) {
+                    teamFeature.classList.remove('feature-locked');
+                }
             }
             
             // Show upgrade prompt if on free plan
             if (userSubscription.plan === 'free') {
-                document.getElementById('upgrade-prompt').classList.remove('hidden');
+                const upgradePrompt = document.getElementById('upgrade-prompt');
+                if (upgradePrompt) {
+                    upgradePrompt.classList.remove('hidden');
+                }
             }
         }
 
