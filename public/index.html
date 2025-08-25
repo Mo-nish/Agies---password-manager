@@ -346,9 +346,61 @@
             visibility: visible !important;
             opacity: 1 !important;
         }
+
+        /* CRITICAL FALLBACK - Ensure content is visible even if JavaScript fails */
+        .hero-section,
+        .hero-section *,
+        .navbar,
+        .navbar *,
+        button,
+        .btn-primary,
+        .btn-google,
+        .feature-card,
+        .cta-section {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            transform: none !important;
+        }
+        
+        /* Force specific display types */
+        .flex { display: flex !important; }
+        .grid { display: grid !important; }
+        .inline-block { display: inline-block !important; }
+        
+        /* Ensure buttons are clickable */
+        button {
+            pointer-events: auto !important;
+            cursor: pointer !important;
+        }
+        
+        /* Override any GSAP transforms that might hide content */
+        .gsap-marker-start,
+        .gsap-marker-end {
+            display: none !important;
+        }
+        
+        /* Force all text to be visible */
+        h1, h2, h3, h4, h5, h6, p, span, div {
+            color: inherit !important;
+            background: inherit !important;
+        }
     </style>
 </head>
 <body>
+    <!-- NoScript Fallback - Critical content visible even without JavaScript -->
+    <noscript>
+        <style>
+            .hero-section, .navbar, button, .btn-primary { 
+                display: block !important; 
+                visibility: visible !important; 
+                opacity: 1 !important; 
+            }
+            .flex { display: flex !important; }
+            .grid { display: grid !important; }
+        </style>
+    </noscript>
+    
     <!-- Animated Maze Background -->
     <div class="fixed inset-0 overflow-hidden">
         <div class="maze-layer top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
@@ -677,6 +729,35 @@
     </footer>
 
     <script>
+        // CRITICAL FALLBACK - Ensure all content is visible even if GSAP fails
+        document.addEventListener('DOMContentLoaded', function() {
+            // Force all critical elements to be visible
+            const criticalElements = document.querySelectorAll('.hero-section, .navbar, button, .btn-primary, .btn-google, .feature-card');
+            criticalElements.forEach(el => {
+                el.style.display = 'block';
+                el.style.visibility = 'visible';
+                el.style.opacity = '1';
+                el.style.transform = 'none';
+            });
+            
+            // Force flex and grid elements
+            const flexElements = document.querySelectorAll('.flex');
+            flexElements.forEach(el => el.style.display = 'flex');
+            
+            const gridElements = document.querySelectorAll('.grid');
+            gridElements.forEach(el => el.style.display = 'grid');
+            
+            // Force buttons to be clickable
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(btn => {
+                btn.style.display = 'inline-block';
+                btn.style.visibility = 'visible';
+                btn.style.opacity = '1';
+                btn.style.pointerEvents = 'auto';
+                btn.style.cursor = 'pointer';
+            });
+        });
+        
         // GSAP Animations
         gsap.registerPlugin(TextPlugin, MotionPathPlugin, ScrollTrigger);
         
