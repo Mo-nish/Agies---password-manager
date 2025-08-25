@@ -522,7 +522,7 @@ class DarkWebMonitor {
             alert.breaches.map(b => `${b.Name} (${b.BreachDate}) - ${b.DataClasses?.join(', ')}`).join('\n') :
             alert.details;
         
-        alert(`Breach Details:\n\n${details}`);
+        window.alert(`Breach Details:\n\n${details}`);
     }
 
     // Take action on breach
@@ -530,7 +530,7 @@ class DarkWebMonitor {
         const alert = this.breachAlerts.find(a => a.id === alertId);
         if (!alert) return;
         
-        const action = prompt(`Choose action for ${alert.title}:\n1. Rotate Password\n2. Lock Account\n3. Mark as Resolved\n4. Investigate Further`);
+        const action = window.prompt(`Choose action for ${alert.title}:\n1. Rotate Password\n2. Lock Account\n3. Mark as Resolved\n4. Investigate Further`);
         
         switch(action) {
             case '1':
@@ -555,13 +555,13 @@ class DarkWebMonitor {
         const credential = this.credentials.find(c => c.domain === alert.affectedCredentials[0]);
         if (credential) {
             await this.triggerAutoRotation(credential);
-            alert('Password rotated successfully!');
+            window.alert('Password rotated successfully!');
         }
     }
 
     // Lock account for breach
     lockAccountForBreach(alert) {
-        alert(`Account ${alert.affectedCredentials[0]} has been locked for security. Please verify your identity to unlock.`);
+        window.alert(`Account ${alert.affectedCredentials[0]} has been locked for security. Please verify your identity to unlock.`);
     }
 
     // Resolve breach
@@ -569,7 +569,7 @@ class DarkWebMonitor {
         alert.status = 'resolved';
         alert.action = 'resolved';
         this.updateBreachAlertsDisplay();
-        alert('Breach marked as resolved.');
+        window.alert('Breach marked as resolved.');
     }
 
     // Investigate breach
@@ -577,7 +577,7 @@ class DarkWebMonitor {
         alert.status = 'investigating';
         alert.action = 'investigating';
         this.updateBreachAlertsDisplay();
-        alert('Breach investigation started.');
+        window.alert('Breach investigation started.');
     }
 
     // Emergency lockdown
@@ -596,7 +596,7 @@ class DarkWebMonitor {
                 'System'
             );
             
-            alert('🚨 EMERGENCY LOCKDOWN ACTIVATED! All accounts are now locked.');
+            window.alert('🚨 EMERGENCY LOCKDOWN ACTIVATED! All accounts are now locked.');
         }
     }
 
@@ -620,7 +620,7 @@ class DarkWebMonitor {
         a.click();
         URL.revokeObjectURL(url);
         
-        alert('Breach report exported successfully!');
+        window.alert('Breach report exported successfully!');
     }
 
     // Scan specific email
@@ -628,7 +628,7 @@ class DarkWebMonitor {
         const email = prompt('Enter email address to scan:');
         if (!email) return;
         
-        alert(`🔍 Scanning ${email} for breaches...\n\nThis will check:\n• HaveIBeenPwned database\n• Dark web marketplaces\n• Paste sites and forums\n• Recent breach reports`);
+        window.alert(`🔍 Scanning ${email} for breaches...\n\nThis will check:\n• HaveIBeenPwned database\n• Dark web marketplaces\n• Paste sites and forums\n• Recent breach reports`);
         
         // Simulate email scan
         setTimeout(async () => {
@@ -638,9 +638,9 @@ class DarkWebMonitor {
                     { domain: email.split('@')[1], email: email },
                     breaches
                 );
-                alert(`🚨 BREACH DETECTED for ${email}!\n\nImmediate action required. Password rotation recommended.`);
+                window.alert(`🚨 BREACH DETECTED for ${email}!\n\nImmediate action required. Password rotation recommended.`);
             } else {
-                alert(`✅ No breaches found for ${email}\n\nAccount appears to be secure.`);
+                window.alert(`✅ No breaches found for ${email}\n\nAccount appears to be secure.`);
             }
         }, 2000);
     }
@@ -650,7 +650,7 @@ class DarkWebMonitor {
         const domain = prompt('Enter domain to scan (e.g., example.com):');
         if (!domain) return;
         
-        alert(`🌐 Scanning ${domain} for security issues...\n\nThis will check:\n• Domain reputation\n• Known breaches\n• Security vulnerabilities\n• Compromised accounts`);
+        window.alert(`🌐 Scanning ${domain} for security issues...\n\nThis will check:\n• Domain reputation\n• Known breaches\n• Security vulnerabilities\n• Compromised accounts`);
         
         // Simulate domain scan
         setTimeout(() => {
@@ -660,9 +660,9 @@ class DarkWebMonitor {
                     { domain: domain, email: `user@${domain}` },
                     [{ Name: `${domain} Security Issues`, BreachDate: new Date().toISOString().split('T')[0], DataClasses: ['Email addresses'] }]
                 );
-                alert(`⚠️ Security issues found for ${domain}\n\n${issues} compromised account(s) detected.`);
+                window.alert(`⚠️ Security issues found for ${domain}\n\n${issues} compromised account(s) detected.`);
             } else {
-                alert(`✅ No security issues found for ${domain}\n\nDomain appears to be secure.`);
+                window.alert(`✅ No security issues found for ${domain}\n\nDomain appears to be secure.`);
             }
         }, 3000);
     }
@@ -679,13 +679,13 @@ class DarkWebMonitor {
             `${scan.date}: ${scan.type} - ${scan.breaches} breaches found (${scan.status})`
         ).join('\n');
         
-        alert(`📋 Scan History:\n\n${historyText}`);
+        window.alert(`📋 Scan History:\n\n${historyText}`);
     }
 
     // Enable auto-rotation
     enableAutoRotation() {
         this.autoRotationEnabled = true;
-        alert('🔄 Auto-rotation enabled!\n\nPasswords will now be automatically rotated when breaches are detected.');
+        window.alert('🔄 Auto-rotation enabled!\n\nPasswords will now be automatically rotated when breaches are detected.');
         
         // Update toggle switch
         const toggle = document.getElementById('auto-rotation-toggle');
@@ -832,7 +832,7 @@ class DarkWebMonitor {
                 this.updateCredentialDisplay();
                 this.updateStats();
                 
-                alert(`✅ Password rotated successfully for ${credential.domain}!\n\nNew password has been generated and stored securely.`);
+                window.alert(`✅ Password rotated successfully for ${credential.domain}!\n\nNew password has been generated and stored securely.`);
             }, 2000);
         }
     }
@@ -850,7 +850,7 @@ class DarkWebMonitor {
         );
         
         if (affectedCredentials.length > 0) {
-            alert(`🔄 AUTO-ROTATION TRIGGERED!\n\nRotating passwords for ${affectedCredentials.length} affected account(s)...`);
+            window.alert(`🔄 AUTO-ROTATION TRIGGERED!\n\nRotating passwords for ${affectedCredentials.length} affected account(s)...`);
             
             // Rotate passwords
             for (const credential of affectedCredentials) {
@@ -865,7 +865,7 @@ class DarkWebMonitor {
             this.updateCredentialDisplay();
             this.updateStats();
             
-            alert(`✅ Auto-rotation completed!\n\n${affectedCredentials.length} password(s) rotated successfully.`);
+            window.alert(`✅ Auto-rotation completed!\n\n${affectedCredentials.length} password(s) rotated successfully.`);
         }
     }
 
@@ -900,7 +900,7 @@ class DarkWebMonitor {
 // Global functions for button interactions
 function startScan() {
     if (window.darkWebMonitor) {
-        window.darkWebMonitor.startScan();
+        window.darkWebMonitor.startRealScan();
     }
 }
 

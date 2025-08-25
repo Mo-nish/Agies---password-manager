@@ -2191,31 +2191,48 @@ def cancel_subscription():
 @require_auth
 def check_breach():
     try:
+        print("🔍 CHECK_BREACH: Request received")
         user_id = request.headers.get('X-User-ID')
+        print(f"🔍 CHECK_BREACH: User ID: {user_id}")
+        
         if not user_id:
+            print("❌ CHECK_BREACH: No user_id in headers")
             return jsonify({"error": "Authentication required"}), 401
         
         data = request.get_json()
+        print(f"🔍 CHECK_BREACH: Request data: {data}")
+        
+        if not data:
+            print("❌ CHECK_BREACH: No JSON data received")
+            return jsonify({"error": "No data received"}), 400
+        
         email = data.get('email')
+        print(f"🔍 CHECK_BREACH: Email: {email}")
         
         if not email:
+            print("❌ CHECK_BREACH: No email in data")
             return jsonify({"error": "Email required"}), 400
         
         # HaveIBeenPwned API endpoint
         hibp_url = f"https://haveibeenpwned.com/api/v3/breachedaccount/{email}"
+        print(f"🔍 CHECK_BREACH: Calling HIBP API: {hibp_url}")
         
         # Headers required by HaveIBeenPwned API
         headers = {
             'User-Agent': 'MazePasswordManager/1.0',
             'hibp-api-key': os.environ.get('HIBP_API_KEY', '')  # Optional API key
         }
+        print(f"🔍 CHECK_BREACH: Headers: {headers}")
         
         try:
+            print("🔍 CHECK_BREACH: Making request to HIBP...")
             # Make request to HaveIBeenPwned
             response = requests.get(hibp_url, headers=headers, timeout=10)
+            print(f"🔍 CHECK_BREACH: HIBP response status: {response.status_code}")
             
             if response.status_code == 200:
                 breaches = response.json()
+                print(f"✅ CHECK_BREACH: Found {len(breaches)} breaches")
                 return jsonify({
                     "email": email,
                     "breaches": breaches,
@@ -2223,6 +2240,7 @@ def check_breach():
                 }), 200
             elif response.status_code == 404:
                 # No breaches found
+                print("✅ CHECK_BREACH: No breaches found")
                 return jsonify({
                     "email": email,
                     "breaches": [],
@@ -2230,6 +2248,7 @@ def check_breach():
                 }), 200
             else:
                 # API error
+                print(f"⚠️ CHECK_BREACH: HIBP API error: {response.status_code}")
                 return jsonify({
                     "error": f"HaveIBeenPwned API error: {response.status_code}",
                     "email": email,
@@ -2237,8 +2256,10 @@ def check_breach():
                 }), 500
                 
         except requests.exceptions.RequestException as e:
+            print(f"⚠️ CHECK_BREACH: HIBP API request failed: {str(e)}")
             # Fallback to simulated data if API fails
             simulated_breaches = simulate_breach_data(email)
+            print(f"🔄 CHECK_BREACH: Using simulated data: {len(simulated_breaches)} breaches")
             return jsonify({
                 "email": email,
                 "breaches": simulated_breaches,
@@ -2247,6 +2268,9 @@ def check_breach():
             }), 200
             
     except Exception as e:
+        print(f"❌ CHECK_BREACH: Exception occurred: {str(e)}")
+        import traceback
+        print(f"❌ CHECK_BREACH: Traceback: {traceback.format_exc()}")
         return jsonify({"error": str(e)}), 500
 
 def simulate_breach_data(email):
