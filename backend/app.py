@@ -12,7 +12,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Database setup
-DATABASE = 'agies.db'
+DATABASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'agies.db')
 
 # Subscription plans and features
 SUBSCRIPTION_PLANS = {
@@ -84,118 +84,133 @@ SUBSCRIPTION_PLANS = {
 }
 
 def init_db():
-    conn = sqlite3.connect(DATABASE)
-    c = conn.cursor()
-    
-    # Create users table with subscription info
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS users (
-            id TEXT PRIMARY KEY,
-            email TEXT UNIQUE NOT NULL,
-            password_hash TEXT NOT NULL,
-            subscription_plan TEXT DEFAULT 'free',
-            subscription_status TEXT DEFAULT 'active',
-            subscription_start_date TIMESTAMP,
-            subscription_end_date TIMESTAMP,
-            payment_provider TEXT,
-            payment_customer_id TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            last_login TIMESTAMP
-        )
-    ''')
-    
-    # Create vaults table
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS vaults (
-            id TEXT PRIMARY KEY,
-            user_id TEXT NOT NULL,
-            name TEXT NOT NULL,
-            description TEXT,
-            icon TEXT DEFAULT '🔐',
-            password_count INTEGER DEFAULT 0,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users (id)
-        )
-    ''')
-    
-    # Create passwords table
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS passwords (
-            id TEXT PRIMARY KEY,
-            vault_id TEXT NOT NULL,
-            title TEXT NOT NULL,
-            username TEXT NOT NULL,
-            password TEXT NOT NULL,
-            url TEXT,
-            notes TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (vault_id) REFERENCES vaults (id)
-        )
-    ''')
-    
-    # Create subscriptions table
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS subscriptions (
-            id TEXT PRIMARY KEY,
-            user_id TEXT NOT NULL,
-            plan_name TEXT NOT NULL,
-            status TEXT NOT NULL,
-            amount INTEGER NOT NULL,
-            currency TEXT DEFAULT 'INR',
-            payment_provider TEXT,
-            payment_id TEXT,
-            start_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            end_date TIMESTAMP,
-            auto_renew BOOLEAN DEFAULT 1,
-            FOREIGN KEY (user_id) REFERENCES users (id)
-        )
-    ''')
-    
-    # Create payments table
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS payments (
-            id TEXT PRIMARY KEY,
-            user_id TEXT NOT NULL,
-            subscription_id TEXT,
-            amount INTEGER NOT NULL,
-            currency TEXT DEFAULT 'INR',
-            payment_provider TEXT NOT NULL,
-            payment_id TEXT NOT NULL,
-            status TEXT NOT NULL,
-            payment_method TEXT,
-            upi_transaction_id TEXT,
-            payment_screenshot TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users (id),
-            FOREIGN KEY (subscription_id) REFERENCES subscriptions (id)
-        )
-    ''')
-    
-    # Create admin notifications table
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS admin_notifications (
-            id TEXT PRIMARY KEY,
-            type TEXT NOT NULL,
-            user_id TEXT NOT NULL,
-            payment_id TEXT,
-            message TEXT NOT NULL,
-            status TEXT DEFAULT 'pending',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users (id),
-            FOREIGN KEY (payment_id) REFERENCES payments (id)
-        )
-    ''')
-    
-    conn.commit()
-    conn.close()
+    try:
+        print(f"🔍 Initializing database at: {DATABASE}")
+        conn = sqlite3.connect(DATABASE)
+        c = conn.cursor()
+        
+        # Create users table with subscription info
+        c.execute('''
+            CREATE TABLE IF NOT EXISTS users (
+                id TEXT PRIMARY KEY,
+                email TEXT UNIQUE NOT NULL,
+                password_hash TEXT NOT NULL,
+                subscription_plan TEXT DEFAULT 'free',
+                subscription_status TEXT DEFAULT 'active',
+                subscription_start_date TIMESTAMP,
+                subscription_end_date TIMESTAMP,
+                payment_provider TEXT,
+                payment_customer_id TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                last_login TIMESTAMP
+            )
+        ''')
+        
+        # Create vaults table
+        c.execute('''
+            CREATE TABLE IF NOT EXISTS vaults (
+                id TEXT PRIMARY KEY,
+                user_id TEXT NOT NULL,
+                name TEXT NOT NULL,
+                description TEXT,
+                icon TEXT DEFAULT '🔐',
+                password_count INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users (id)
+            )
+        ''')
+        
+        # Create passwords table
+        c.execute('''
+            CREATE TABLE IF NOT EXISTS passwords (
+                id TEXT PRIMARY KEY,
+                vault_id TEXT NOT NULL,
+                title TEXT NOT NULL,
+                username TEXT NOT NULL,
+                password TEXT NOT NULL,
+                url TEXT,
+                notes TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (vault_id) REFERENCES vaults (id)
+            )
+        ''')
+        
+        # Create subscriptions table
+        c.execute('''
+            CREATE TABLE IF NOT EXISTS subscriptions (
+                id TEXT PRIMARY KEY,
+                user_id TEXT NOT NULL,
+                plan_name TEXT NOT NULL,
+                status TEXT NOT NULL,
+                amount INTEGER NOT NULL,
+                currency TEXT DEFAULT 'INR',
+                payment_provider TEXT,
+                payment_id TEXT,
+                start_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                end_date TIMESTAMP,
+                auto_renew BOOLEAN DEFAULT 1,
+                FOREIGN KEY (user_id) REFERENCES users (id)
+            )
+        ''')
+        
+        # Create payments table
+        c.execute('''
+            CREATE TABLE IF NOT EXISTS payments (
+                id TEXT PRIMARY KEY,
+                user_id TEXT NOT NULL,
+                subscription_id TEXT,
+                amount INTEGER NOT NULL,
+                currency TEXT DEFAULT 'INR',
+                payment_provider TEXT NOT NULL,
+                payment_id TEXT NOT NULL,
+                status TEXT NOT NULL,
+                payment_method TEXT,
+                upi_transaction_id TEXT,
+                payment_screenshot TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users (id),
+                FOREIGN KEY (subscription_id) REFERENCES subscriptions (id)
+            )
+        ''')
+        
+        # Create admin notifications table
+        c.execute('''
+            CREATE TABLE IF NOT EXISTS admin_notifications (
+                id TEXT PRIMARY KEY,
+                type TEXT NOT NULL,
+                user_id TEXT NOT NULL,
+                payment_id TEXT,
+                message TEXT NOT NULL,
+                status TEXT DEFAULT 'pending',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users (id),
+                FOREIGN KEY (payment_id) REFERENCES payments (id)
+            )
+        ''')
+        
+        conn.commit()
+        print("✅ Database tables checked/created successfully.")
+    except sqlite3.OperationalError as e:
+        print(f"❌ Database error during initialization: {e}")
+        print("Please ensure the directory has write permissions and the file does not exist.")
+        print("If it exists, you might need to delete it to re-initialize.")
+    except Exception as e:
+        print(f"❌ Unexpected error during database initialization: {e}")
+    finally:
+        if 'conn' in locals() and conn:
+            conn.close()
 
 def get_db():
     """Get database connection with row factory set to return dictionaries"""
-    conn = sqlite3.connect(DATABASE)
-    conn.row_factory = sqlite3.Row  # This will allow us to access columns by name
-    return conn
+    try:
+        conn = sqlite3.connect(DATABASE)
+        conn.row_factory = sqlite3.Row  # This will allow us to access columns by name
+        return conn
+    except sqlite3.OperationalError as e:
+        print(f"❌ Database connection error: {e}")
+        return None
 
 # Initialize database tables
 init_db()
@@ -325,6 +340,9 @@ print("✅ Ready to accept real user registrations and subscriptions")
 def get_user_subscription_plan(user_id):
     try:
         conn = get_db()
+        if not conn:
+            print("Database connection failed, defaulting to free plan.")
+            return 'free'
         c = conn.cursor()
         
         c.execute('SELECT subscription_plan FROM users WHERE id = ?', (user_id,))
@@ -347,6 +365,9 @@ def can_add_password(user_id):
         max_passwords = SUBSCRIPTION_PLANS[plan]['features']['max_passwords']
         
         conn = get_db()
+        if not conn:
+            print("Database connection failed, allowing password.")
+            return True
         c = conn.cursor()
         
         # Count current passwords
@@ -375,6 +396,9 @@ def can_add_vault(user_id):
         max_vaults = SUBSCRIPTION_PLANS[plan]['features']['max_vaults']
         
         conn = get_db()
+        if not conn:
+            print("Database connection failed, allowing vault.")
+            return True
         c = conn.cursor()
         
         # Count current vaults
@@ -580,6 +604,8 @@ def vaults():
 def debug_user_data(user_id):
     try:
         conn = get_db()
+        if not conn:
+            return jsonify({"error": "Database connection failed"}), 500
         c = conn.cursor()
         
         # Get user info
@@ -644,6 +670,12 @@ def health_check():
     try:
         # Test database connection
         conn = get_db()
+        if not conn:
+            return jsonify({
+                "status": "unhealthy",
+                "error": "Database connection failed",
+                "timestamp": datetime.now().isoformat()
+            }), 500
         c = conn.cursor()
         c.execute('SELECT 1')
         conn.close()
@@ -677,6 +709,8 @@ def register():
         # Create user
         user_id = str(uuid.uuid4())
         conn = get_db()
+        if not conn:
+            return jsonify({"error": "Database connection failed during registration"}), 500
         c = conn.cursor()
         
         # Check if user exists
@@ -718,6 +752,8 @@ def login_api():
             return jsonify({"error": "Email and password required"}), 400
         
         conn = get_db()
+        if not conn:
+            return jsonify({"error": "Database connection failed during login"}), 500
         c = conn.cursor()
         
         # Get user with subscription info
@@ -835,6 +871,8 @@ def get_profile():
             return jsonify({"error": "Authentication required"}), 401
         
         conn = get_db()
+        if not conn:
+            return jsonify({"error": "Database connection failed"}), 500
         c = conn.cursor()
         
         c.execute('SELECT id, email, created_at FROM users WHERE id = ?', (user_id,))
@@ -863,6 +901,8 @@ def get_vaults():
             return jsonify({"error": "Authentication required"}), 401
         
         conn = get_db()
+        if not conn:
+            return jsonify({"error": "Database connection failed"}), 500
         c = conn.cursor()
         
         c.execute('SELECT * FROM vaults WHERE user_id = ?', (user_id,))
@@ -913,6 +953,8 @@ def create_vault():
         
         vault_id = str(uuid.uuid4())
         conn = get_db()
+        if not conn:
+            return jsonify({"error": "Database connection failed"}), 500
         c = conn.cursor()
         
         c.execute('INSERT INTO vaults (id, user_id, name, description, icon) VALUES (?, ?, ?, ?, ?)',
@@ -939,6 +981,8 @@ def get_passwords(vault_id):
             return jsonify({"error": "Authentication required"}), 401
         
         conn = get_db()
+        if not conn:
+            return jsonify({"error": "Database connection failed"}), 500
         c = conn.cursor()
         
         # Verify vault belongs to user
@@ -999,6 +1043,8 @@ def add_password(vault_id):
             return jsonify({"error": "Title, username, and password are required"}), 400
         
         conn = get_db()
+        if not conn:
+            return jsonify({"error": "Database connection failed"}), 500
         c = conn.cursor()
         
         # Verify vault belongs to user
@@ -1048,6 +1094,8 @@ def update_password(password_id):
             return jsonify({"error": "Title, username, and password are required"}), 400
         
         conn = get_db()
+        if not conn:
+            return jsonify({"error": "Database connection failed"}), 500
         c = conn.cursor()
         
         # Verify password belongs to user's vault
@@ -1086,6 +1134,8 @@ def delete_password(password_id):
             return jsonify({"error": "Authentication required"}), 401
         
         conn = get_db()
+        if not conn:
+            return jsonify({"error": "Database connection failed"}), 500
         c = conn.cursor()
         
         # Get vault_id before deleting
@@ -1129,6 +1179,8 @@ def get_vault(vault_id):
     try:
         user_id = request.headers.get('X-User-ID')
         db = get_db()
+        if not db:
+            return jsonify({"error": "Database connection failed"}), 500
         
         vault = db.execute(
             'SELECT * FROM vaults WHERE id = ? AND user_id = ?',
@@ -1155,6 +1207,8 @@ def update_vault(vault_id):
             return jsonify({"error": "Vault name is required"}), 400
             
         db = get_db()
+        if not db:
+            return jsonify({"error": "Database connection failed"}), 500
         
         # Check if vault exists and belongs to user
         vault = db.execute(
@@ -1187,6 +1241,8 @@ def delete_vault(vault_id):
     try:
         user_id = request.headers.get('X-User-ID')
         db = get_db()
+        if not db:
+            return jsonify({"error": "Database connection failed"}), 500
         
         # Check if vault exists and belongs to user
         vault = db.execute(
@@ -1224,6 +1280,8 @@ def search_passwords():
             return jsonify({"error": "Search query required"}), 400
         
         conn = get_db()
+        if not conn:
+            return jsonify({"error": "Database connection failed"}), 500
         c = conn.cursor()
         
         # Search passwords in user's vaults
@@ -1300,6 +1358,8 @@ def serve_frontend(path):
 def test_subscription():
     try:
         conn = get_db()
+        if not conn:
+            return jsonify({"error": "Database connection failed during test"}), 500
         c = conn.cursor()
         
         # Get user count
@@ -1407,6 +1467,8 @@ def create_upi_order():
         
         # Create payment order
         conn = get_db()
+        if not conn:
+            return jsonify({"error": "Database connection failed"}), 500
         c = conn.cursor()
         
         # Insert payment order
@@ -1463,6 +1525,8 @@ def verify_upi_payment():
             return jsonify({"error": "Order ID and UPI transaction ID required"}), 400
         
         conn = get_db()
+        if not conn:
+            return jsonify({"error": "Database connection failed"}), 500
         c = conn.cursor()
         
         # Get payment order
@@ -1527,6 +1591,8 @@ def admin_verify_payment(payment_id):
             return jsonify({"error": "Invalid admin key"}), 401
         
         conn = get_db()
+        if not conn:
+            return jsonify({"error": "Database connection failed"}), 500
         c = conn.cursor()
         
         # Get payment details
@@ -1572,6 +1638,8 @@ def admin_reject_payment(payment_id):
             return jsonify({"error": "Invalid admin key"}), 401
         
         conn = get_db()
+        if not conn:
+            return jsonify({"error": "Database connection failed"}), 500
         c = conn.cursor()
         
         # Get payment details
@@ -1602,6 +1670,8 @@ def admin_reject_payment(payment_id):
 def admin_pending_payments():
     try:
         conn = get_db()
+        if not conn:
+            return jsonify({"error": "Database connection failed"}), 500
         c = conn.cursor()
         
         c.execute('''
@@ -1624,6 +1694,8 @@ def admin_pending_payments():
 def admin_statistics():
     try:
         conn = get_db()
+        if not conn:
+            return jsonify({"error": "Database connection failed"}), 500
         c = conn.cursor()
         
         # Get total users
@@ -1674,6 +1746,8 @@ def admin_statistics():
 def admin_get_users():
     try:
         conn = get_db()
+        if not conn:
+            return jsonify({"error": "Database connection failed"}), 500
         c = conn.cursor()
         
         c.execute('''
@@ -1694,6 +1768,8 @@ def admin_get_users():
 def admin_recent_activity():
     try:
         conn = get_db()
+        if not conn:
+            return jsonify({"error": "Database connection failed"}), 500
         c = conn.cursor()
         
         c.execute('''
@@ -1717,6 +1793,8 @@ def admin_recent_activity():
 def get_user_details(user_id):
     try:
         conn = get_db()
+        if not conn:
+            return jsonify({"error": "Database connection failed"}), 500
         c = conn.cursor()
         
         # Get user details
@@ -1805,6 +1883,8 @@ def get_user_subscription():
             return jsonify({"error": "Authentication required"}), 401
         
         conn = get_db()
+        if not conn:
+            return jsonify({"error": "Database connection failed"}), 500
         c = conn.cursor()
         
         c.execute('''
@@ -1928,6 +2008,8 @@ def confirm_payment():
         plan = SUBSCRIPTION_PLANS[plan_name]
         
         conn = get_db()
+        if not conn:
+            return jsonify({"error": "Database connection failed"}), 500
         c = conn.cursor()
         
         # Update user subscription
@@ -1976,6 +2058,8 @@ def cancel_subscription():
             return jsonify({"error": "Authentication required"}), 401
         
         conn = get_db()
+        if not conn:
+            return jsonify({"error": "Database connection failed"}), 500
         c = conn.cursor()
         
         # Update user subscription to free
@@ -2005,10 +2089,24 @@ def cancel_subscription():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
-    # Initialize database and run migrations
-    init_db()
-    migrate_database()
-    
-    port = int(os.environ.get('PORT', 8000))
-    debug_mode = os.environ.get('FLASK_ENV') == 'development'
-    app.run(host='0.0.0.0', port=port, debug=debug_mode)
+    try:
+        print("🚀 Starting Maze Password Manager...")
+        print(f"🔍 Working directory: {os.getcwd()}")
+        print(f"🔍 Database path: {DATABASE}")
+        
+        # Initialize database and run migrations
+        print("🔧 Initializing database...")
+        init_db()
+        print("🔧 Running database migrations...")
+        migrate_database()
+        
+        port = int(os.environ.get('PORT', 8000))
+        debug_mode = os.environ.get('FLASK_ENV') == 'development'
+        print(f"🌐 Starting Flask app on port {port}, debug={debug_mode}")
+        
+        app.run(host='0.0.0.0', port=port, debug=debug_mode)
+    except Exception as e:
+        print(f"❌ Failed to start Maze Password Manager: {e}")
+        import traceback
+        traceback.print_exc()
+        exit(1)

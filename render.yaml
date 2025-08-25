@@ -4,10 +4,14 @@ services:
     env: python
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app
+    startCommand: gunicorn --config gunicorn.conf.py app:app
     envVars:
       - key: PYTHON_VERSION
         value: 3.9.16
+      - key: FLASK_ENV
+        value: production
+      - key: PYTHONPATH
+        value: ./backend
     staticPublishPath: ./public
     routes:
       - type: rewrite
