@@ -281,6 +281,41 @@
             align-items: flex-start !important;
         }
         
+        /* VERTICAL LAYOUT FOR PREMIUM & ENTERPRISE - NO OVERLAP */
+        .premium-enterprise-container {
+            width: 100% !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            gap: 3rem !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        
+        .premium-enterprise-container .plan-card {
+            width: 100% !important;
+            max-width: 800px !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            float: none !important;
+            clear: both !important;
+            position: relative !important;
+            z-index: 1 !important;
+        }
+        
+        /* Ensure no content disturbance */
+        .plan-card + .plan-card {
+            margin-top: 3rem !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+        }
+        
+        /* Force proper page flow */
+        .pricing-section {
+            margin-bottom: 6rem !important;
+            overflow: visible !important;
+        }
+        
         .payment-methods {
             display: flex;
             gap: 1rem;
@@ -477,11 +512,11 @@
                     <p style="color: #F59E0B; font-size: 1.2rem;">Scroll down to see Premium (₹599) and Enterprise (₹999) plans</p>
                 </div>
 
-                <!-- Row 2: Premium and Enterprise Plans - SEPARATE CONTAINERS -->
-                <div style="display: flex; justify-content: center; gap: 4rem; flex-wrap: wrap;">
-                    <!-- Premium Plan - SEPARATE CONTAINER -->
-                    <div style="width: 320px; margin: 0; padding: 0;">
-                        <div class="plan-card" style="width: 100%; border: 3px solid #10B981; margin: 0;">
+                <!-- Row 2: Premium and Enterprise Plans - VERTICAL LAYOUT TO PREVENT OVERLAP -->
+                <div class="premium-enterprise-container" style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 3rem;">
+                    <!-- Premium Plan - FULL WIDTH CONTAINER -->
+                    <div style="width: 100%; max-width: 800px; margin: 0; padding: 0;">
+                        <div class="plan-card" style="width: 100%; border: 3px solid #10B981; margin: 0; background: rgba(16, 185, 129, 0.05);">
                             <div class="text-center mb-6">
                                 <h3 class="text-2xl font-bold mb-2">Premium Plan</h3>
                                 <div class="price">
@@ -510,9 +545,9 @@
                         </div>
                     </div>
 
-                    <!-- Enterprise Plan - SEPARATE CONTAINER -->
-                    <div style="width: 320px; margin: 0; padding: 0;">
-                        <div class="plan-card" style="width: 100%; border: 3px solid #F59E0B; margin: 0;">
+                    <!-- Enterprise Plan - FULL WIDTH CONTAINER -->
+                    <div style="width: 100%; max-width: 800px; margin: 0; padding: 0;">
+                        <div class="plan-card" style="width: 100%; border: 3px solid #F59E0B; margin: 0; background: rgba(245, 158, 11, 0.05);">
                             <div class="text-center mb-6">
                                 <h3 class="text-2xl font-bold mb-2">Enterprise</h3>
                                 <div class="price">
