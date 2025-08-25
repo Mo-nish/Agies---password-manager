@@ -7,7 +7,7 @@ import uuid
 from datetime import datetime
 import bcrypt
 
-app = Flask(__name__, static_folder='../public', static_url_path='')
+app = Flask(__name__)
 CORS(app)
 
 # Database setup
@@ -68,17 +68,22 @@ def get_db():
 # Initialize database
 init_db()
 
+# Main routes for the application
 @app.route('/')
 def home():
-    return send_from_directory('../public', 'maze-password-manager.html')
+    return send_from_directory('public', 'index.html')
 
 @app.route('/login')
 def login():
-    return send_from_directory('../public', 'login.html')
+    return send_from_directory('public', 'login.html')
+
+@app.route('/dashboard')
+def dashboard():
+    return send_from_directory('public', 'maze-password-manager.html')
 
 @app.route('/maze')
 def maze():
-    return send_from_directory('../public', 'maze-password-manager.html')
+    return send_from_directory('public', 'maze-password-manager.html')
 
 @app.route('/api/health')
 def health():
@@ -510,12 +515,12 @@ def serve_frontend(path):
         return jsonify({"error": "API endpoint not found"}), 404
     
     # Skip specific routes we've already defined
-    if path in ['', 'login', 'maze', 'index.html']:
+    if path in ['', 'login', 'dashboard', 'maze', 'index.html']:
         return jsonify({"error": "Route not found"}), 404
     
     # Serve static files from public directory
     try:
-        return send_from_directory('../public', path)
+        return send_from_directory('public', path)
     except FileNotFoundError:
         return jsonify({"error": "File not found"}), 404
 
