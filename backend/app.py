@@ -72,30 +72,92 @@ init_db()
 @app.route('/')
 def home():
     try:
-        return send_from_directory('public', 'index.html')
+        # Try multiple possible paths for the public directory
+        possible_paths = [
+            'public',
+            '../public', 
+            './public',
+            os.path.join(os.getcwd(), 'public'),
+            os.path.join(os.path.dirname(__file__), '..', 'public')
+        ]
+        
+        for path in possible_paths:
+            if os.path.exists(os.path.join(path, 'index.html')):
+                return send_from_directory(path, 'index.html')
+        
+        # If no path works, return debug info
+        return jsonify({
+            "error": "index.html not found",
+            "possible_paths": possible_paths,
+            "current_dir": os.getcwd(),
+            "files_in_current": os.listdir('.') if os.path.exists('.') else []
+        }), 404
+        
     except Exception as e:
-        return f"Error serving home page: {str(e)}", 500
+        return jsonify({"error": f"Error serving home page: {str(e)}"}), 500
 
 @app.route('/login')
 def login():
     try:
-        return send_from_directory('public', 'login.html')
+        # Try multiple possible paths for the public directory
+        possible_paths = [
+            'public',
+            '../public', 
+            './public',
+            os.path.join(os.getcwd(), 'public'),
+            os.path.join(os.path.dirname(__file__), '..', 'public')
+        ]
+        
+        for path in possible_paths:
+            if os.path.exists(os.path.join(path, 'login.html')):
+                return send_from_directory(path, 'login.html')
+        
+        return jsonify({"error": "login.html not found"}), 404
+        
     except Exception as e:
-        return f"Error serving login page: {str(e)}", 500
+        return jsonify({"error": f"Error serving login page: {str(e)}"}), 500
 
 @app.route('/dashboard')
 def dashboard():
     try:
-        return send_from_directory('public', 'maze-password-manager.html')
+        # Try multiple possible paths for the public directory
+        possible_paths = [
+            'public',
+            '../public', 
+            './public',
+            os.path.join(os.getcwd(), 'public'),
+            os.path.join(os.path.dirname(__file__), '..', 'public')
+        ]
+        
+        for path in possible_paths:
+            if os.path.exists(os.path.join(path, 'maze-password-manager.html')):
+                return send_from_directory(path, 'maze-password-manager.html')
+        
+        return jsonify({"error": "maze-password-manager.html not found"}), 404
+        
     except Exception as e:
-        return f"Error serving dashboard: {str(e)}", 500
+        return jsonify({"error": f"Error serving dashboard: {str(e)}"}), 500
 
 @app.route('/maze')
 def maze():
     try:
-        return send_from_directory('public', 'maze-password-manager.html')
+        # Try multiple possible paths for the public directory
+        possible_paths = [
+            'public',
+            '../public', 
+            './public',
+            os.path.join(os.getcwd(), 'public'),
+            os.path.join(os.path.dirname(__file__), '..', 'public')
+        ]
+        
+        for path in possible_paths:
+            if os.path.exists(os.path.join(path, 'maze-password-manager.html')):
+                return send_from_directory(path, 'maze-password-manager.html')
+        
+        return jsonify({"error": "maze-password-manager.html not found"}), 404
+        
     except Exception as e:
-        return f"Error serving maze page: {str(e)}", 500
+        return jsonify({"error": f"Error serving maze page: {str(e)}"}), 500
 
 @app.route('/api/health')
 def health():
