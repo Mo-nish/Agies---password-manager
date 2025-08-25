@@ -582,6 +582,52 @@
             contain: layout !important;
             isolation: isolate !important;
         }
+        
+        /* PRICING SECTION ISOLATION - CRITICAL */
+        .pricing-section-isolated {
+            position: relative !important;
+            isolation: isolate !important;
+            contain: layout !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: visible !important;
+            z-index: 1 !important;
+        }
+        
+        .pricing-header-isolated {
+            position: relative !important;
+            z-index: 5 !important;
+            margin-bottom: 3rem !important;
+            isolation: isolate !important;
+            contain: layout !important;
+        }
+        
+        .pricing-plans-isolated {
+            position: relative !important;
+            isolation: isolate !important;
+            contain: layout !important;
+            margin: 0 !important;
+            padding: 1rem 0 !important;
+            z-index: 10 !important;
+        }
+        
+        /* Ensure no content above interferes */
+        .pricing-section-isolated::before {
+            content: "" !important;
+            display: block !important;
+            clear: both !important;
+            height: 2rem !important;
+            position: relative !important;
+            z-index: 1 !important;
+        }
+        
+        /* Force pricing cards to stay in their container */
+        .plan-card {
+            position: relative !important;
+            z-index: inherit !important;
+            overflow: hidden !important;
+            contain: layout !important;
+        }
     </style>
 </head>
 <body>
@@ -653,140 +699,150 @@
                 </button>
             </div>
 
-            <!-- Pricing Plans - COMPACT DESIGN WITH NO OVERLAP -->
-            <div style="width: 100%; margin-bottom: 4rem; position: relative; padding: 1rem 0;">
+            <!-- PRICING SECTION - COMPLETELY ISOLATED -->
+            <section class="pricing-section-isolated" style="width: 100%; position: relative; isolation: isolate; contain: layout; margin: 0; padding: 0; overflow: visible;">
                 
-                <!-- Row 1: Free and Pro Plans - COMPACT SPACING -->
-                <div style="display: flex; justify-content: center; gap: 3rem; margin-bottom: 3rem; flex-wrap: wrap;">
-                    <!-- Free Plan -->
-                    <div class="plan-card" style="width: 300px; flex-shrink: 0; margin: 0; position: relative; z-index: 10; padding: 1.5rem;">
-                        <div class="text-center mb-6">
-                            <h3 class="text-2xl font-bold mb-2">Free Plan</h3>
-                            <div class="price">
-                                <span class="currency">₹</span>0
-                                <span class="period">/month</span>
-                            </div>
-                            <p class="text-gray-400 mt-2">Perfect for getting started</p>
-                        </div>
-                        
-                        <ul class="feature-list mb-6">
-                            <li>Up to 50 passwords</li>
-                            <li>2 vaults</li>
-                            <li>Basic encryption</li>
-                            <li>Password generator</li>
-                            <li>Basic support</li>
-                            <li class="disabled">Dark web monitoring</li>
-                            <li class="disabled">AI security</li>
-                            <li class="disabled">Team sharing</li>
-                        </ul>
-                        
-                        <button class="w-full btn-primary py-3 rounded-lg text-white font-semibold" disabled>
-                            Current Plan
-                        </button>
-                    </div>
-
-                    <!-- Pro Plan -->
-                    <div class="plan-card popular" style="width: 300px; flex-shrink: 0; margin: 0; position: relative; z-index: 10; padding: 1.5rem;">
-                        <div class="text-center mb-6">
-                            <h3 class="text-2xl font-bold mb-2">Pro Plan</h3>
-                            <div class="price">
-                                <span class="currency">₹</span>299
-                                <span class="period">/month</span>
-                            </div>
-                            <p class="text-gray-400 mt-2">Most popular choice</p>
-                        </div>
-                        
-                        <ul class="feature-list mb-6">
-                            <li>Up to 1,000 passwords</li>
-                            <li>10 vaults</li>
-                            <li>Advanced encryption</li>
-                            <li>Password generator</li>
-                            <li>Priority support</li>
-                            <li>Dark web monitoring</li>
-                            <li>AI security</li>
-                            <li>Custom themes</li>
-                        </ul>
-                        
-                        <button onclick="selectPlan('pro')" class="w-full btn-premium py-3 rounded-lg text-white font-semibold">
-                            Choose Pro
-                        </button>
-                    </div>
+                <!-- PRICING HEADER - ISOLATED -->
+                <div class="pricing-header-isolated" style="width: 100%; text-align: center; margin-bottom: 3rem; padding: 2rem; background: rgba(16, 185, 129, 0.1); border: 2px solid #10B981; border-radius: 15px; position: relative; z-index: 5;">
+                    <h2 style="color: #10B981; font-size: 2.5rem; font-weight: bold; margin-bottom: 1rem;">Choose Your Security Plan</h2>
+                    <p style="color: #10B981; font-size: 1.2rem;">Select the perfect plan for your security needs</p>
                 </div>
 
-                <!-- VISUAL SEPARATOR - COMPACT -->
-                <div style="text-align: center; margin: 3rem 0; padding: 1.5rem; background: rgba(245, 158, 11, 0.2); border: 3px solid #F59E0B; border-radius: 15px; position: relative; z-index: 10;">
-                    <h3 style="color: #F59E0B; font-size: 1.5rem; font-weight: bold; margin-bottom: 0.5rem;">⬇️ PREMIUM & ENTERPRISE PLANS BELOW ⬇️</h3>
-                    <p style="color: #F59E0B; font-size: 1rem;">Scroll down to see Premium (₹599) and Enterprise (₹999) plans</p>
-                </div>
-
-                <!-- Row 2: Premium and Enterprise Plans - COMPACT AND CONTAINED -->
-                <div style="width: 100%; position: relative; margin-top: 2rem;">
+                <!-- Pricing Plans - COMPACT DESIGN WITH NO OVERLAP -->
+                <div class="pricing-plans-isolated" style="width: 100%; margin-bottom: 4rem; position: relative; padding: 1rem 0; isolation: isolate; contain: layout;">
                     
-                    <!-- Premium Plan - COMPACT CONTAINER -->
-                    <div style="width: 100%; max-width: 700px; margin: 0 auto 3rem auto; padding: 0; position: relative; z-index: 20; clear: both;">
-                        <div class="plan-card premium-plan" style="width: 100%; border: 3px solid #10B981; margin: 0; background: rgba(16, 185, 129, 0.05); position: relative; z-index: 20; padding: 2rem; border-radius: 15px;">
+                    <!-- Row 1: Free and Pro Plans - COMPACT SPACING -->
+                    <div style="display: flex; justify-content: center; gap: 3rem; margin-bottom: 3rem; flex-wrap: wrap;">
+                        <!-- Free Plan -->
+                        <div class="plan-card" style="width: 300px; flex-shrink: 0; margin: 0; position: relative; z-index: 10; padding: 1.5rem;">
                             <div class="text-center mb-6">
-                                <h3 class="text-2xl font-bold mb-2">Premium Plan</h3>
+                                <h3 class="text-2xl font-bold mb-2">Free Plan</h3>
                                 <div class="price">
-                                    <span class="currency">₹</span>599
+                                    <span class="currency">₹</span>0
                                     <span class="period">/month</span>
                                 </div>
-                                <p class="text-gray-400 mt-2">For power users</p>
+                                <p class="text-gray-400 mt-2">Perfect for getting started</p>
                             </div>
                             
                             <ul class="feature-list mb-6">
-                                <li>Up to 10,000 passwords</li>
-                                <li>50 vaults</li>
-                                <li>Military-grade encryption</li>
-                                <li>Advanced password generator</li>
-                                <li>24/7 priority support</li>
+                                <li>Up to 50 passwords</li>
+                                <li>2 vaults</li>
+                                <li>Basic encryption</li>
+                                <li>Password generator</li>
+                                <li>Basic support</li>
+                                <li class="disabled">Dark web monitoring</li>
+                                <li class="disabled">AI security</li>
+                                <li class="disabled">Team sharing</li>
+                            </ul>
+                            
+                            <button class="w-full btn-primary py-3 rounded-lg text-white font-semibold" disabled>
+                                Current Plan
+                            </button>
+                        </div>
+
+                        <!-- Pro Plan -->
+                        <div class="plan-card popular" style="width: 300px; flex-shrink: 0; margin: 0; position: relative; z-index: 10; padding: 1.5rem;">
+                            <div class="text-center mb-6">
+                                <h3 class="text-2xl font-bold mb-2">Pro Plan</h3>
+                                <div class="price">
+                                    <span class="currency">₹</span>299
+                                    <span class="period">/month</span>
+                                </div>
+                                <p class="text-gray-400 mt-2">Most popular choice</p>
+                            </div>
+                            
+                            <ul class="feature-list mb-6">
+                                <li>Up to 1,000 passwords</li>
+                                <li>10 vaults</li>
+                                <li>Advanced encryption</li>
+                                <li>Password generator</li>
+                                <li>Priority support</li>
                                 <li>Dark web monitoring</li>
                                 <li>AI security</li>
-                                <li>Team sharing</li>
-                                <li>Advanced analytics</li>
                                 <li>Custom themes</li>
                             </ul>
                             
-                            <button onclick="selectPlan('premium')" class="w-full btn-premium py-3 rounded-lg text-white font-semibold">
-                                Choose Premium
+                            <button onclick="selectPlan('pro')" class="w-full btn-premium py-3 rounded-lg text-white font-semibold">
+                                Choose Pro
                             </button>
                         </div>
                     </div>
 
-                    <!-- Enterprise Plan - COMPACT CONTAINER -->
-                    <div style="width: 100%; max-width: 700px; margin: 0 auto; padding: 0; position: relative; z-index: 30; clear: both;">
-                        <div class="plan-card enterprise-plan" style="width: 100%; border: 3px solid #F59E0B; margin: 0; background: rgba(245, 158, 11, 0.05); position: relative; z-index: 30; padding: 2rem; border-radius: 15px;">
-                            <div class="text-center mb-6">
-                                <h3 class="text-2xl font-bold mb-2">Enterprise</h3>
-                                <div class="price">
-                                    <span class="currency">₹</span>999
-                                    <span class="period">/month</span>
-                                </div>
-                                <p class="text-gray-400 mt-2">For teams & businesses</p>
-                            </div>
+                    <!-- VISUAL SEPARATOR - COMPACT -->
+                    <div style="text-align: center; margin: 3rem 0; padding: 1.5rem; background: rgba(245, 158, 11, 0.2); border: 3px solid #F59E0B; border-radius: 15px; position: relative; z-index: 10;">
+                        <h3 style="color: #F59E0B; font-size: 1.5rem; font-weight: bold; margin-bottom: 0.5rem;">⬇️ PREMIUM & ENTERPRISE PLANS BELOW ⬇️</h3>
+                        <p style="color: #F59E0B; font-size: 1rem;">Scroll down to see Premium (₹599) and Enterprise (₹999) plans</p>
+                    </div>
 
-                            <ul class="feature-list mb-6">
-                                <li>Up to 100,000 passwords</li>
-                                <li>100 vaults</li>
-                                <li>Quantum encryption</li>
-                                <li>Enterprise password generator</li>
-                                <li>Dedicated support</li>
-                                <li>Dark web monitoring</li>
-                                <li>AI security</li>
-                                <li>Team sharing</li>
-                                <li>Advanced analytics</li>
-                                <li>Custom themes</li>
-                                <li>SSO integration</li>
-                                <li>API access</li>
-                            </ul>
-                            
-                            <button onclick="selectPlan('enterprise')" class="w-full btn-enterprise py-3 rounded-lg text-white font-semibold">
-                                Choose Enterprise
-                            </button>
+                    <!-- Row 2: Premium and Enterprise Plans - COMPACT AND CONTAINED -->
+                    <div style="width: 100%; position: relative; margin-top: 2rem;">
+                        
+                        <!-- Premium Plan - COMPACT CONTAINER -->
+                        <div style="width: 100%; max-width: 700px; margin: 0 auto 3rem auto; padding: 0; position: relative; z-index: 20; clear: both;">
+                            <div class="plan-card premium-plan" style="width: 100%; border: 3px solid #10B981; margin: 0; background: rgba(16, 185, 129, 0.05); position: relative; z-index: 20; padding: 2rem; border-radius: 15px;">
+                                <div class="text-center mb-6">
+                                    <h3 class="text-2xl font-bold mb-2">Premium Plan</h3>
+                                    <div class="price">
+                                        <span class="currency">₹</span>599
+                                        <span class="period">/month</span>
+                                    </div>
+                                    <p class="text-gray-400 mt-2">For power users</p>
+                                </div>
+                                
+                                <ul class="feature-list mb-6">
+                                    <li>Up to 10,000 passwords</li>
+                                    <li>50 vaults</li>
+                                    <li>Military-grade encryption</li>
+                                    <li>Advanced password generator</li>
+                                    <li>24/7 priority support</li>
+                                    <li>Dark web monitoring</li>
+                                    <li>AI security</li>
+                                    <li>Team sharing</li>
+                                    <li>Advanced analytics</li>
+                                    <li>Custom themes</li>
+                                </ul>
+                                
+                                <button onclick="selectPlan('premium')" class="w-full btn-premium py-3 rounded-lg text-white font-semibold">
+                                    Choose Premium
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Enterprise Plan - COMPACT CONTAINER -->
+                        <div style="width: 100%; max-width: 700px; margin: 0 auto; padding: 0; position: relative; z-index: 30; clear: both;">
+                            <div class="plan-card enterprise-plan" style="width: 100%; border: 3px solid #F59E0B; margin: 0; background: rgba(245, 158, 11, 0.05); position: relative; z-index: 30; padding: 2rem; border-radius: 15px;">
+                                <div class="text-center mb-6">
+                                    <h3 class="text-2xl font-bold mb-2">Enterprise</h3>
+                                    <div class="price">
+                                        <span class="currency">₹</span>999
+                                        <span class="period">/month</span>
+                                    </div>
+                                    <p class="text-gray-400 mt-2">For teams & businesses</p>
+                                </div>
+
+                                <ul class="feature-list mb-6">
+                                    <li>Up to 100,000 passwords</li>
+                                    <li>100 vaults</li>
+                                    <li>Quantum encryption</li>
+                                    <li>Enterprise password generator</li>
+                                    <li>Dedicated support</li>
+                                    <li>Dark web monitoring</li>
+                                    <li>AI security</li>
+                                    <li>Team sharing</li>
+                                    <li>Advanced analytics</li>
+                                    <li>Custom themes</li>
+                                    <li>SSO integration</li>
+                                    <li>API access</li>
+                                </ul>
+                                
+                                <button onclick="selectPlan('enterprise')" class="w-full btn-enterprise py-3 rounded-lg text-white font-semibold">
+                                    Choose Enterprise
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
             <!-- Payment Options -->
             <div class="glass-card rounded-2xl p-8 mb-12">
