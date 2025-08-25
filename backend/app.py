@@ -422,7 +422,7 @@ def home():
                 return send_from_directory(path, 'index.html')
         
         # If no path works, return debug info
-    return jsonify({
+        return jsonify({
             "error": "index.html not found",
             "possible_paths": possible_paths,
             "current_dir": os.getcwd(),
