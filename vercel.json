@@ -1,65 +1,37 @@
 {
   "version": 2,
+  "framework": null,
   "builds": [
     {
       "src": "public/**/*",
       "use": "@vercel/static"
     }
   ],
-  "rewrites": [
+  "routes": [
     {
-      "source": "/",
-      "destination": "/public/index.html"
+      "src": "/",
+      "dest": "/public/maze-password-manager.html"
     },
     {
-      "source": "/dashboard",
-      "destination": "/public/dashboard-working.html"
+      "src": "/login",
+      "dest": "/public/login.html"
     },
     {
-      "source": "/security-dashboard",
-      "destination": "/public/security-dashboard-working.html"
+      "src": "/maze",
+      "dest": "/public/maze-password-manager.html"
     },
     {
-      "source": "/js/(.*)",
-      "destination": "/public/js/$1"
+      "src": "/js/(.*)",
+      "dest": "/public/js/$1"
     },
     {
-      "source": "/css/(.*)",
-      "destination": "/public/css/$1"
+      "src": "/css/(.*)",
+      "dest": "/public/css/$1"
     },
     {
-      "source": "/images/(.*)",
-      "destination": "/public/images/$1"
-    },
-    {
-      "source": "/chrome-extension/(.*)",
-      "destination": "/public/chrome-extension/$1"
+      "src": "/(.*)",
+      "dest": "/public/$1"
     }
   ],
-  "redirects": [
-    {
-      "source": "/vault-sharing",
-      "destination": "/dashboard",
-      "permanent": false
-    }
-  ],
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "no-cache, no-store, must-revalidate"
-        },
-        {
-          "key": "Pragma",
-          "value": "no-cache"
-        },
-        {
-          "key": "Expires",
-          "value": "0"
-        }
-      ]
-    }
-  ]
+  "public": true
 }

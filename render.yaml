@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: agies-password-manager
+    name: maze-password-manager
     env: python
     plan: free
     buildCommand: pip install -r requirements.txt
@@ -8,3 +8,17 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.9.16
+    staticPublishPath: ./public
+    routes:
+      - type: rewrite
+        source: /js/*
+        destination: /public/js/*
+      - type: rewrite
+        source: /css/*
+        destination: /public/css/*
+      - type: rewrite
+        source: /chrome-extension/*
+        destination: /public/chrome-extension/*
+      - type: rewrite
+        source: /(.*)
+        destination: /public/$1

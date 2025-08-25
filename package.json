@@ -9,7 +9,7 @@
     "dev:backend": "nodemon --exec ts-node src/backend/index.ts",
     "dev:frontend": "vite",
     "dev:tauri": "tauri dev",
-    "build": "npm run build:js && npm run build:backend && npm run build:frontend && npm run build:tauri",
+    "build": "echo 'Build disabled for Vercel deployment'",
     "build:js": "babel public/js --out-dir dist/js --copy-files",
     "build:backend": "tsc",
     "build:frontend": "vite build",

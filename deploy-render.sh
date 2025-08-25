@@ -1,43 +1,22 @@
 #!/bin/bash
 
-# 🚀 Deploy Agies Backend to Render (FREE!)
+echo "🚀 Deploying Maze Password Manager to Render..."
 
-echo "🌟 Deploying Agies Backend to Render..."
+# Check if render CLI is installed
+if ! command -v render &> /dev/null; then
+    echo "📦 Installing Render CLI..."
+    curl -sL https://render.com/download.sh | sh
+fi
 
-# Create a temporary directory for deployment
-TEMP_DIR=$(mktemp -d)
-echo "📁 Created temp directory: $TEMP_DIR"
+# Deploy to Render
+echo "🌐 Deploying to Render..."
+render deploy
 
-# Copy backend files
-cp -r backend/* $TEMP_DIR/
-cd $TEMP_DIR
-
-# Create a simple Procfile for Render
-echo "web: gunicorn app:app" > Procfile
-
-# Create a simple runtime.txt
-echo "python-3.9.16" > runtime.txt
-
-# Initialize git and push to a new repository
-git init
-git add .
-git commit -m "Initial deployment to Render"
-
+echo "✅ Deployment complete!"
+echo "🔗 Your app will be available at: https://maze-password-manager.onrender.com"
 echo ""
-echo "🎯 NEXT STEPS:"
-echo "1. Go to https://render.com"
-echo "2. Sign up/Login with GitHub"
-echo "3. Click 'New +' → 'Web Service'"
-echo "4. Connect your GitHub repository or use this directory: $TEMP_DIR"
-echo "5. Set build command: pip install -r requirements.txt"
-echo "6. Set start command: gunicorn app:app"
-echo "7. Choose FREE plan"
-echo "8. Deploy!"
-echo ""
-echo "🌐 Your frontend is already live at:"
-echo "   https://agies-password-manager-41gtowhsh-monish-reddys-projects.vercel.app"
-echo ""
-echo "🔧 Backend files are ready in: $TEMP_DIR"
-echo "   You can upload these directly to Render"
-echo ""
-echo "🚀 Ready to deploy the world's next top password manager!"
+echo "📋 Next steps:"
+echo "1. Go to https://dashboard.render.com"
+echo "2. Connect your GitHub repository"
+echo "3. Select 'maze-password-manager' service"
+echo "4. Deploy!"

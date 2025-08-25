@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, render_template_string
 from flask_cors import CORS
 import sqlite3
 import os
@@ -7,7 +7,7 @@ import uuid
 from datetime import datetime
 import bcrypt
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='../public', static_url_path='')
 CORS(app)
 
 # Database setup
@@ -53,7 +53,7 @@ def init_db():
             notes TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (vault_id) REFERENCES vaults (id)
+            FOREIGN KEY (vault_id) REFERENCES users (id)
         )
     ''')
     
@@ -70,11 +70,15 @@ init_db()
 
 @app.route('/')
 def home():
-    return jsonify({
-        "message": "Agies Password Manager API",
-        "status": "running",
-        "version": "1.0.0"
-    })
+    return send_from_directory('../public', 'maze-password-manager.html')
+
+@app.route('/login')
+def login():
+    return send_from_directory('../public', 'login.html')
+
+@app.route('/maze')
+def maze():
+    return send_from_directory('../public', 'maze-password-manager.html')
 
 @app.route('/api/health')
 def health():
