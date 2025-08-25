@@ -275,12 +275,33 @@ def migrate_database():
                     payment_id TEXT NOT NULL,
                     status TEXT NOT NULL,
                     payment_method TEXT,
+                    upi_transaction_id TEXT,
+                    payment_screenshot TEXT,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (user_id) REFERENCES users (id),
                     FOREIGN KEY (subscription_id) REFERENCES subscriptions (id)
                 )
             ''')
             print("✅ Created payments table")
+        
+        # Check if admin_notifications table exists
+        c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='admin_notifications'")
+        if not c.fetchone():
+            c.execute('''
+                CREATE TABLE admin_notifications (
+                    id TEXT PRIMARY KEY,
+                    type TEXT NOT NULL,
+                    user_id TEXT NOT NULL,
+                    payment_id TEXT,
+                    message TEXT NOT NULL,
+                    status TEXT DEFAULT 'pending',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users (id),
+                    FOREIGN KEY (payment_id) REFERENCES payments (id)
+                )
+            ''')
+            print("✅ Created admin_notifications table")
         
         # Create a test subscription for demonstration
         c.execute("SELECT COUNT(*) FROM subscriptions")
@@ -702,10 +723,29 @@ def login_api():
         c = conn.cursor()
         
         # Get user with subscription info
-        c.execute('''
-            SELECT id, password_hash, subscription_plan, subscription_status 
-            FROM users WHERE email = ?
-        ''', (email,))
+        try:
+            c.execute('''
+                SELECT id, password_hash, subscription_plan, subscription_status 
+                FROM users WHERE email = ?
+            ''', (email,))
+        except sqlite3.OperationalError:
+            # If subscription_plan column doesn't exist, create it
+            try:
+                c.execute('ALTER TABLE users ADD COLUMN subscription_plan TEXT DEFAULT "free"')
+                c.execute('ALTER TABLE users ADD COLUMN subscription_status TEXT DEFAULT "active"')
+                conn.commit()
+                print("✅ Added subscription columns during login")
+                
+                # Try the query again
+                c.execute('''
+                    SELECT id, password_hash, subscription_plan, subscription_status 
+                    FROM users WHERE email = ?
+                ''', (email,))
+            except Exception as e:
+                print(f"Error adding columns: {e}")
+                # Fallback to basic user query
+                c.execute('SELECT id, password_hash FROM users WHERE email = ?', (email,))
+        
         user = c.fetchone()
         
         if not user:
@@ -717,12 +757,37 @@ def login_api():
             # Generate a more secure token
             token = str(uuid.uuid4()) + '_' + str(int(time.time()))
             
-            # Update user's last login time (add this column if needed)
+            # Ensure user has subscription info
+            subscription_plan = user.get('subscription_plan', 'free')
+            subscription_status = user.get('subscription_status', 'active')
+            
+            # Update user's last login time and ensure subscription columns exist
             try:
-                c.execute('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?', (user['id'],))
-            except:
-                # Column might not exist, that's okay
-                pass
+                c.execute('''
+                    UPDATE users 
+                    SET last_login = CURRENT_TIMESTAMP,
+                        subscription_plan = ?,
+                        subscription_status = ?
+                    WHERE id = ?
+                ''', (subscription_plan, subscription_status, user['id']))
+            except sqlite3.OperationalError:
+                # If columns don't exist, try to add them
+                try:
+                    c.execute('ALTER TABLE users ADD COLUMN last_login TIMESTAMP')
+                    c.execute('ALTER TABLE users ADD COLUMN subscription_plan TEXT DEFAULT "free"')
+                    c.execute('ALTER TABLE users ADD COLUMN subscription_status TEXT DEFAULT "active"')
+                    conn.commit()
+                    
+                    # Update again
+                    c.execute('''
+                        UPDATE users 
+                        SET last_login = CURRENT_TIMESTAMP,
+                            subscription_plan = ?,
+                            subscription_status = ?
+                        WHERE id = ?
+                    ''', (subscription_plan, subscription_status, user['id']))
+                except Exception as e:
+                    print(f"Error updating user: {e}")
             
             conn.commit()
             conn.close()
@@ -732,8 +797,8 @@ def login_api():
                 "user_id": user['id'],
                 "email": email,
                 "token": token,
-                "subscription_plan": user['subscription_plan'],
-                "subscription_status": user['subscription_status']
+                "subscription_plan": subscription_plan,
+                "subscription_status": subscription_status
             }), 200
         else:
             conn.close()

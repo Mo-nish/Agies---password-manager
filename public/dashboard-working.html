@@ -185,43 +185,43 @@
             </div>
 
             <!-- Subscription Status -->
-            <div class="glass-card rounded-2xl p-8 mb-12 max-w-4xl mx-auto">
-                <div class="flex items-center justify-between mb-6">
+            <div class="glass-card p-6 mb-8">
+                <div class="flex items-center justify-between">
                     <div>
-                        <h2 class="text-2xl font-bold mb-2">Your Subscription</h2>
-                        <p class="text-gray-300">Current plan: <span id="current-plan" class="font-semibold">Loading...</span></p>
+                        <h3 class="text-xl font-semibold mb-2">Your Subscription</h3>
+                        <p class="text-gray-300">Current Plan: <span id="plan-badge" class="px-3 py-1 bg-blue-600 text-white rounded-full text-sm">Free</span></p>
                     </div>
-                    <button id="upgrade-btn" class="btn-premium px-6 py-3 rounded-full text-white font-semibold">
+                    <a href="/pricing" class="btn-primary px-6 py-3 rounded-lg text-white font-semibold">
                         Upgrade Plan
-                    </button>
+                    </a>
                 </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                    <div class="text-center">
-                        <div class="text-3xl mb-2">🔐</div>
-                        <div class="text-2xl font-bold" id="password-usage">0/50</div>
-                        <div class="text-gray-300">Passwords</div>
+                <!-- Free Plan Features -->
+                <div id="free-plan-features" class="mt-4 p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg">
+                    <h4 class="font-semibold text-blue-400 mb-2">Free Plan Features:</h4>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-green-400">✅</span>
+                            <span>50 Passwords</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-green-400">✅</span>
+                            <span>2 Vaults</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-green-400">✅</span>
+                            <span>Basic Encryption</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-green-400">✅</span>
+                            <span>Password Generator</span>
+                        </div>
                     </div>
                     
-                    <div class="text-center">
-                        <div class="text-3xl mb-2">🏗️</div>
-                        <div class="text-2xl font-bold" id="vault-usage">0/2</div>
-                        <div class="text-gray-300">Vaults</div>
-                    </div>
-                    
-                    <div class="text-center">
-                        <div class="text-3xl mb-2">🛡️</div>
-                        <div class="text-2xl font-bold" id="security-features">0/6</div>
-                        <div class="text-gray-300">Security Features</div>
-                    </div>
-                </div>
-                
-                <div id="upgrade-prompt" class="upgrade-prompt hidden">
-                    <p class="text-center text-yellow-300 mb-3">🚀 Unlock premium features with a Pro plan!</p>
-                    <div class="flex justify-center">
-                        <button onclick="window.location.href='/pricing'" class="btn-premium px-6 py-2 rounded-full text-white">
-                            View Plans
-                        </button>
+                    <div class="mt-4 p-3 bg-yellow-900/20 border border-yellow-500/30 rounded-lg">
+                        <p class="text-yellow-400 text-sm">
+                            <strong>Upgrade to Pro</strong> to unlock unlimited passwords, advanced security features, and priority support!
+                        </p>
                     </div>
                 </div>
             </div>
@@ -375,7 +375,7 @@
                             <option value="💳">💳 Finance</option>
                             <option value="🎮">🎮 Gaming</option>
                             <option value="🛒">🛒 Shopping</option>
-                            <option value="��">📧 Email</option>
+                            <option value="📧">📧 Email</option>
                             <option value="🌐">🌐 Social</option>
                         </select>
                     </div>
