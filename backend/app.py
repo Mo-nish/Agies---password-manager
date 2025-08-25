@@ -71,23 +71,52 @@ init_db()
 # Main routes for the application
 @app.route('/')
 def home():
-    return send_from_directory('public', 'index.html')
+    try:
+        return send_from_directory('public', 'index.html')
+    except Exception as e:
+        return f"Error serving home page: {str(e)}", 500
 
 @app.route('/login')
 def login():
-    return send_from_directory('public', 'login.html')
+    try:
+        return send_from_directory('public', 'login.html')
+    except Exception as e:
+        return f"Error serving login page: {str(e)}", 500
 
 @app.route('/dashboard')
 def dashboard():
-    return send_from_directory('public', 'maze-password-manager.html')
+    try:
+        return send_from_directory('public', 'maze-password-manager.html')
+    except Exception as e:
+        return f"Error serving dashboard: {str(e)}", 500
 
 @app.route('/maze')
 def maze():
-    return send_from_directory('public', 'maze-password-manager.html')
+    try:
+        return send_from_directory('public', 'maze-password-manager.html')
+    except Exception as e:
+        return f"Error serving maze page: {str(e)}", 500
 
 @app.route('/api/health')
 def health():
     return jsonify({"status": "healthy", "timestamp": datetime.now().isoformat()})
+
+@app.route('/debug')
+def debug():
+    import os
+    try:
+        public_dir = os.path.join(os.getcwd(), 'public')
+        files = os.listdir(public_dir) if os.path.exists(public_dir) else []
+        return jsonify({
+            "current_dir": os.getcwd(),
+            "public_dir": public_dir,
+            "public_dir_exists": os.path.exists(public_dir),
+            "files_in_public": files,
+            "index_html_exists": os.path.exists(os.path.join(public_dir, 'index.html')),
+            "login_html_exists": os.path.exists(os.path.join(public_dir, 'login.html'))
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # User registration
 @app.route('/api/auth/register', methods=['POST'])
