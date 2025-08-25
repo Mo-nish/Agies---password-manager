@@ -320,7 +320,7 @@
         .premium-plan {
             position: relative !important;
             z-index: 20 !important;
-            margin-bottom: 4rem !important;
+            margin-bottom: 6rem !important;
             clear: both !important;
             float: none !important;
             left: auto !important;
@@ -328,6 +328,7 @@
             top: auto !important;
             bottom: auto !important;
             transform: none !important;
+            isolation: isolate !important;
         }
         
         .enterprise-plan {
@@ -342,6 +343,7 @@
             top: auto !important;
             bottom: auto !important;
             transform: none !important;
+            isolation: isolate !important;
         }
         
         /* Force isolation between plans */
@@ -349,7 +351,7 @@
             content: "" !important;
             display: block !important;
             clear: both !important;
-            height: 4rem !important;
+            height: 6rem !important;
         }
         
         .enterprise-plan::before {
@@ -364,6 +366,35 @@
             isolation: isolate !important;
             contain: layout !important;
             overflow: visible !important;
+        }
+        
+        /* ADDITIONAL SPACING AND OVERLAP PREVENTION */
+        .premium-plan-container {
+            margin-bottom: 6rem !important;
+            padding: 0 !important;
+            position: relative !important;
+            z-index: 20 !important;
+        }
+        
+        .enterprise-plan-container {
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+            padding: 0 !important;
+            position: relative !important;
+            z-index: 30 !important;
+        }
+        
+        /* Force proper page flow */
+        .pricing-section {
+            margin-bottom: 8rem !important;
+            overflow: visible !important;
+            position: relative !important;
+        }
+        
+        /* Ensure no text overlap */
+        .plan-card * {
+            position: relative !important;
+            z-index: inherit !important;
         }
         
         .payment-methods {
@@ -562,11 +593,11 @@
                     <p style="color: #F59E0B; font-size: 1.2rem;">Scroll down to see Premium (₹599) and Enterprise (₹999) plans</p>
                 </div>
 
-                <!-- Row 2: Premium and Enterprise Plans - COMPLETELY SEPARATE CONTAINERS -->
-                <div style="width: 100%; position: relative;">
-                    <!-- Premium Plan - ISOLATED CONTAINER -->
-                    <div style="width: 100%; max-width: 800px; margin: 0 auto 4rem auto; padding: 0; position: relative; z-index: 20; clear: both;">
-                        <div class="plan-card premium-plan" style="width: 100%; border: 3px solid #10B981; margin: 0; background: rgba(16, 185, 129, 0.05); position: relative; z-index: 20;">
+                <!-- Row 2: Premium and Enterprise Plans - COMPLETELY RESTRUCTURED TO PREVENT OVERLAP -->
+                <div style="width: 100%; position: relative; margin-top: 2rem;">
+                    <!-- Premium Plan - ISOLATED CONTAINER WITH INTERNAL FEATURES -->
+                    <div class="premium-plan-container" style="width: 100%; max-width: 800px; margin: 0 auto 6rem auto; padding: 0; position: relative; z-index: 20; clear: both;">
+                        <div class="plan-card premium-plan" style="width: 100%; border: 3px solid #10B981; margin: 0; background: rgba(16, 185, 129, 0.05); position: relative; z-index: 20; padding: 2rem;">
                             <div class="text-center mb-6">
                                 <h3 class="text-2xl font-bold mb-2">Premium Plan</h3>
                                 <div class="price">
@@ -595,9 +626,9 @@
                         </div>
                     </div>
 
-                    <!-- Enterprise Plan - ISOLATED CONTAINER -->
-                    <div style="width: 100%; max-width: 800px; margin: 0 auto; padding: 0; position: relative; z-index: 30; clear: both;">
-                        <div class="plan-card enterprise-plan" style="width: 100%; border: 3px solid #F59E0B; margin: 0; background: rgba(245, 158, 11, 0.05); position: relative; z-index: 30;">
+                    <!-- Enterprise Plan - ISOLATED CONTAINER WITH INTERNAL FEATURES -->
+                    <div class="enterprise-plan-container" style="width: 100%; max-width: 800px; margin: 0 auto; padding: 0; position: relative; z-index: 30; clear: both;">
+                        <div class="plan-card enterprise-plan" style="width: 100%; border: 3px solid #F59E0B; margin: 0; background: rgba(245, 158, 11, 0.05); position: relative; z-index: 30; padding: 2rem;">
                             <div class="text-center mb-6">
                                 <h3 class="text-2xl font-bold mb-2">Enterprise</h3>
                                 <div class="price">
