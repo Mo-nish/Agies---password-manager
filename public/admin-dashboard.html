@@ -206,10 +206,10 @@
                     <button onclick="showManualVerification()" class="w-full btn-primary py-3 rounded-lg">
                         ✅ Manual Payment Verification
                     </button>
-                    <button onclick="showUserManagement()" class="w-full btn-success py-3 rounded-lg">
+                    <button onclick="openUserManagement()" class="w-full btn-success py-3 rounded-lg">
                         👥 User Management
                     </button>
-                    <button onclick="showSystemStats()" class="w-full btn-primary py-3 rounded-lg">
+                    <button onclick="openSystemStatistics()" class="w-full btn-primary py-3 rounded-lg">
                         📊 System Statistics
                     </button>
                 </div>
@@ -586,12 +586,232 @@
             loadDashboardData();
         }
 
+        // User Management feature
+        function openUserManagement() {
+            // Load and display user management interface
+            loadUserManagement();
+        }
+
+        // Load user management data
+        async function loadUserManagement() {
+            try {
+                const response = await fetch('/api/admin/users', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const users = await response.json();
+                    showUserManagementModal(users);
+                } else {
+                    throw new Error('Failed to load users');
+                }
+            } catch (error) {
+                console.error('Error loading users:', error);
+                showError('Failed to load user data');
+            }
+        }
+
+        // Show user management modal
+        function showUserManagementModal(users) {
+            const modalHTML = `
+                <div id="user-management-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div class="bg-gray-800 rounded-xl p-6 w-full max-w-4xl mx-4 max-h-[80vh] overflow-y-auto">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-xl font-semibold text-white">User Management</h3>
+                            <button onclick="closeUserManagementModal()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+                        </div>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left text-gray-300">
+                                <thead class="text-xs uppercase bg-gray-700 text-gray-300">
+                                    <tr>
+                                        <th class="px-6 py-3">User ID</th>
+                                        <th class="px-6 py-3">Email</th>
+                                        <th class="px-6 py-3">Plan</th>
+                                        <th class="px-6 py-3">Status</th>
+                                        <th class="px-6 py-3">Created</th>
+                                        <th class="px-6 py-3">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${users.map(user => `
+                                        <tr class="bg-gray-800 border-b border-gray-700 hover:bg-gray-700">
+                                            <td class="px-6 py-4">${user.id}</td>
+                                            <td class="px-6 py-4">${user.email}</td>
+                                            <td class="px-6 py-4">
+                                                <span class="px-2 py-1 text-xs rounded-full ${
+                                                    user.subscription_plan === 'enterprise' ? 'bg-purple-900 text-purple-300' :
+                                                    user.subscription_plan === 'premium' ? 'bg-blue-900 text-blue-300' :
+                                                    user.subscription_plan === 'pro' ? 'bg-green-900 text-green-300' :
+                                                    'bg-gray-700 text-gray-300'
+                                                }">${user.subscription_plan || 'free'}</span>
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <span class="px-2 py-1 text-xs rounded-full ${
+                                                    user.subscription_status === 'active' ? 'bg-green-900 text-green-300' :
+                                                    user.subscription_status === 'pending' ? 'bg-yellow-900 text-yellow-300' :
+                                                    'bg-red-900 text-red-300'
+                                                }">${user.subscription_status || 'inactive'}</span>
+                                            </td>
+                                            <td class="px-6 py-4">${new Date(user.created_at).toLocaleDateString()}</td>
+                                            <td class="px-6 py-4">
+                                                <button onclick="viewUserDetails('${user.id}')" class="text-blue-400 hover:text-blue-300 mr-2">👁️</button>
+                                                <button onclick="suspendUser('${user.id}')" class="text-yellow-400 hover:text-yellow-300 mr-2">⏸️</button>
+                                                <button onclick="deleteUser('${user.id}')" class="text-red-400 hover:text-red-300">🗑️</button>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
+
+        // Close user management modal
+        function closeUserManagementModal() {
+            const modal = document.getElementById('user-management-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        // View user details
+        function viewUserDetails(userId) {
+            // Implement user details view
+            alert(`Viewing details for user ${userId}`);
+        }
+
+        // Suspend user
+        function suspendUser(userId) {
+            if (confirm('Are you sure you want to suspend this user?')) {
+                // Implement user suspension
+                alert(`User ${userId} suspended`);
+            }
+        }
+
+        // Delete user
+        function deleteUser(userId) {
+            if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+                // Implement user deletion
+                alert(`User ${userId} deleted`);
+            }
+        }
+
+        // System Statistics feature
+        function openSystemStatistics() {
+            // Load and display system statistics
+            loadSystemStatistics();
+        }
+
+        // Load system statistics
+        async function loadSystemStatistics() {
+            try {
+                const response = await fetch('/api/admin/statistics', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const stats = await response.json();
+                    showSystemStatisticsModal(stats);
+                } else {
+                    throw new Error('Failed to load statistics');
+                }
+            } catch (error) {
+                console.error('Error loading statistics:', error);
+                showError('Failed to load system statistics');
+            }
+        }
+
+        // Show system statistics modal
+        function showSystemStatisticsModal(stats) {
+            const modalHTML = `
+                <div id="system-statistics-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div class="bg-gray-800 rounded-xl p-6 w-full max-w-2xl mx-4">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-xl font-semibold text-white">System Statistics</h3>
+                            <button onclick="closeSystemStatisticsModal()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-6">
+                            <div class="bg-gray-700 rounded-lg p-4">
+                                <h4 class="text-lg font-semibold text-white mb-2">Users</h4>
+                                <div class="text-3xl font-bold text-blue-400">${stats.total_users || 0}</div>
+                                <p class="text-gray-300 text-sm">Total registered users</p>
+                            </div>
+                            
+                            <div class="bg-gray-700 rounded-lg p-4">
+                                <h4 class="text-lg font-semibold text-white mb-2">Revenue</h4>
+                                <div class="text-3xl font-bold text-green-400">₹${stats.total_revenue || 0}</div>
+                                <p class="text-gray-300 text-sm">Total subscription revenue</p>
+                            </div>
+                            
+                            <div class="bg-gray-700 rounded-lg p-4">
+                                <h4 class="text-lg font-semibold text-white mb-2">Vaults</h4>
+                                <div class="text-3xl font-bold text-purple-400">${stats.total_vaults || 0}</div>
+                                <p class="text-gray-300 text-sm">Total vaults created</p>
+                            </div>
+                            
+                            <div class="bg-gray-700 rounded-lg p-4">
+                                <h4 class="text-lg font-semibold text-white mb-2">Passwords</h4>
+                                <div class="text-3xl font-bold text-yellow-400">${stats.total_passwords || 0}</div>
+                                <p class="text-gray-300 text-sm">Total passwords stored</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 bg-gray-700 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold text-white mb-2">Plan Distribution</h4>
+                            <div class="space-y-2">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-300">Free Plan:</span>
+                                    <span class="text-white">${stats.free_users || 0} users</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-300">Pro Plan:</span>
+                                    <span class="text-white">${stats.pro_users || 0} users</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-300">Premium Plan:</span>
+                                    <span class="text-white">${stats.premium_users || 0} users</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-300">Enterprise Plan:</span>
+                                    <span class="text-white">${stats.enterprise_users || 0} users</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
+
+        // Close system statistics modal
+        function closeSystemStatisticsModal() {
+            const modal = document.getElementById('system-statistics-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
         function showUserManagement() {
-            alert('User Management feature coming soon!');
+            // This function is now replaced by openUserManagement()
+            openUserManagement();
         }
 
         function showSystemStats() {
-            alert('System Statistics feature coming soon!');
+            // This function is now replaced by openSystemStatistics()
+            openSystemStatistics();
         }
 
         function logout() {

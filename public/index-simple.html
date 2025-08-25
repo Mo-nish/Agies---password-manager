@@ -516,6 +516,10 @@
                 updatePasswordCount();
             }
         };
+
+        // Global import functions
+        window.importFromChrome = importFromChrome;
+        window.importFromCSV = importFromCSV;
         
         // Show modals
         function showModal(modal) {
@@ -710,11 +714,11 @@
         
         // Import functionality
         document.getElementById('importChromeBtn').addEventListener('click', () => {
-            alert('Chrome import functionality coming soon! This will allow you to import passwords directly from your Chrome browser.');
+            importFromChrome();
         });
         
         document.getElementById('importCsvBtn').addEventListener('click', () => {
-            alert('CSV import functionality coming soon! You can export passwords from other password managers as CSV and import them here.');
+            importFromCSV();
         });
         
         document.getElementById('manualImportBtn').addEventListener('click', () => {

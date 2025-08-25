@@ -1125,53 +1125,93 @@ def delete_password(password_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Get vault with password count
-@app.route('/api/vaults/<vault_id>', methods=['GET'])
+@app.route('/api/vaults/<int:vault_id>', methods=['GET'])
 @require_auth
 def get_vault(vault_id):
+    """Get a specific vault by ID"""
     try:
         user_id = request.headers.get('X-User-ID')
-        if not user_id:
-            return jsonify({"error": "Authentication required"}), 401
+        db = get_db()
         
-        conn = get_db()
-        c = conn.cursor()
-        
-        # Get vault with password count
-        c.execute('''
-            SELECT v.*, COUNT(p.id) as actual_password_count 
-            FROM vaults v 
-            LEFT JOIN passwords p ON v.id = p.vault_id 
-            WHERE v.id = ? AND v.user_id = ? 
-            GROUP BY v.id
-        ''', (vault_id, user_id))
-        
-        vault = c.fetchone()
-        conn.close()
+        vault = db.execute(
+            'SELECT * FROM vaults WHERE id = ? AND user_id = ?',
+            (vault_id, user_id)
+        ).fetchone()
         
         if not vault:
             return jsonify({"error": "Vault not found"}), 404
-        
-        # Update the stored password count to match actual count
-        if vault['actual_password_count'] != vault['password_count']:
-            conn = get_db()
-            c = conn.cursor()
-            c.execute('UPDATE vaults SET password_count = ? WHERE id = ?', (vault['actual_password_count'], vault_id))
-            conn.commit()
-            conn.close()
-            vault['password_count'] = vault['actual_password_count']
-        
-        return jsonify({
-            "id": vault['id'],
-            "name": vault['name'],
-            "description": vault['description'],
-            "icon": vault['icon'],
-            "password_count": vault['password_count'],
-            "created_at": vault['created_at']
-        }), 200
+            
+        return jsonify(dict(vault))
         
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": f"Error retrieving vault: {str(e)}"}), 500
+
+@app.route('/api/vaults/<int:vault_id>', methods=['PUT'])
+@require_auth
+def update_vault(vault_id):
+    """Update a vault"""
+    try:
+        user_id = request.headers.get('X-User-ID')
+        data = request.get_json()
+        
+        if not data or 'name' not in data:
+            return jsonify({"error": "Vault name is required"}), 400
+            
+        db = get_db()
+        
+        # Check if vault exists and belongs to user
+        vault = db.execute(
+            'SELECT * FROM vaults WHERE id = ? AND user_id = ?',
+            (vault_id, user_id)
+        ).fetchone()
+        
+        if not vault:
+            return jsonify({"error": "Vault not found"}), 404
+            
+        # Update vault
+        db.execute(
+            '''UPDATE vaults 
+               SET name = ?, description = ?, icon = ?, updated_at = CURRENT_TIMESTAMP
+               WHERE id = ? AND user_id = ?''',
+            (data['name'], data.get('description', ''), data.get('icon', '🔐'), vault_id, user_id)
+        )
+        
+        db.commit()
+        
+        return jsonify({"message": "Vault updated successfully"})
+        
+    except Exception as e:
+        return jsonify({"error": f"Error updating vault: {str(e)}"}), 500
+
+@app.route('/api/vaults/<int:vault_id>', methods=['DELETE'])
+@require_auth
+def delete_vault(vault_id):
+    """Delete a vault and all its passwords"""
+    try:
+        user_id = request.headers.get('X-User-ID')
+        db = get_db()
+        
+        # Check if vault exists and belongs to user
+        vault = db.execute(
+            'SELECT * FROM vaults WHERE id = ? AND user_id = ?',
+            (vault_id, user_id)
+        ).fetchone()
+        
+        if not vault:
+            return jsonify({"error": "Vault not found"}), 404
+            
+        # Delete all passwords in the vault first
+        db.execute('DELETE FROM passwords WHERE vault_id = ?', (vault_id,))
+        
+        # Delete the vault
+        db.execute('DELETE FROM vaults WHERE id = ? AND user_id = ?', (vault_id, user_id))
+        
+        db.commit()
+        
+        return jsonify({"message": "Vault deleted successfully"})
+        
+    except Exception as e:
+        return jsonify({"error": f"Error deleting vault: {str(e)}"}), 500
 
 # Search passwords
 @app.route('/api/passwords/search', methods=['GET'])
@@ -1549,16 +1589,16 @@ def get_upi_payment_methods():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Admin route to verify payments manually
-@app.route('/api/admin/verify-payment/<payment_id>', methods=['POST'])
+# Admin routes for payment verification and management
+@app.route('/api/admin/verify-payment/<int:payment_id>', methods=['POST'])
 def admin_verify_payment(payment_id):
     try:
         data = request.get_json()
-        admin_key = data.get('admin_key')  # Simple admin authentication
+        admin_key = data.get('admin_key')
         
-        # In production, use proper admin authentication
-        if admin_key != "maze_admin_2024":
-            return jsonify({"error": "Unauthorized"}), 401
+        # Simple admin key verification (in production, use proper admin authentication)
+        if admin_key != 'maze_admin_2024':
+            return jsonify({"error": "Invalid admin key"}), 401
         
         conn = get_db()
         c = conn.cursor()
@@ -1568,199 +1608,180 @@ def admin_verify_payment(payment_id):
         payment = c.fetchone()
         
         if not payment:
-            conn.close()
             return jsonify({"error": "Payment not found"}), 404
         
-        # Update payment status to completed
-        c.execute('UPDATE payments SET status = "completed" WHERE id = ?', (payment_id,))
+        # Update payment status
+        c.execute('UPDATE payments SET status = "verified", verified_at = CURRENT_TIMESTAMP WHERE id = ?', (payment_id,))
         
-        # Get user details
-        user_id = payment['user_id']
+        # Update user subscription
+        c.execute('''
+            UPDATE users 
+            SET subscription_plan = ?, subscription_status = "active", subscription_start_date = CURRENT_TIMESTAMP
+            WHERE id = ?
+        ''', (payment['plan'], payment['user_id']))
         
-        # Get plan from payment amount
-        plan_name = None
-        for plan, details in SUBSCRIPTION_PLANS.items():
-            if details['price'] == payment['amount']:
-                plan_name = plan
-                break
-        
-        if plan_name:
-            # Update user subscription
-            c.execute('''
-                UPDATE users 
-                SET subscription_plan = ?, subscription_status = 'active', 
-                    subscription_start_date = CURRENT_TIMESTAMP,
-                    payment_provider = 'upi'
-                WHERE id = ?
-            ''', (plan_name, user_id))
-            
-            # Create subscription record
-            subscription_id = str(uuid.uuid4())
-            c.execute('''
-                INSERT INTO subscriptions (id, user_id, plan_name, status, amount, currency, payment_provider, payment_id)
-                VALUES (?, ?, ?, 'active', ?, ?, 'upi', ?)
-            ''', (subscription_id, user_id, plan_name, payment['amount'], payment['currency'], payment_id))
+        # Add admin notification
+        c.execute('''
+            INSERT INTO admin_notifications (user_id, payment_id, action, details, created_at)
+            VALUES (?, ?, "payment_verified", "Payment verified and subscription activated", CURRENT_TIMESTAMP)
+        ''', (payment['user_id'], payment_id))
         
         conn.commit()
         conn.close()
         
-        return jsonify({
-            "message": "Payment verified successfully",
-            "user_id": user_id,
-            "plan": plan_name,
-            "status": "completed"
-        }), 200
+        return jsonify({"message": "Payment verified successfully"}), 200
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Admin route to reject payments
-@app.route('/api/admin/reject-payment/<payment_id>', methods=['POST'])
+@app.route('/api/admin/reject-payment/<int:payment_id>', methods=['POST'])
 def admin_reject_payment(payment_id):
     try:
         data = request.get_json()
         admin_key = data.get('admin_key')
         reason = data.get('reason', 'No reason provided')
         
-        if admin_key != "maze_admin_2024":
-            return jsonify({"error": "Unauthorized"}), 401
+        # Simple admin key verification
+        if admin_key != 'maze_admin_2024':
+            return jsonify({"error": "Invalid admin key"}), 401
         
         conn = get_db()
         c = conn.cursor()
         
-        # Update payment status to rejected
-        c.execute('''
-            UPDATE payments 
-            SET status = 'rejected', 
-                updated_at = CURRENT_TIMESTAMP 
-            WHERE id = ?
-        ''', (payment_id,))
+        # Get payment details
+        c.execute('SELECT * FROM payments WHERE id = ?', (payment_id,))
+        payment = c.fetchone()
         
-        # Create admin notification
-        notification_id = str(uuid.uuid4())
+        if not payment:
+            return jsonify({"error": "Payment not found"}), 404
+        
+        # Update payment status
+        c.execute('UPDATE payments SET status = "rejected", rejected_at = CURRENT_TIMESTAMP WHERE id = ?', (payment_id,))
+        
+        # Add admin notification
         c.execute('''
-            INSERT INTO admin_notifications (id, type, user_id, payment_id, message, status)
-            VALUES (?, 'payment_rejected', ?, ?, ?, 'completed')
-        ''', (notification_id, payment_id, payment_id, f"Payment rejected: {reason}"))
+            INSERT INTO admin_notifications (user_id, payment_id, action, details, created_at)
+            VALUES (?, ?, "payment_rejected", ?, CURRENT_TIMESTAMP)
+        ''', (payment['user_id'], payment_id, f"Payment rejected: {reason}"))
         
         conn.commit()
         conn.close()
         
-        return jsonify({
-            "message": "Payment rejected successfully",
-            "status": "rejected"
-        }), 200
+        return jsonify({"message": "Payment rejected successfully"}), 200
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Get pending payments for admin
 @app.route('/api/admin/pending-payments', methods=['GET'])
-def get_pending_payments():
+def admin_pending_payments():
     try:
         conn = get_db()
         c = conn.cursor()
         
-        # Get pending payments with user details
         c.execute('''
-            SELECT p.*, u.email as user_email 
-            FROM payments p 
-            JOIN users u ON p.user_id = u.id 
-            WHERE p.status IN ('pending', 'pending_verification')
+            SELECT p.*, u.email, u.subscription_plan
+            FROM payments p
+            JOIN users u ON p.user_id = u.id
+            WHERE p.status = "pending"
             ORDER BY p.created_at DESC
         ''')
         
         payments = c.fetchall()
         conn.close()
         
-        payment_list = []
-        for payment in payments:
-            payment_list.append({
-                'id': payment['id'],
-                'user_id': payment['user_id'],
-                'user_email': payment['user_email'],
-                'amount': payment['amount'],
-                'currency': payment['currency'],
-                'payment_provider': payment['payment_provider'],
-                'status': payment['status'],
-                'upi_transaction_id': payment.get('upi_transaction_id'),
-                'notes': payment.get('notes'),
-                'created_at': payment['created_at'],
-                'updated_at': payment.get('updated_at')
-            })
-        
-        return jsonify(payment_list), 200
+        return jsonify([dict(payment) for payment in payments]), 200
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Get admin statistics
 @app.route('/api/admin/statistics', methods=['GET'])
-def get_admin_statistics():
+def admin_statistics():
     try:
         conn = get_db()
         c = conn.cursor()
         
-        # Total revenue
-        c.execute('SELECT SUM(amount) as total FROM payments WHERE status = "completed"')
-        total_revenue = c.fetchone()['total'] or 0
+        # Get total users
+        c.execute('SELECT COUNT(*) as total_users FROM users')
+        total_users = c.fetchone()['total_users']
         
-        # Total users
-        c.execute('SELECT COUNT(*) as count FROM users')
-        total_users = c.fetchone()['count']
-        
-        # Pending payments
-        c.execute('SELECT COUNT(*) as count FROM payments WHERE status IN ("pending", "pending_verification")')
-        pending_payments = c.fetchone()['count']
-        
-        # Verified today
+        # Get plan distribution
         c.execute('''
-            SELECT COUNT(*) as count FROM payments 
-            WHERE status = "completed" 
-            AND DATE(updated_at) = DATE(CURRENT_TIMESTAMP)
+            SELECT subscription_plan, COUNT(*) as count
+            FROM users
+            GROUP BY subscription_plan
         ''')
-        verified_today = c.fetchone()['count']
+        plan_distribution = {row['subscription_plan'] or 'free': row['count'] for row in c.fetchall()}
+        
+        # Get total revenue
+        c.execute('''
+            SELECT SUM(amount) as total_revenue
+            FROM payments
+            WHERE status = "verified"
+        ''')
+        total_revenue = c.fetchone()['total_revenue'] or 0
+        
+        # Get total vaults
+        c.execute('SELECT COUNT(*) as total_vaults FROM vaults')
+        total_vaults = c.fetchone()['total_vaults']
+        
+        # Get total passwords
+        c.execute('SELECT COUNT(*) as total_passwords FROM passwords')
+        total_passwords = c.fetchone()['total_passwords']
         
         conn.close()
         
         return jsonify({
-            'total_revenue': total_revenue,
-            'total_users': total_users,
-            'pending_payments': pending_payments,
-            'verified_today': verified_today
+            "total_users": total_users,
+            "total_revenue": total_revenue,
+            "total_vaults": total_vaults,
+            "total_passwords": total_passwords,
+            "free_users": plan_distribution.get('free', 0),
+            "pro_users": plan_distribution.get('pro', 0),
+            "premium_users": plan_distribution.get('premium', 0),
+            "enterprise_users": plan_distribution.get('enterprise', 0)
         }), 200
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Get recent admin activity
-@app.route('/api/admin/recent-activity', methods=['GET'])
-def get_recent_activity():
+@app.route('/api/admin/users', methods=['GET'])
+def admin_get_users():
     try:
         conn = get_db()
         c = conn.cursor()
         
-        # Get recent admin notifications
         c.execute('''
-            SELECT * FROM admin_notifications 
-            ORDER BY created_at DESC 
-            LIMIT 10
+            SELECT id, email, subscription_plan, subscription_status, created_at
+            FROM users
+            ORDER BY created_at DESC
+        ''')
+        
+        users = c.fetchall()
+        conn.close()
+        
+        return jsonify([dict(user) for user in users]), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/admin/recent-activity', methods=['GET'])
+def admin_recent_activity():
+    try:
+        conn = get_db()
+        c = conn.cursor()
+        
+        c.execute('''
+            SELECT an.*, u.email
+            FROM admin_notifications an
+            JOIN users u ON an.user_id = u.id
+            ORDER BY an.created_at DESC
+            LIMIT 20
         ''')
         
         activities = c.fetchall()
         conn.close()
         
-        activity_list = []
-        for activity in activities:
-            activity_list.append({
-                'id': activity['id'],
-                'type': activity['type'],
-                'message': activity['message'],
-                'status': activity['status'],
-                'created_at': activity['created_at']
-            })
-        
-        return jsonify(activity_list), 200
+        return jsonify([dict(activity) for activity in activities]), 200
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500

@@ -364,27 +364,151 @@
 
         // Edit vault (REAL FUNCTIONALITY)
         async function editVault(vaultId) {
-            const newName = prompt('Enter new vault name:');
-            if (!newName || !newName.trim()) return;
-            
+            // Get vault data first
             try {
-                // For now, we'll just show a message since we need to implement the update API
-                alert('Vault editing will be implemented in the next update!');
-                // TODO: Implement vault update API
+                const response = await fetch(`/api/vaults/${vaultId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const vault = await response.json();
+                    showEditVaultModal(vault);
+                } else {
+                    throw new Error('Failed to load vault details');
+                }
             } catch (error) {
-                alert('Error editing vault: ' + error.message);
+                console.error('Error loading vault:', error);
+                showError('Failed to load vault details');
+            }
+        }
+
+        // Show edit vault modal
+        function showEditVaultModal(vault) {
+            // Create modal HTML
+            const modalHTML = `
+                <div id="edit-vault-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div class="bg-gray-800 rounded-xl p-6 w-full max-w-md mx-4">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-xl font-semibold text-white">Edit Vault</h3>
+                            <button onclick="closeEditVaultModal()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+                        </div>
+                        
+                        <form id="edit-vault-form" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Vault Name</label>
+                                <input type="text" id="edit-vault-name" value="${vault.name}" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:border-blue-500 focus:outline-none" required>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Description</label>
+                                <textarea id="edit-vault-description" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:border-blue-500 focus:outline-none" rows="3">${vault.description || ''}</textarea>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Icon</label>
+                                <select id="edit-vault-icon" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:border-blue-500 focus:outline-none">
+                                    <option value="🔐" ${vault.icon === '🔐' ? 'selected' : ''}>🔐 Lock</option>
+                                    <option value="🏦" ${vault.icon === '🏦' ? 'selected' : ''}>🏦 Bank</option>
+                                    <option value="💳" ${vault.icon === '💳' ? 'selected' : ''}>💳 Credit Card</option>
+                                    <option value="🌐" ${vault.icon === '🌐' ? 'selected' : ''}>🌐 Website</option>
+                                    <option value="📱" ${vault.icon === '📱' ? 'selected' : ''}>📱 App</option>
+                                    <option value="💼" ${vault.icon === '💼' ? 'selected' : ''}>💼 Business</option>
+                                    <option value="🎮" ${vault.icon === '🎮' ? 'selected' : ''}>🎮 Gaming</option>
+                                    <option value="🔑" ${vault.icon === '🔑' ? 'selected' : ''}>🔑 Key</option>
+                                </select>
+                            </div>
+                            
+                            <div class="flex space-x-3 pt-4">
+                                <button type="submit" class="flex-1 btn-primary px-4 py-2 rounded-lg text-white">
+                                    Update Vault
+                                </button>
+                                <button type="button" onclick="closeEditVaultModal()" class="flex-1 px-4 py-2 border border-gray-600 rounded-lg text-gray-300 hover:bg-gray-700 transition-colors">
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            
+            // Add modal to page
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            
+            // Handle form submission
+            document.getElementById('edit-vault-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await updateVault(vault.id);
+            });
+        }
+
+        // Close edit vault modal
+        function closeEditVaultModal() {
+            const modal = document.getElementById('edit-vault-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        // Update vault
+        async function updateVault(vaultId) {
+            try {
+                const name = document.getElementById('edit-vault-name').value;
+                const description = document.getElementById('edit-vault-description').value;
+                const icon = document.getElementById('edit-vault-icon').value;
+                
+                if (!name.trim()) {
+                    showError('Please enter a vault name');
+                    return;
+                }
+                
+                const response = await fetch(`/api/vaults/${vaultId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, description, icon })
+                });
+
+                if (response.ok) {
+                    closeEditVaultModal();
+                    showSuccess('Vault updated successfully!');
+                    // Reload vaults to show changes
+                    loadAllVaults();
+                } else {
+                    throw new Error('Failed to update vault');
+                }
+            } catch (error) {
+                console.error('Error updating vault:', error);
+                showError('Failed to update vault. Please try again.');
             }
         }
 
         // Delete vault (REAL FUNCTIONALITY)
         async function deleteVault(vaultId) {
-            if (confirm('Are you sure you want to delete this vault? This action cannot be undone.')) {
+            if (confirm('Are you sure you want to delete this vault? This action cannot be undone and will delete all passwords inside.')) {
                 try {
-                    // For now, we'll just show a message since we need to implement the delete API
-                    alert('Vault deletion will be implemented in the next update!');
-                    // TODO: Implement vault delete API
+                    const response = await fetch(`/api/vaults/${vaultId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (response.ok) {
+                        showSuccess('Vault deleted successfully!');
+                        // Reload vaults to show changes
+                        loadAllVaults();
+                    } else {
+                        throw new Error('Failed to delete vault');
+                    }
                 } catch (error) {
-                    alert('Error deleting vault: ' + error.message);
+                    console.error('Error deleting vault:', error);
+                    showError('Failed to delete vault. Please try again.');
                 }
             }
         }
@@ -396,8 +520,94 @@
 
         // Placeholder functions for quick actions
         function viewAllVaults() {
-            alert('View All Vaults functionality will be implemented in a future update.');
-            // TODO: Implement view all vaults functionality
+            // Load and display all vaults instead of showing placeholder
+            loadAllVaults();
+        }
+
+        // Load all vaults with real functionality
+        async function loadAllVaults() {
+            try {
+                const response = await fetch('/api/vaults', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    displayAllVaults(data.vaults);
+                } else if (response.status === 401) {
+                    // Redirect to login if not authenticated
+                    window.location.href = '/login';
+                } else {
+                    throw new Error('Failed to load vaults');
+                }
+            } catch (error) {
+                console.error('Error loading vaults:', error);
+                // Show user-friendly error
+                showError('Failed to load vaults. Please try again.');
+            }
+        }
+
+        // Display all vaults in a grid
+        function displayAllVaults(vaults) {
+            const container = document.getElementById('vaults-container');
+            const emptyState = document.getElementById('empty-state');
+            
+            if (!vaults || vaults.length === 0) {
+                showEmptyState();
+                return;
+            }
+
+            // Hide empty state and show vaults
+            emptyState.classList.add('hidden');
+            container.classList.remove('hidden');
+
+            // Render vaults
+            container.innerHTML = vaults.map(vault => `
+                <div class="vault-card bg-gray-800/50 border border-gray-700 rounded-xl p-6 hover:bg-gray-800/70 transition-all duration-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="text-4xl">${vault.icon || '🔐'}</div>
+                        <div class="flex space-x-2">
+                            <button onclick="editVault('${vault.id}')" class="p-2 text-blue-400 hover:text-blue-300 hover:bg-blue-900/30 rounded-lg transition-colors">
+                                ✏️
+                            </button>
+                            <button onclick="deleteVault('${vault.id}')" class="p-2 text-red-400 hover:text-red-300 hover:bg-red-900/30 rounded-lg transition-colors">
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <h3 class="text-xl font-semibold text-white mb-2">${vault.name}</h3>
+                    <p class="text-gray-300 mb-4">${vault.description || 'No description'}</p>
+                    
+                    <div class="flex items-center justify-between text-sm text-gray-400 mb-4">
+                        <span>${vault.password_count || 0} passwords</span>
+                        <span>Created ${new Date(vault.created_at).toLocaleDateString()}</span>
+                    </div>
+                    
+                    <button onclick="openVault('${vault.id}')" class="w-full btn-primary px-4 py-2 rounded-lg text-white">
+                        Open Vault
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Show error message
+        function showError(message) {
+            // Create a temporary error notification
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'fixed top-4 right-4 bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+            errorDiv.textContent = message;
+            document.body.appendChild(errorDiv);
+            
+            // Remove after 5 seconds
+            setTimeout(() => {
+                if (errorDiv.parentNode) {
+                    errorDiv.parentNode.removeChild(errorDiv);
+                }
+            }, 5000);
         }
 
         function goToDashboard() {
