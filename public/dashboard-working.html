@@ -474,16 +474,52 @@
 
         async function loadSubscriptionInfo() {
             try {
+                console.log('🔍 Loading subscription info...');
                 const response = await fetch('/api/user/subscription', {
                     headers: window.authService.getAuthHeaders()
                 });
                 
                 if (response.ok) {
                     userSubscription = await response.json();
+                    console.log('✅ Subscription loaded:', userSubscription);
+                    updateSubscriptionUI();
+                } else {
+                    console.warn('⚠️ Subscription endpoint returned:', response.status, response.statusText);
+                    // Use default free plan if subscription endpoint fails
+                    userSubscription = {
+                        plan: 'free',
+                        plan_name: 'Free',
+                        status: 'active',
+                        features: {
+                            max_passwords: 50,
+                            max_vaults: 3,
+                            dark_web_monitoring: false,
+                            ai_security: false,
+                            advanced_analytics: false,
+                            team_sharing: false
+                        }
+                    };
+                    console.log('🔄 Using default free plan');
                     updateSubscriptionUI();
                 }
             } catch (error) {
-                console.error('Error loading subscription:', error);
+                console.error('❌ Error loading subscription:', error);
+                // Use default free plan on error
+                userSubscription = {
+                    plan: 'free',
+                    plan_name: 'Free',
+                    status: 'active',
+                    features: {
+                        max_passwords: 50,
+                        max_vaults: 3,
+                        dark_web_monitoring: false,
+                        ai_security: false,
+                        advanced_analytics: false,
+                        team_sharing: false
+                    }
+                };
+                console.log('🔄 Using default free plan due to error');
+                updateSubscriptionUI();
             }
         }
 

@@ -1958,15 +1958,23 @@ def admin_dashboard():
 @require_auth
 def get_user_subscription():
     try:
+        print("🔍 GET_USER_SUBSCRIPTION: Request received")
         user_id = request.headers.get('X-User-ID')
+        print(f"🔍 GET_USER_SUBSCRIPTION: User ID from headers: {user_id}")
+        print(f"🔍 GET_USER_SUBSCRIPTION: All headers: {dict(request.headers)}")
+        
         if not user_id:
+            print("❌ GET_USER_SUBSCRIPTION: No user_id in headers")
             return jsonify({"error": "Authentication required"}), 401
         
         conn = get_db()
         if not conn:
+            print("❌ GET_USER_SUBSCRIPTION: Database connection failed")
             return jsonify({"error": "Database connection failed"}), 500
+        
         c = conn.cursor()
         
+        print(f"🔍 GET_USER_SUBSCRIPTION: Querying database for user: {user_id}")
         c.execute('''
             SELECT subscription_plan, subscription_status, subscription_start_date, subscription_end_date,
                    payment_provider, payment_customer_id
@@ -1977,11 +1985,15 @@ def get_user_subscription():
         conn.close()
         
         if not user:
+            print(f"❌ GET_USER_SUBSCRIPTION: User not found in database: {user_id}")
             return jsonify({"error": "User not found"}), 404
         
-        plan_info = SUBSCRIPTION_PLANS.get(user['subscription_plan'], SUBSCRIPTION_PLANS['free'])
+        print(f"✅ GET_USER_SUBSCRIPTION: User found: {dict(user)}")
         
-        return jsonify({
+        plan_info = SUBSCRIPTION_PLANS.get(user['subscription_plan'], SUBSCRIPTION_PLANS['free'])
+        print(f"🔍 GET_USER_SUBSCRIPTION: Plan info: {plan_info}")
+        
+        response_data = {
             "plan": user['subscription_plan'],
             "status": user['subscription_status'],
             "plan_name": plan_info['name'],
@@ -1991,9 +2003,15 @@ def get_user_subscription():
             "start_date": user['subscription_start_date'],
             "end_date": user['subscription_end_date'],
             "payment_provider": user['payment_provider']
-        }), 200
+        }
+        
+        print(f"✅ GET_USER_SUBSCRIPTION: Returning response: {response_data}")
+        return jsonify(response_data), 200
         
     except Exception as e:
+        print(f"❌ GET_USER_SUBSCRIPTION: Exception occurred: {str(e)}")
+        import traceback
+        print(f"❌ GET_USER_SUBSCRIPTION: Traceback: {traceback.format_exc()}")
         return jsonify({"error": str(e)}), 500
 
 # Get available plans
