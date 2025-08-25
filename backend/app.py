@@ -419,9 +419,17 @@ def can_add_vault(user_id):
 # Authentication middleware
 def require_auth(f):
     def decorated_function(*args, **kwargs):
+        print(f"🔐 REQUIRE_AUTH: Checking authentication for {f.__name__}")
+        print(f"🔐 REQUIRE_AUTH: Headers: {dict(request.headers)}")
+        
         user_id = request.headers.get('X-User-ID')
+        print(f"🔐 REQUIRE_AUTH: User ID from headers: {user_id}")
+        
         if not user_id:
+            print("❌ REQUIRE_AUTH: No user_id found, authentication failed")
             return jsonify({"error": "Authentication required"}), 401
+        
+        print(f"✅ REQUIRE_AUTH: Authentication successful for user: {user_id}")
         return f(*args, **kwargs)
     decorated_function.__name__ = f.__name__
     return decorated_function
@@ -1221,9 +1229,19 @@ def get_vault(vault_id):
     """Get a specific vault by ID"""
     try:
         user_id = request.headers.get('X-User-ID')
+        print(f"🔍 GET_VAULT: Request for vault_id={vault_id}, user_id={user_id}")
+        print(f"🔍 GET_VAULT: Headers received: {dict(request.headers)}")
+        
+        if not user_id:
+            print("❌ GET_VAULT: No user_id in headers")
+            return jsonify({"error": "Authentication required"}), 401
+        
         db = get_db()
         if not db:
+            print("❌ GET_VAULT: Database connection failed")
             return jsonify({"error": "Database connection failed"}), 500
+        
+        print(f"🔍 GET_VAULT: Querying database for vault_id={vault_id}, user_id={user_id}")
         
         vault = db.execute(
             'SELECT * FROM vaults WHERE id = ? AND user_id = ?',
@@ -1231,11 +1249,20 @@ def get_vault(vault_id):
         ).fetchone()
         
         if not vault:
+            print(f"❌ GET_VAULT: Vault not found - vault_id={vault_id}, user_id={user_id}")
+            # Let's check what vaults exist for this user
+            all_vaults = db.execute('SELECT id, name, user_id FROM vaults WHERE user_id = ?', (user_id,)).fetchall()
+            print(f"🔍 GET_VAULT: User's vaults: {[dict(v) for v in all_vaults]}")
             return jsonify({"error": "Vault not found"}), 404
-            
+        
+        print(f"✅ GET_VAULT: Vault found: {dict(vault)}")
         return jsonify(dict(vault))
         
     except Exception as e:
+        print(f"❌ GET_VAULT: Exception occurred: {str(e)}")
+        print(f"❌ GET_VAULT: Exception type: {type(e)}")
+        import traceback
+        print(f"❌ GET_VAULT: Traceback: {traceback.format_exc()}")
         return jsonify({"error": f"Error retrieving vault: {str(e)}"}), 500
 
 @app.route('/api/vaults/<int:vault_id>', methods=['PUT'])
@@ -2286,6 +2313,39 @@ def get_security_stats():
         }), 200
         
     except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/debug/vaults', methods=['GET'])
+def debug_vaults():
+    """Debug endpoint to check vault data"""
+    try:
+        print("🔍 DEBUG_VAULTS: Checking database connectivity")
+        db = get_db()
+        if not db:
+            return jsonify({"error": "Database connection failed"}), 500
+        
+        print("🔍 DEBUG_VAULTS: Database connected, checking vaults table")
+        
+        # Check if vaults table exists and has data
+        vaults = db.execute('SELECT * FROM vaults LIMIT 10').fetchall()
+        print(f"🔍 DEBUG_VAULTS: Found {len(vaults)} vaults")
+        
+        # Check users table
+        users = db.execute('SELECT id, email FROM users LIMIT 10').fetchall()
+        print(f"🔍 DEBUG_VAULTS: Found {len(users)} users")
+        
+        return jsonify({
+            "database_status": "connected",
+            "vaults_count": len(vaults),
+            "users_count": len(users),
+            "sample_vaults": [dict(v) for v in vaults[:3]],
+            "sample_users": [dict(u) for u in users[:3]]
+        })
+        
+    except Exception as e:
+        print(f"❌ DEBUG_VAULTS: Exception: {str(e)}")
+        import traceback
+        print(f"❌ DEBUG_VAULTS: Traceback: {traceback.format_exc()}")
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':

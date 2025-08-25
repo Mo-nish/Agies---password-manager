@@ -384,18 +384,35 @@ class AuthService {
     // Get vault details
     async getVault(vaultId) {
         try {
+            console.log('🔍 GET_VAULT: Calling API for vault:', vaultId);
+            console.log('🔍 GET_VAULT: Auth headers:', this.getAuthHeaders());
+            console.log('🔍 GET_VAULT: Current user:', this.user);
+            console.log('🔍 GET_VAULT: Token available:', !!this.token);
+            
             const response = await fetch(`/api/vaults/${vaultId}`, {
                 method: 'GET',
                 headers: this.getAuthHeaders()
             });
 
+            console.log('🔍 GET_VAULT: Response status:', response.status);
+            console.log('🔍 GET_VAULT: Response headers:', Object.fromEntries(response.headers.entries()));
+
             if (!response.ok) {
-                throw new Error('Failed to get vault');
+                const errorText = await response.text();
+                console.error('❌ GET_VAULT: Response not OK:', response.status, errorText);
+                try {
+                    const errorData = JSON.parse(errorText);
+                    throw new Error(errorData.error || 'Failed to get vault');
+                } catch (parseError) {
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
             }
 
-            return await response.json();
+            const vaultData = await response.json();
+            console.log('✅ GET_VAULT: Vault data received:', vaultData);
+            return vaultData;
         } catch (error) {
-            console.error('Get vault error:', error);
+            console.error('❌ GET_VAULT: Exception occurred:', error);
             throw error;
         }
     }
