@@ -2358,6 +2358,29 @@ def debug_vaults():
         print(f"❌ DEBUG_VAULTS: Traceback: {traceback.format_exc()}")
         return jsonify({"error": str(e)}), 500
 
+# Basic error handler for any unhandled exceptions
+@app.errorhandler(Exception)
+def handle_exception(e):
+    """Handle any unhandled exceptions"""
+    print(f"❌ Unhandled exception: {str(e)}")
+    import traceback
+    print(f"❌ Traceback: {traceback.format_exc()}")
+    
+    return jsonify({
+        "error": "Internal server error",
+        "message": str(e),
+        "timestamp": datetime.now().isoformat()
+    }), 500
+
+# Basic route to test if Flask is working
+@app.route('/test')
+def test_route():
+    """Simple test route to verify Flask is working"""
+    return jsonify({
+        "status": "Flask is working!",
+        "timestamp": datetime.now().isoformat()
+    })
+
 if __name__ == '__main__':
     try:
         print("🚀 Starting Maze Password Manager...")
@@ -2371,15 +2394,23 @@ if __name__ == '__main__':
         else:
             print(f"⚠️ Database file does not exist: {DATABASE}")
         
-        # Initialize database
-        print("🔧 Initializing database...")
-        init_db()
-        print("✅ Database initialized successfully")
+        # Initialize database with error handling
+        try:
+            print("🔧 Initializing database...")
+            init_db()
+            print("✅ Database initialized successfully")
+        except Exception as db_error:
+            print(f"❌ Database initialization failed: {db_error}")
+            print("🔄 Continuing without database initialization...")
         
-        # Migrate database if needed
-        print("🔄 Running database migration...")
-        migrate_database()
-        print("✅ Database migration completed")
+        # Migrate database if needed with error handling
+        try:
+            print("🔄 Running database migration...")
+            migrate_database()
+            print("✅ Database migration completed")
+        except Exception as migration_error:
+            print(f"❌ Database migration failed: {migration_error}")
+            print("🔄 Continuing without database migration...")
         
         port = int(os.environ.get('PORT', 8000))
         debug_mode = os.environ.get('FLASK_ENV') == 'development'
