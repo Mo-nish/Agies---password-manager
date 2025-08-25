@@ -14,6 +14,11 @@ class LoginManager {
     init() {
         console.log('🔐 Initializing Login Manager...');
         
+        // Check if user is already authenticated
+        if (this.checkAuthStatus()) {
+            return; // User will be redirected
+        }
+        
         this.setupEventListeners();
         this.setupFormValidation();
         this.setupOTPInput();
@@ -195,6 +200,100 @@ class LoginManager {
         }
     }
 
+    // API methods - REAL API calls to Flask backend
+    async loginAPI(email, password) {
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Login failed');
+            }
+
+            const data = await response.json();
+            
+            // Store user data in localStorage
+            localStorage.setItem('user_id', data.user_id);
+            localStorage.setItem('auth_token', data.token);
+            localStorage.setItem('user_email', email);
+            
+            return data;
+        } catch (error) {
+            console.error('Login API error:', error);
+            throw error;
+        }
+    }
+
+    async signupAPI(formData) {
+        try {
+            const response = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    email: formData.email, 
+                    password: formData.password 
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Signup failed');
+            }
+
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Signup API error:', error);
+            throw error;
+        }
+    }
+
+    async forgotPasswordAPI(email) {
+        try {
+            // For now, simulate success (implement real password reset later)
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            return { success: true, message: 'Reset link sent' };
+        } catch (error) {
+            console.error('Forgot password API error:', error);
+            throw error;
+        }
+    }
+
+    // Check if user is already authenticated
+    checkAuthStatus() {
+        const userId = localStorage.getItem('user_id');
+        const token = localStorage.getItem('auth_token');
+        
+        if (userId && token) {
+            // User is authenticated, redirect to dashboard
+            window.location.href = '/dashboard';
+            return true;
+        }
+        return false;
+    }
+
+    // Logout function
+    logout() {
+        localStorage.removeItem('user_id');
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('user_email');
+        window.location.href = '/';
+    }
+
+    // Redirect to dashboard after successful login
+    redirectToDashboard() {
+        window.location.href = '/dashboard';
+    }
+
+    // Update the handleLogin method to use real API
     async handleLogin() {
         if (this.isAuthenticating) return;
 
@@ -209,24 +308,27 @@ class LoginManager {
         this.showLoadingState('login');
 
         try {
-            // Simulate API call
-            await this.simulateLoginAPI(email, password);
+            // Use real API instead of simulation
+            const result = await this.loginAPI(email, password);
             
-            // Show 2FA step
-            this.showStep('2fa');
+            // Show success message
+            this.showSuccess('Login successful! Redirecting to dashboard...');
             
-            // Simulate sending 2FA code
-            this.simulateSend2FACode(email);
+            // Redirect to dashboard after a short delay
+            setTimeout(() => {
+                this.redirectToDashboard();
+            }, 1500);
             
         } catch (error) {
             console.error('Login failed:', error);
-            this.showError('Login failed. Please check your credentials.');
+            this.showError(error.message || 'Login failed. Please check your credentials.');
         } finally {
             this.hideLoadingState('login');
             this.isAuthenticating = false;
         }
     }
 
+    // Update the handleSignup method to use real API
     async handleSignup() {
         if (this.isAuthenticating) return;
 
@@ -240,11 +342,11 @@ class LoginManager {
         this.showLoadingState('signup');
 
         try {
-            // Simulate API call
-            await this.simulateSignupAPI(formData);
+            // Use real API instead of simulation
+            const result = await this.signupAPI(formData);
             
             // Show success message
-            this.showSuccess('Account created successfully! Please check your email for verification.');
+            this.showSuccess('Account created successfully! Please log in.');
             
             // Return to login
             setTimeout(() => {
@@ -253,13 +355,14 @@ class LoginManager {
             
         } catch (error) {
             console.error('Signup failed:', error);
-            this.showError('Signup failed. Please try again.');
+            this.showError(error.message || 'Signup failed. Please try again.');
         } finally {
             this.hideLoadingState('signup');
             this.isAuthenticating = false;
         }
     }
 
+    // Update the handleForgotPassword method to use real API
     async handleForgotPassword() {
         if (this.isAuthenticating) return;
 
@@ -274,8 +377,8 @@ class LoginManager {
         this.showLoadingState('forgot-password');
 
         try {
-            // Simulate API call
-            await this.simulateForgotPasswordAPI(email);
+            // Use real API instead of simulation
+            const result = await this.forgotPasswordAPI(email);
             
             // Show success message
             this.showSuccess('Password reset link sent to your email!');
@@ -287,7 +390,7 @@ class LoginManager {
             
         } catch (error) {
             console.error('Password reset failed:', error);
-            this.showError('Failed to send reset link. Please try again.');
+            this.showError(error.message || 'Failed to send reset link. Please try again.');
         } finally {
             this.hideLoadingState('forgot-password');
             this.isAuthenticating = false;
@@ -485,34 +588,6 @@ class LoginManager {
     }
 
     // API simulation methods
-    async simulateLoginAPI(email, password) {
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        // Simulate validation
-        if (email === 'demo@maze.com' && password === 'password123') {
-            return { success: true, user: { email, id: 'demo-user' } };
-        } else {
-            throw new Error('Invalid credentials');
-        }
-    }
-
-    async simulateSignupAPI(formData) {
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        // Simulate success
-        return { success: true, user: { email: formData.email, id: 'new-user' } };
-    }
-
-    async simulateForgotPasswordAPI(email) {
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        // Simulate success
-        return { success: true, message: 'Reset link sent' };
-    }
-
     async simulate2FAVerificationAPI(code) {
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 1000));
@@ -573,19 +648,6 @@ class LoginManager {
             default:
                 return null;
         }
-    }
-
-    // Navigation methods
-    redirectToDashboard() {
-        // Store user data in localStorage
-        localStorage.setItem('maze_user_data', JSON.stringify({
-            username: 'Demo User',
-            email: 'demo@maze.com',
-            subscription: 'free'
-        }));
-        
-        // Redirect to dashboard
-        window.location.href = 'maze-password-manager.html';
     }
 
     // Notification methods

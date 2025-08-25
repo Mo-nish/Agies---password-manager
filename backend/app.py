@@ -41,7 +41,7 @@ def init_db():
         )
     ''')
     
-    # Create passwords table
+    # Create passwords table - FIXED foreign key reference
     c.execute('''
         CREATE TABLE IF NOT EXISTS passwords (
             id TEXT PRIMARY KEY,
@@ -53,7 +53,7 @@ def init_db():
             notes TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (vault_id) REFERENCES users (id)
+            FOREIGN KEY (vault_id) REFERENCES vaults (id)
         )
     ''')
     
@@ -67,6 +67,16 @@ def get_db():
 
 # Initialize database
 init_db()
+
+# Authentication middleware
+def require_auth(f):
+    def decorated_function(*args, **kwargs):
+        user_id = request.headers.get('X-User-ID')
+        if not user_id:
+            return jsonify({"error": "Authentication required"}), 401
+        return f(*args, **kwargs)
+    decorated_function.__name__ = f.__name__
+    return decorated_function
 
 # Main routes for the application
 @app.route('/')
@@ -130,10 +140,10 @@ def dashboard():
         ]
         
         for path in possible_paths:
-            if os.path.exists(os.path.join(path, 'maze-password-manager.html')):
-                return send_from_directory(path, 'maze-password-manager.html')
+            if os.path.exists(os.path.join(path, 'dashboard-working.html')):
+                return send_from_directory(path, 'dashboard-working.html')
         
-        return jsonify({"error": "maze-password-manager.html not found"}), 404
+        return jsonify({"error": "dashboard-working.html not found"}), 404
         
     except Exception as e:
         return jsonify({"error": f"Error serving dashboard: {str(e)}"}), 500
@@ -146,7 +156,6 @@ def maze():
             'public',
             '../public', 
             './public',
-            os.path.join(os.getcwd(), 'public'),
             os.path.join(os.path.dirname(__file__), '..', 'public')
         ]
         
@@ -158,6 +167,48 @@ def maze():
         
     except Exception as e:
         return jsonify({"error": f"Error serving maze page: {str(e)}"}), 500
+
+@app.route('/security')
+def security():
+    try:
+        # Try multiple possible paths for the public directory
+        possible_paths = [
+            'public',
+            '../public', 
+            './public',
+            os.path.join(os.getcwd(), 'public'),
+            os.path.join(os.path.dirname(__file__), '..', 'public')
+        ]
+        
+        for path in possible_paths:
+            if os.path.exists(os.path.join(path, 'security-dashboard-working.html')):
+                return send_from_directory(path, 'security-dashboard-working.html')
+        
+        return jsonify({"error": "security-dashboard-working.html not found"}), 404
+        
+    except Exception as e:
+        return jsonify({"error": f"Error serving security page: {str(e)}"}), 500
+
+@app.route('/vaults')
+def vaults():
+    try:
+        # Try multiple possible paths for the public directory
+        possible_paths = [
+            'public',
+            '../public', 
+            './public',
+            os.path.join(os.getcwd(), 'public'),
+            os.path.join(os.path.dirname(__file__), '..', 'public')
+        ]
+        
+        for path in possible_paths:
+            if os.path.exists(os.path.join(path, 'vaults.html')):
+                return send_from_directory(path, 'vaults.html')
+        
+        return jsonify({"error": "vaults.html not found"}), 404
+        
+    except Exception as e:
+        return jsonify({"error": f"Error serving vaults page: {str(e)}"}), 500
 
 @app.route('/api/health')
 def health():
@@ -261,8 +312,19 @@ def login_api():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# User logout
+@app.route('/api/auth/logout', methods=['POST'])
+def logout():
+    try:
+        # In a real app, you'd invalidate the token
+        # For now, just return success
+        return jsonify({"message": "Logged out successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 # Get user profile
 @app.route('/api/auth/profile', methods=['GET'])
+@require_auth
 def get_profile():
     try:
         # Simple auth check (in production, use JWT)
@@ -291,6 +353,7 @@ def get_profile():
 
 # Get user vaults
 @app.route('/api/vaults', methods=['GET'])
+@require_auth
 def get_vaults():
     try:
         user_id = request.headers.get('X-User-ID')
@@ -300,29 +363,29 @@ def get_vaults():
         conn = get_db()
         c = conn.cursor()
         
-        c.execute('''
-            SELECT v.*, COUNT(p.id) as password_count 
-            FROM vaults v 
-            LEFT JOIN passwords p ON v.id = p.vault_id 
-            WHERE v.user_id = ? 
-            GROUP BY v.id
-        ''', (user_id,))
-        
-        vaults = []
-        for row in c.fetchall():
-            vault = dict(row)
-            vault['password_count'] = vault['password_count'] or 0
-            vaults.append(vault)
-        
+        c.execute('SELECT * FROM vaults WHERE user_id = ?', (user_id,))
+        vaults = c.fetchall()
         conn.close()
         
-        return jsonify(vaults), 200
+        vault_list = []
+        for vault in vaults:
+            vault_list.append({
+                'id': vault['id'],
+                'name': vault['name'],
+                'description': vault['description'],
+                'icon': vault['icon'],
+                'password_count': vault['password_count'],
+                'created_at': vault['created_at']
+            })
+        
+        return jsonify(vault_list), 200
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Create vault
+# Create new vault
 @app.route('/api/vaults', methods=['POST'])
+@require_auth
 def create_vault():
     try:
         user_id = request.headers.get('X-User-ID')
@@ -341,28 +404,23 @@ def create_vault():
         conn = get_db()
         c = conn.cursor()
         
-        c.execute('''
-            INSERT INTO vaults (id, user_id, name, description, icon) 
-            VALUES (?, ?, ?, ?, ?)
-        ''', (vault_id, user_id, name, description, icon))
+        c.execute('INSERT INTO vaults (id, user_id, name, description, icon) VALUES (?, ?, ?, ?, ?)',
+                 (vault_id, user_id, name, description, icon))
         
         conn.commit()
         conn.close()
         
         return jsonify({
-            "id": vault_id,
-            "name": name,
-            "description": description,
-            "icon": icon,
-            "password_count": 0,
-            "created_at": datetime.now().isoformat()
+            "message": "Vault created successfully",
+            "vault_id": vault_id
         }), 201
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Get vault passwords
+# Get passwords for a vault
 @app.route('/api/vaults/<vault_id>/passwords', methods=['GET'])
+@require_auth
 def get_passwords(vault_id):
     try:
         user_id = request.headers.get('X-User-ID')
@@ -374,17 +432,29 @@ def get_passwords(vault_id):
         
         # Verify vault belongs to user
         c.execute('SELECT id FROM vaults WHERE id = ? AND user_id = ?', (vault_id, user_id))
-        if not c.fetchone():
+        vault = c.fetchone()
+        if not vault:
             conn.close()
             return jsonify({"error": "Vault not found"}), 404
         
-        # Get passwords
-        c.execute('SELECT * FROM passwords WHERE vault_id = ? ORDER BY created_at DESC', (vault_id,))
-        passwords = [dict(row) for row in c.fetchall()]
-        
+        c.execute('SELECT * FROM passwords WHERE vault_id = ?', (vault_id,))
+        passwords = c.fetchall()
         conn.close()
         
-        return jsonify(passwords), 200
+        password_list = []
+        for password in passwords:
+            password_list.append({
+                'id': password['id'],
+                'title': password['title'],
+                'username': password['username'],
+                'password': password['password'],  # In production, decrypt this
+                'url': password['url'],
+                'notes': password['notes'],
+                'created_at': password['created_at'],
+                'updated_at': password['updated_at']
+            })
+        
+        return jsonify(password_list), 200
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500
