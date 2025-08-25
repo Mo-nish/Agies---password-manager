@@ -8,6 +8,7 @@
     <!-- External Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
     
     <!-- Custom CSS -->
     <style>
@@ -51,6 +52,18 @@
             box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
         }
         
+        .btn-premium {
+            background: linear-gradient(135deg, #F59E0B, #EF4444);
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-premium:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(245, 158, 11, 0.4);
+        }
+        
         .navbar {
             background: rgba(15, 23, 42, 0.95);
             backdrop-filter: blur(20px);
@@ -71,9 +84,69 @@
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
             border-color: rgba(99, 102, 241, 0.3);
         }
+        
+        .vault-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s ease;
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+        
+        .vault-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+        
+        .maze-layer {
+            position: absolute;
+            border-radius: 50%;
+            border: 2px solid rgba(99, 102, 241, 0.2);
+            animation: rotate 30s linear infinite;
+        }
+        
+        .maze-layer:nth-child(1) { width: 200px; height: 200px; animation-duration: 30s; }
+        .maze-layer:nth-child(2) { width: 300px; height: 300px; animation-duration: 25s; animation-direction: reverse; }
+        .maze-layer:nth-child(3) { width: 400px; height: 400px; animation-duration: 35s; }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .plan-badge {
+            background: linear-gradient(135deg, #F59E0B, #EF4444);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .feature-locked {
+            opacity: 0.5;
+            filter: grayscale(100%);
+        }
+        
+        .upgrade-prompt {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(239, 68, 68, 0.1));
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
     </style>
 </head>
 <body>
+    <!-- Animated Maze Background -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="maze-layer top-1/4 left-1/4"></div>
+        <div class="maze-layer top-3/4 right-1/4"></div>
+        <div class="maze-layer bottom-1/4 left-3/4"></div>
+    </div>
+
     <!-- Navigation Bar -->
     <nav class="navbar fixed top-0 left-0 right-0 z-50 px-6 py-4">
         <div class="max-w-7xl mx-auto flex items-center justify-between">
@@ -87,12 +160,13 @@
             
             <div class="flex items-center space-x-6">
                 <a href="/dashboard" class="text-white hover:text-blue-300 transition-colors">Dashboard</a>
-                <a href="/maze" class="text-gray-300 hover:text-white transition-colors">Maze Vault</a>
-                <a href="/security" class="text-gray-300 hover:text-white transition-colors">Security</a>
                 <a href="/vaults" class="text-gray-300 hover:text-white transition-colors">Vaults</a>
+                <a href="/security" class="text-gray-300 hover:text-white transition-colors">Security</a>
+                <a href="/pricing" class="text-gray-300 hover:text-white transition-colors">Pricing</a>
                 
                 <div class="flex items-center space-x-4">
                     <span id="user-email" class="text-gray-300"></span>
+                    <span id="plan-badge" class="plan-badge">Free</span>
                     <button id="logout-btn" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-full text-white transition-colors">
                         Logout
                     </button>
@@ -106,25 +180,48 @@
         <div class="max-w-7xl mx-auto">
             <!-- Welcome Section -->
             <div class="text-center mb-16">
-                <h1 class="text-5xl font-bold mb-6 gradient-text">Welcome to Your Vault</h1>
-                <p class="text-xl text-gray-300">Secure your digital life with Maze Password Manager</p>
+                <h1 class="text-5xl font-bold mb-6 gradient-text">Welcome to Your Secure Vault</h1>
+                <p class="text-xl text-gray-300">Manage your passwords with military-grade security</p>
             </div>
 
-            <!-- User Info Card -->
-            <div class="glass-card rounded-2xl p-8 mb-12 max-w-2xl mx-auto">
-                <h2 class="text-2xl font-bold mb-6 text-center">Your Account</h2>
-                <div class="space-y-4">
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-300">Email:</span>
-                        <span id="user-email-display" class="text-white font-medium"></span>
+            <!-- Subscription Status -->
+            <div class="glass-card rounded-2xl p-8 mb-12 max-w-4xl mx-auto">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold mb-2">Your Subscription</h2>
+                        <p class="text-gray-300">Current plan: <span id="current-plan" class="font-semibold">Loading...</span></p>
                     </div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-300">User ID:</span>
-                        <span id="user-id-display" class="text-white font-medium font-mono text-sm"></span>
+                    <button id="upgrade-btn" class="btn-premium px-6 py-3 rounded-full text-white font-semibold">
+                        Upgrade Plan
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="text-center">
+                        <div class="text-3xl mb-2">🔐</div>
+                        <div class="text-2xl font-bold" id="password-usage">0/50</div>
+                        <div class="text-gray-300">Passwords</div>
                     </div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-300">Status:</span>
-                        <span class="px-3 py-1 bg-green-600 text-white rounded-full text-sm">Authenticated</span>
+                    
+                    <div class="text-center">
+                        <div class="text-3xl mb-2">🏗️</div>
+                        <div class="text-2xl font-bold" id="vault-usage">0/2</div>
+                        <div class="text-gray-300">Vaults</div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="text-3xl mb-2">🛡️</div>
+                        <div class="text-2xl font-bold" id="security-features">0/6</div>
+                        <div class="text-gray-300">Security Features</div>
+                    </div>
+                </div>
+                
+                <div id="upgrade-prompt" class="upgrade-prompt hidden">
+                    <p class="text-center text-yellow-300 mb-3">🚀 Unlock premium features with a Pro plan!</p>
+                    <div class="flex justify-center">
+                        <button onclick="window.location.href='/pricing'" class="btn-premium px-6 py-2 rounded-full text-white">
+                            View Plans
+                        </button>
                     </div>
                 </div>
             </div>
@@ -159,6 +256,83 @@
                 </div>
             </div>
 
+            <!-- Recent Vaults -->
+            <div class="mb-12">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-3xl font-bold">Recent Vaults</h2>
+                    <button onclick="window.location.href='/vaults'" class="text-blue-400 hover:text-blue-300 transition-colors">
+                        View All →
+                    </button>
+                </div>
+                
+                <div id="recent-vaults" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Vaults will be loaded here -->
+                </div>
+                
+                <div id="no-vaults" class="text-center py-16 hidden">
+                    <div class="text-8xl mb-6">🔐</div>
+                    <h3 class="text-2xl font-bold mb-4">No Vaults Yet</h3>
+                    <p class="text-xl text-gray-300 mb-8">Create your first vault to start organizing passwords</p>
+                    <button onclick="createVault()" class="btn-primary px-8 py-4 rounded-full text-white text-lg font-semibold">
+                        Create Your First Vault
+                    </button>
+                </div>
+            </div>
+
+            <!-- Premium Features Preview -->
+            <div class="glass-card rounded-2xl p-8 mb-12">
+                <h2 class="text-3xl font-bold mb-6 text-center">Premium Features</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="text-center feature-locked" id="feature-dark-web">
+                        <div class="text-4xl mb-3">🌐</div>
+                        <h3 class="font-semibold mb-2">Dark Web Monitor</h3>
+                        <p class="text-sm text-gray-400 mb-3">Monitor for breached passwords</p>
+                        <div class="upgrade-prompt">
+                            <p class="text-xs text-yellow-300 mb-2">Pro Plan Required</p>
+                            <button onclick="upgradeToPro()" class="btn-premium px-4 py-1 rounded text-white text-xs">
+                                Upgrade
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center feature-locked" id="feature-ai">
+                        <div class="text-4xl mb-3">🧠</div>
+                        <h3 class="font-semibold mb-2">AI Security</h3>
+                        <p class="text-sm text-gray-400 mb-3">Advanced threat detection</p>
+                        <div class="upgrade-prompt">
+                            <p class="text-xs text-yellow-300 mb-2">Pro Plan Required</p>
+                            <button onclick="upgradeToPro()" class="btn-premium px-4 py-1 rounded text-white text-xs">
+                                Upgrade
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center feature-locked" id="feature-analytics">
+                        <div class="text-4xl mb-3">📊</div>
+                        <h3 class="font-semibold mb-2">Advanced Analytics</h3>
+                        <p class="text-sm text-gray-400 mb-3">Security insights & reports</p>
+                        <div class="upgrade-prompt">
+                            <p class="text-xs text-yellow-300 mb-2">Premium Plan Required</p>
+                            <button onclick="upgradeToPremium()" class="btn-premium px-4 py-1 rounded text-white text-xs">
+                                Upgrade
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center feature-locked" id="feature-team">
+                        <div class="text-4xl mb-3">👥</div>
+                        <h3 class="font-semibold mb-2">Team Sharing</h3>
+                        <p class="text-sm text-gray-400 mb-3">Share vaults with team</p>
+                        <div class="upgrade-prompt">
+                            <p class="text-xs text-yellow-300 mb-2">Premium Plan Required</p>
+                            <button onclick="upgradeToPremium()" class="btn-premium px-4 py-1 rounded text-white text-xs">
+                                Upgrade
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Recent Activity -->
             <div class="glass-card rounded-2xl p-8">
                 <h2 class="text-2xl font-bold mb-6">Recent Activity</h2>
@@ -170,14 +344,51 @@
                             <p class="text-gray-400 text-sm">Just now</p>
                         </div>
                     </div>
-                    <div class="flex items-center space-x-4 p-4 bg-white/5 rounded-lg">
-                        <div class="text-2xl">🔐</div>
-                        <div>
-                            <p class="text-white">Session authenticated</p>
-                            <p class="text-gray-400 text-sm">Session started</p>
-                        </div>
-                    </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Vault Modal -->
+    <div id="create-vault-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="glass-card rounded-2xl p-8 max-w-md w-full">
+                <h2 class="text-2xl font-bold mb-6">Create New Vault</h2>
+                
+                <form id="create-vault-form" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Vault Name</label>
+                        <input type="text" id="vault-name" class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500" placeholder="e.g., Personal, Work, Finance" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Description (Optional)</label>
+                        <textarea id="vault-description" class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500" placeholder="Describe what this vault contains" rows="3"></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Icon</label>
+                        <select id="vault-icon" class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-blue-500">
+                            <option value="🔐">🔐 Default</option>
+                            <option value="💼">💼 Work</option>
+                            <option value="🏠">🏠 Personal</option>
+                            <option value="💳">💳 Finance</option>
+                            <option value="🎮">🎮 Gaming</option>
+                            <option value="🛒">🛒 Shopping</option>
+                            <option value="📧">📧 Email</option>
+                            <option value="🌐">🌐 Social</option>
+                        </select>
+                    </div>
+                    
+                    <div class="flex space-x-4 pt-4">
+                        <button type="button" onclick="closeCreateVaultModal()" class="flex-1 px-4 py-3 border border-white/20 rounded-lg text-white hover:bg-white/10 transition-colors">
+                            Cancel
+                        </button>
+                        <button type="submit" class="flex-1 btn-primary px-4 py-3 rounded-lg text-white">
+                            Create Vault
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -185,10 +396,13 @@
     <!-- Scripts -->
     <script src="js/auth-service.js"></script>
     <script>
-        // Dashboard functionality
+        let userSubscription = null;
+        let userVaults = [];
+
+        // Initialize dashboard
         document.addEventListener('DOMContentLoaded', function() {
             // Check authentication
-            if (!window.authService.isAuthenticated()) {
+            if (!window.authService || !window.authService.isAuthenticated()) {
                 window.location.href = '/login';
                 return;
             }
@@ -196,34 +410,249 @@
             // Display user info
             const user = window.authService.getCurrentUser();
             document.getElementById('user-email').textContent = user.email;
-            document.getElementById('user-email-display').textContent = user.email;
-            document.getElementById('user-id-display').textContent = user.id;
 
-            // Setup logout button
+            // Setup event listeners
+            setupEventListeners();
+            
+            // Load user data
+            loadUserData();
+            
+            // Initialize animations
+            initializeAnimations();
+        });
+
+        function setupEventListeners() {
+            // Logout button
             document.getElementById('logout-btn').addEventListener('click', async function() {
                 await window.authService.logout();
                 window.location.href = '/';
             });
-        });
+
+            // Upgrade button
+            document.getElementById('upgrade-btn').addEventListener('click', function() {
+                window.location.href = '/pricing';
+            });
+
+            // Create vault form
+            document.getElementById('create-vault-form').addEventListener('submit', handleCreateVault);
+        }
+
+        async function loadUserData() {
+            try {
+                // Load subscription info
+                await loadSubscriptionInfo();
+                
+                // Load vaults
+                await loadVaults();
+                
+                // Update UI based on subscription
+                updateFeatureAccess();
+                
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
+
+        async function loadSubscriptionInfo() {
+            try {
+                const response = await fetch('/api/user/subscription', {
+                    headers: window.authService.getAuthHeaders()
+                });
+                
+                if (response.ok) {
+                    userSubscription = await response.json();
+                    updateSubscriptionUI();
+                }
+            } catch (error) {
+                console.error('Error loading subscription:', error);
+            }
+        }
+
+        async function loadVaults() {
+            try {
+                userVaults = await window.authService.getVaults();
+                displayRecentVaults();
+            } catch (error) {
+                console.error('Error loading vaults:', error);
+                userVaults = [];
+                displayRecentVaults();
+            }
+        }
+
+        function updateSubscriptionUI() {
+            if (!userSubscription) return;
+            
+            document.getElementById('current-plan').textContent = userSubscription.plan_name;
+            document.getElementById('plan-badge').textContent = userSubscription.plan_name;
+            
+            // Update usage stats
+            const maxPasswords = userSubscription.features.max_passwords;
+            const maxVaults = userSubscription.features.max_vaults;
+            
+            // For now, show current usage (you'd get this from actual data)
+            document.getElementById('password-usage').textContent = `0/${maxPasswords}`;
+            document.getElementById('vault-usage').textContent = `${userVaults.length}/${maxVaults}`;
+            
+            // Count enabled security features
+            const enabledFeatures = Object.values(userSubscription.features).filter(f => f === true).length;
+            document.getElementById('security-features').textContent = `${enabledFeatures}/6`;
+        }
+
+        function updateFeatureAccess() {
+            if (!userSubscription) return;
+            
+            const features = userSubscription.features;
+            
+            // Update feature access based on subscription
+            if (features.dark_web_monitoring) {
+                document.getElementById('feature-dark-web').classList.remove('feature-locked');
+            }
+            
+            if (features.ai_security) {
+                document.getElementById('feature-ai').classList.remove('feature-locked');
+            }
+            
+            if (features.advanced_analytics) {
+                document.getElementById('feature-analytics').classList.remove('feature-locked');
+            }
+            
+            if (features.team_sharing) {
+                document.getElementById('feature-team').classList.remove('feature-locked');
+            }
+            
+            // Show upgrade prompt if on free plan
+            if (userSubscription.plan === 'free') {
+                document.getElementById('upgrade-prompt').classList.remove('hidden');
+            }
+        }
+
+        function displayRecentVaults() {
+            const container = document.getElementById('recent-vaults');
+            const noVaults = document.getElementById('no-vaults');
+            
+            if (!userVaults || userVaults.length === 0) {
+                container.classList.add('hidden');
+                noVaults.classList.remove('hidden');
+                return;
+            }
+            
+            container.classList.remove('hidden');
+            noVaults.classList.add('hidden');
+            
+            // Show only first 6 vaults
+            const recentVaults = userVaults.slice(0, 6);
+            
+            container.innerHTML = recentVaults.map(vault => `
+                <div class="vault-card">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="text-3xl">${vault.icon}</div>
+                        <div class="flex space-x-2">
+                            <button onclick="openVault('${vault.id}')" class="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-white text-sm">
+                                Open
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <h3 class="text-lg font-semibold mb-2">${vault.name}</h3>
+                    <p class="text-gray-300 mb-4">${vault.description || 'No description'}</p>
+                    
+                    <div class="flex items-center justify-between text-sm text-gray-400">
+                        <span>${vault.password_count || 0} passwords</span>
+                        <span>Created ${new Date(vault.created_at).toLocaleDateString()}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function initializeAnimations() {
+            gsap.registerPlugin(ScrollTrigger);
+            
+            // Animate feature cards
+            gsap.from(".feature-card", {
+                duration: 1,
+                opacity: 0,
+                y: 50,
+                ease: "power2.out",
+                stagger: 0.2,
+                scrollTrigger: {
+                    trigger: ".feature-card",
+                    start: "top 80%"
+                }
+            });
+            
+            // Animate vault cards
+            gsap.from(".vault-card", {
+                duration: 1,
+                opacity: 0,
+                y: 50,
+                ease: "power2.out",
+                stagger: 0.1,
+                scrollTrigger: {
+                    trigger: ".vault-card",
+                    start: "top 80%"
+                }
+            });
+        }
 
         // Quick action functions
         function createVault() {
-            const vaultName = prompt('Enter vault name:');
-            if (vaultName) {
-                window.authService.createVault(vaultName)
-                    .then(result => {
-                        alert('Vault created successfully!');
-                        location.reload();
-                    })
-                    .catch(error => {
-                        alert('Error creating vault: ' + error.message);
-                    });
+            document.getElementById('create-vault-modal').classList.remove('hidden');
+        }
+
+        function closeCreateVaultModal() {
+            document.getElementById('create-vault-modal').classList.add('hidden');
+            document.getElementById('create-vault-form').reset();
+        }
+
+        async function handleCreateVault(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('vault-name').value;
+            const description = document.getElementById('vault-description').value;
+            const icon = document.getElementById('vault-icon').value;
+            
+            if (!name.trim()) {
+                alert('Please enter a vault name');
+                return;
+            }
+            
+            try {
+                const result = await window.authService.createVault(name, description, icon);
+                alert('Vault created successfully!');
+                closeCreateVaultModal();
+                await loadVaults(); // Reload vaults
+            } catch (error) {
+                if (error.message.includes('upgrade_required')) {
+                    alert('Vault limit reached! Please upgrade your plan to create more vaults.');
+                    window.location.href = '/pricing';
+                } else {
+                    alert('Error creating vault: ' + error.message);
+                }
             }
         }
 
         function viewVaults() {
             window.location.href = '/vaults';
         }
+
+        function openVault(vaultId) {
+            window.location.href = `/vault-interface.html?vault=${vaultId}`;
+        }
+
+        function upgradeToPro() {
+            window.location.href = '/pricing?plan=pro';
+        }
+
+        function upgradeToPremium() {
+            window.location.href = '/pricing?plan=premium';
+        }
+
+        // Global functions for onclick handlers
+        window.createVault = createVault;
+        window.viewVaults = viewVaults;
+        window.openVault = openVault;
+        window.upgradeToPro = upgradeToPro;
+        window.upgradeToPremium = upgradeToPremium;
     </script>
 </body>
 </html>

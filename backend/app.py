@@ -13,16 +13,91 @@ CORS(app)
 # Database setup
 DATABASE = 'agies.db'
 
+# Subscription plans and features
+SUBSCRIPTION_PLANS = {
+    'free': {
+        'name': 'Free Plan',
+        'price': 0,
+        'currency': 'INR',
+        'features': {
+            'max_passwords': 50,
+            'max_vaults': 2,
+            'dark_web_monitoring': False,
+            'ai_security': False,
+            'priority_support': False,
+            'team_sharing': False,
+            'advanced_analytics': False,
+            'custom_themes': False
+        }
+    },
+    'pro': {
+        'name': 'Pro Plan',
+        'price': 299,
+        'currency': 'INR',
+        'billing_cycle': 'monthly',
+        'features': {
+            'max_passwords': 1000,
+            'max_vaults': 10,
+            'dark_web_monitoring': True,
+            'ai_security': True,
+            'priority_support': False,
+            'team_sharing': False,
+            'advanced_analytics': False,
+            'custom_themes': True
+        }
+    },
+    'premium': {
+        'name': 'Premium Plan',
+        'price': 599,
+        'currency': 'INR',
+        'billing_cycle': 'monthly',
+        'features': {
+            'max_passwords': 10000,
+            'max_vaults': 50,
+            'dark_web_monitoring': True,
+            'ai_security': True,
+            'priority_support': True,
+            'team_sharing': True,
+            'advanced_analytics': True,
+            'custom_themes': True
+        }
+    },
+    'enterprise': {
+        'name': 'Enterprise Plan',
+        'price': 1499,
+        'currency': 'INR',
+        'billing_cycle': 'monthly',
+        'features': {
+            'max_passwords': 100000,
+            'max_vaults': 100,
+            'dark_web_monitoring': True,
+            'ai_security': True,
+            'priority_support': True,
+            'team_sharing': True,
+            'advanced_analytics': True,
+            'custom_themes': True,
+            'sso_integration': True,
+            'api_access': True
+        }
+    }
+}
+
 def init_db():
     conn = sqlite3.connect(DATABASE)
     c = conn.cursor()
     
-    # Create users table
+    # Create users table with subscription info
     c.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id TEXT PRIMARY KEY,
             email TEXT UNIQUE NOT NULL,
             password_hash TEXT NOT NULL,
+            subscription_plan TEXT DEFAULT 'free',
+            subscription_status TEXT DEFAULT 'active',
+            subscription_start_date TIMESTAMP,
+            subscription_end_date TIMESTAMP,
+            payment_provider TEXT,
+            payment_customer_id TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
@@ -41,7 +116,7 @@ def init_db():
         )
     ''')
     
-    # Create passwords table - FIXED foreign key reference
+    # Create passwords table
     c.execute('''
         CREATE TABLE IF NOT EXISTS passwords (
             id TEXT PRIMARY KEY,
@@ -54,6 +129,42 @@ def init_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (vault_id) REFERENCES vaults (id)
+        )
+    ''')
+    
+    # Create subscriptions table
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS subscriptions (
+            id TEXT PRIMARY KEY,
+            user_id TEXT NOT NULL,
+            plan_name TEXT NOT NULL,
+            status TEXT NOT NULL,
+            amount INTEGER NOT NULL,
+            currency TEXT DEFAULT 'INR',
+            payment_provider TEXT,
+            payment_id TEXT,
+            start_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            end_date TIMESTAMP,
+            auto_renew BOOLEAN DEFAULT 1,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+    ''')
+    
+    # Create payments table
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS payments (
+            id TEXT PRIMARY KEY,
+            user_id TEXT NOT NULL,
+            subscription_id TEXT,
+            amount INTEGER NOT NULL,
+            currency TEXT DEFAULT 'INR',
+            payment_provider TEXT NOT NULL,
+            payment_id TEXT NOT NULL,
+            status TEXT NOT NULL,
+            payment_method TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id),
+            FOREIGN KEY (subscription_id) REFERENCES subscriptions (id)
         )
     ''')
     
@@ -188,6 +299,27 @@ def security():
         
     except Exception as e:
         return jsonify({"error": f"Error serving security page: {str(e)}"}), 500
+
+@app.route('/pricing')
+def pricing():
+    try:
+        # Try multiple possible paths for the public directory
+        possible_paths = [
+            'public',
+            '../public', 
+            './public',
+            os.path.join(os.getcwd(), 'public'),
+            os.path.join(os.path.dirname(__file__), '..', 'public')
+        ]
+        
+        for path in possible_paths:
+            if os.path.exists(os.path.join(path, 'pricing.html')):
+                return send_from_directory(path, 'pricing.html')
+        
+        return jsonify({"error": "pricing.html not found"}), 404
+        
+    except Exception as e:
+        return jsonify({"error": f"Error serving pricing page: {str(e)}"}), 500
 
 @app.route('/vault-interface')
 def vault_interface():
@@ -413,6 +545,15 @@ def create_vault():
         if not user_id:
             return jsonify({"error": "Authentication required"}), 401
         
+        # Check vault limit based on subscription
+        if not can_add_vault(user_id):
+            return jsonify({
+                "error": "Vault limit reached for your plan",
+                "upgrade_required": True,
+                "current_plan": "free",
+                "suggested_plan": "pro"
+            }), 403
+        
         data = request.get_json()
         name = data.get('name')
         description = data.get('description', '')
@@ -488,6 +629,15 @@ def add_password(vault_id):
         user_id = request.headers.get('X-User-ID')
         if not user_id:
             return jsonify({"error": "Authentication required"}), 401
+        
+        # Check password limit based on subscription
+        if not can_add_password(user_id):
+            return jsonify({
+                "error": "Password limit reached for your plan",
+                "upgrade_required": True,
+                "current_plan": "free",
+                "suggested_plan": "pro"
+            }), 403
         
         data = request.get_json()
         title = data.get('title')
@@ -826,6 +976,215 @@ def serve_frontend(path):
         
     except Exception as e:
         return jsonify({"error": f"Error serving file: {str(e)}"}), 500
+
+# Get user subscription info
+@app.route('/api/user/subscription', methods=['GET'])
+@require_auth
+def get_user_subscription():
+    try:
+        user_id = request.headers.get('X-User-ID')
+        if not user_id:
+            return jsonify({"error": "Authentication required"}), 401
+        
+        conn = get_db()
+        c = conn.cursor()
+        
+        c.execute('''
+            SELECT subscription_plan, subscription_status, subscription_start_date, subscription_end_date,
+                   payment_provider, payment_customer_id
+            FROM users WHERE id = ?
+        ''', (user_id,))
+        
+        user = c.fetchone()
+        conn.close()
+        
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+        
+        plan_info = SUBSCRIPTION_PLANS.get(user['subscription_plan'], SUBSCRIPTION_PLANS['free'])
+        
+        return jsonify({
+            "plan": user['subscription_plan'],
+            "status": user['subscription_status'],
+            "plan_name": plan_info['name'],
+            "price": plan_info['price'],
+            "currency": plan_info['currency'],
+            "features": plan_info['features'],
+            "start_date": user['subscription_start_date'],
+            "end_date": user['subscription_end_date'],
+            "payment_provider": user['payment_provider']
+        }), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Get available plans
+@app.route('/api/plans', methods=['GET'])
+def get_plans():
+    try:
+        return jsonify(SUBSCRIPTION_PLANS), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Create Stripe payment intent
+@app.route('/api/payments/stripe/create-intent', methods=['POST'])
+@require_auth
+def create_stripe_payment_intent():
+    try:
+        user_id = request.headers.get('X-User-ID')
+        if not user_id:
+            return jsonify({"error": "Authentication required"}), 401
+        
+        data = request.get_json()
+        plan_name = data.get('plan')
+        
+        if plan_name not in SUBSCRIPTION_PLANS:
+            return jsonify({"error": "Invalid plan"}), 400
+        
+        plan = SUBSCRIPTION_PLANS[plan_name]
+        
+        # In production, you would use Stripe's Python library
+        # For now, we'll simulate the payment intent creation
+        payment_intent = {
+            "id": f"pi_{str(uuid.uuid4()).replace('-', '')}",
+            "amount": plan['price'] * 100,  # Stripe uses cents
+            "currency": plan['currency'].lower(),
+            "client_secret": f"pi_{str(uuid.uuid4()).replace('-', '')}_secret_{str(uuid.uuid4()).replace('-', '')}",
+            "plan": plan_name
+        }
+        
+        return jsonify(payment_intent), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Create Razorpay order
+@app.route('/api/payments/razorpay/create-order', methods=['POST'])
+@require_auth
+def create_razorpay_order():
+    try:
+        user_id = request.headers.get('X-User-ID')
+        if not user_id:
+            return jsonify({"error": "Authentication required"}), 401
+        
+        data = request.get_json()
+        plan_name = data.get('plan')
+        
+        if plan_name not in SUBSCRIPTION_PLANS:
+            return jsonify({"error": "Invalid plan"}), 400
+        
+        plan = SUBSCRIPTION_PLANS[plan_name]
+        
+        # In production, you would use Razorpay's Python library
+        # For now, we'll simulate the order creation
+        order = {
+            "id": f"order_{str(uuid.uuid4()).replace('-', '')}",
+            "amount": plan['price'] * 100,  # Razorpay uses paise
+            "currency": plan['currency'],
+            "plan": plan_name,
+            "receipt": f"receipt_{str(uuid.uuid4()).replace('-', '')}"
+        }
+        
+        return jsonify(order), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Confirm payment and upgrade subscription
+@app.route('/api/payments/confirm', methods=['POST'])
+@require_auth
+def confirm_payment():
+    try:
+        user_id = request.headers.get('X-User-ID')
+        if not user_id:
+            return jsonify({"error": "Authentication required"}), 401
+        
+        data = request.get_json()
+        plan_name = data.get('plan')
+        payment_provider = data.get('payment_provider')  # 'stripe' or 'razorpay'
+        payment_id = data.get('payment_id')
+        
+        if plan_name not in SUBSCRIPTION_PLANS:
+            return jsonify({"error": "Invalid plan"}), 400
+        
+        plan = SUBSCRIPTION_PLANS[plan_name]
+        
+        conn = get_db()
+        c = conn.cursor()
+        
+        # Update user subscription
+        c.execute('''
+            UPDATE users 
+            SET subscription_plan = ?, subscription_status = 'active', 
+                subscription_start_date = CURRENT_TIMESTAMP,
+                payment_provider = ?, payment_customer_id = ?
+            WHERE id = ?
+        ''', (plan_name, payment_provider, payment_id, user_id))
+        
+        # Create subscription record
+        subscription_id = str(uuid.uuid4())
+        c.execute('''
+            INSERT INTO subscriptions (id, user_id, plan_name, status, amount, currency, payment_provider, payment_id)
+            VALUES (?, ?, ?, 'active', ?, ?, ?, ?)
+        ''', (subscription_id, user_id, plan_name, plan['price'], plan['currency'], payment_provider, payment_id))
+        
+        # Create payment record
+        payment_record_id = str(uuid.uuid4())
+        c.execute('''
+            INSERT INTO payments (id, user_id, subscription_id, amount, currency, payment_provider, payment_id, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, 'completed')
+        ''', (payment_record_id, user_id, subscription_id, plan['price'], plan['currency'], payment_provider, payment_id))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            "message": "Subscription upgraded successfully",
+            "plan": plan_name,
+            "plan_name": plan['name'],
+            "features": plan['features']
+        }), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Cancel subscription
+@app.route('/api/user/subscription/cancel', methods=['POST'])
+@require_auth
+def cancel_subscription():
+    try:
+        user_id = request.headers.get('X-User-ID')
+        if not user_id:
+            return jsonify({"error": "Authentication required"}), 401
+        
+        conn = get_db()
+        c = conn.cursor()
+        
+        # Update user subscription to free
+        c.execute('''
+            UPDATE users 
+            SET subscription_plan = 'free', subscription_status = 'cancelled'
+            WHERE id = ?
+        ''', (user_id,))
+        
+        # Update subscription record
+        c.execute('''
+            UPDATE subscriptions 
+            SET status = 'cancelled', end_date = CURRENT_TIMESTAMP
+            WHERE user_id = ? AND status = 'active'
+        ''', (user_id,))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            "message": "Subscription cancelled successfully",
+            "plan": "free",
+            "plan_name": SUBSCRIPTION_PLANS['free']['name']
+        }), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8000))
