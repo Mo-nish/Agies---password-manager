@@ -1398,7 +1398,7 @@ def create_upi_order():
 def generate_upi_payment_link(order_id, amount, plan_name):
     # Replace 'your-upi-id@bank' with your actual UPI ID
     # Example: monishreddy@sbicard, monishreddy@ybl, etc.
-    upi_id = "monishreddy@sbicard"  # Change this to your actual UPI ID
+    upi_id = "7013984388@ybl"  # Your actual UPI ID
     
     upi_link = f"upi://pay?pa={upi_id}&pn=MazePasswordManager&tn={plan_name}Subscription&am={amount}&cu=INR&ref={order_id}"
     
