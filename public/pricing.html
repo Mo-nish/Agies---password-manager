@@ -88,10 +88,11 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             transition: all 0.4s ease;
             border-radius: 20px;
-            padding: 2rem;
+            padding: 1.5rem;
             position: relative;
             overflow: visible;
-            min-height: 600px;
+            min-height: 500px;
+            max-height: 550px;
             display: flex;
             flex-direction: column;
         }
@@ -125,14 +126,16 @@
             list-style: none;
             padding: 0;
             flex-grow: 1;
+            margin-bottom: 1rem;
         }
-
+        
         .feature-list li {
-            padding: 0.5rem 0;
+            padding: 0.4rem 0;
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.3rem;
+            font-size: 0.9rem;
         }
         
         .feature-list li::before {
@@ -146,32 +149,32 @@
             color: #EF4444;
             flex-shrink: 0;
         }
-
+        
         .feature-list li.disabled {
             opacity: 0.5;
         }
         
         .price {
-            font-size: 3rem;
+            font-size: 2.5rem;
             font-weight: 900;
             color: #F8FAFC;
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
         }
         
         .price .currency {
-            font-size: 1.5rem;
+            font-size: 1.25rem;
             vertical-align: top;
         }
         
         .price .period {
-            font-size: 1rem;
+            font-size: 0.875rem;
             color: #94A3B8;
             font-weight: 400;
         }
         
         .plan-card button {
             margin-top: auto;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
         }
         
         .payment-methods {
@@ -281,12 +284,15 @@
                 <a href="/" class="text-4xl hover:scale-110 transition-transform mr-6" title="Back to Home">🏠</a>
                 <div class="text-center">
                     <h1 class="text-5xl font-bold mb-6 gradient-text">Choose Your Security Level</h1>
-                    <p class="text-xl text-gray-300">Select the perfect plan for your security needs</p>
+                    <p class="text-xl text-gray-300 mb-4">Select the perfect plan for your security needs</p>
+                    <div class="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 inline-block">
+                        <p class="text-blue-400 font-semibold">📋 4 Plans Available: Free • Pro • Premium • Enterprise</p>
+                    </div>
                 </div>
             </div>
 
             <!-- Pricing Plans -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
                 <!-- Free Plan -->
                 <div class="plan-card">
                     <div class="text-center mb-6">
@@ -296,8 +302,8 @@
                             <span class="period">/month</span>
                         </div>
                         <p class="text-gray-400 mt-2">Perfect for getting started</p>
-                </div>
-                
+                    </div>
+                    
                     <ul class="feature-list mb-8">
                         <li>Up to 50 passwords</li>
                         <li>2 vaults</li>
@@ -307,12 +313,12 @@
                         <li class="disabled">Dark web monitoring</li>
                         <li class="disabled">AI security</li>
                         <li class="disabled">Team sharing</li>
-                </ul>
-                
+                    </ul>
+                    
                     <button class="w-full btn-primary py-3 rounded-lg text-white font-semibold" disabled>
                         Current Plan
                     </button>
-            </div>
+                </div>
 
                 <!-- Pro Plan -->
                 <div class="plan-card popular">
@@ -323,8 +329,8 @@
                             <span class="period">/month</span>
                         </div>
                         <p class="text-gray-400 mt-2">Most popular choice</p>
-                </div>
-                
+                    </div>
+                    
                     <ul class="feature-list mb-8">
                         <li>Up to 1,000 passwords</li>
                         <li>10 vaults</li>
@@ -334,12 +340,12 @@
                         <li>Dark web monitoring</li>
                         <li>AI security</li>
                         <li>Custom themes</li>
-                </ul>
-                
+                    </ul>
+                    
                     <button onclick="selectPlan('pro')" class="w-full btn-premium py-3 rounded-lg text-white font-semibold">
                         Choose Pro
                     </button>
-            </div>
+                </div>
 
                 <!-- Premium Plan -->
                 <div class="plan-card">
@@ -350,8 +356,8 @@
                             <span class="period">/month</span>
                         </div>
                         <p class="text-gray-400 mt-2">For power users</p>
-                </div>
-                
+                    </div>
+                    
                     <ul class="feature-list mb-8">
                         <li>Up to 10,000 passwords</li>
                         <li>50 vaults</li>
@@ -363,8 +369,8 @@
                         <li>Team sharing</li>
                         <li>Advanced analytics</li>
                         <li>Custom themes</li>
-                </ul>
-                
+                    </ul>
+                    
                     <button onclick="selectPlan('premium')" class="w-full btn-premium py-3 rounded-lg text-white font-semibold">
                         Choose Premium
                     </button>
@@ -377,9 +383,9 @@
                         <div class="price">
                             <span class="currency">₹</span>999
                             <span class="period">/month</span>
-            </div>
+                        </div>
                         <p class="text-gray-400 mt-2">For teams & businesses</p>
-        </div>
+                    </div>
 
                     <ul class="feature-list mb-8">
                         <li>Up to 100,000 passwords</li>
@@ -400,7 +406,7 @@
                         Choose Enterprise
                     </button>
                 </div>
-                </div>
+            </div>
 
             <!-- Payment Options -->
             <div class="glass-card rounded-2xl p-8 mb-12">
