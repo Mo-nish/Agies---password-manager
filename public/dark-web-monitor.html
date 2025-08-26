@@ -404,6 +404,53 @@
                 gap: 1rem;
             }
         }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #6366F1;
+            color: #6366F1;
+        }
+        
+        .btn-outline:hover {
+            background: #6366F1;
+            color: white;
+        }
+        
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+        
+        .status-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .status-title {
+            font-size: 0.875rem;
+            color: #9CA3AF;
+            margin-bottom: 0.5rem;
+        }
+        
+        .status-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #F8FAFC;
+            margin-bottom: 0.25rem;
+        }
+        
+        .status-label {
+            font-size: 0.875rem;
+            color: #9CA3AF;
+        }
+        
+        .monitoring-status {
+            margin-top: 1.5rem;
+        }
     </style>
 </head>
 <body>
@@ -459,16 +506,37 @@
             <h2 class="text-2xl font-bold mb-6">🔍 Monitoring Controls</h2>
             
             <div class="monitoring-controls">
-                <button id="start-scan" class="btn btn-primary">🚀 Start Real Scan</button>
+                <button id="start-real-scan" class="btn btn-primary">🚀 Start Enterprise Scan</button>
                 <button id="stop-scan" class="btn btn-secondary">🛑 Stop Scan</button>
-                <button class="btn btn-secondary" onclick="darkWebMonitor.scanSpecificEmail()">📧 Scan Email</button>
-                <button class="btn btn-secondary" onclick="darkWebMonitor.scanSpecificDomain()">🌐 Scan Domain</button>
-                <button class="btn btn-secondary" onclick="darkWebMonitor.viewScanHistory()">📋 Scan History</button>
-                <button class="btn btn-success" onclick="darkWebMonitor.enableAutoRotation()">🔄 Enable Auto-Rotation</button>
-                <button class="btn btn-danger" onclick="darkWebMonitor.emergencyLockdown()">🚨 Emergency Lockdown</button>
+                <button class="btn btn-secondary" onclick="startScan()">📧 Start Scan</button>
+                <button class="btn btn-secondary" onclick="emergencyLockdown()">🚨 Emergency Lockdown</button>
+                <button class="btn btn-success" onclick="toggleAutoRotation()">🔄 Toggle Auto-Rotation</button>
             </div>
             
-            <div class="scan-status">
+            <!-- Enterprise Monitoring Status -->
+            <div class="monitoring-status mt-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="status-card">
+                        <div class="status-title">Continuous Monitoring</div>
+                        <div class="status-value" id="monitoring-status">⏹️ Inactive</div>
+                        <button class="btn btn-sm btn-outline" onclick="toggleMonitoring()">Toggle</button>
+                    </div>
+                    
+                    <div class="status-card">
+                        <div class="status-title">Auto-Rotation</div>
+                        <div class="status-value" id="auto-rotation-status">⏹️ Inactive</div>
+                        <button class="btn btn-sm btn-outline" onclick="toggleAutoRotation()">Toggle</button>
+                    </div>
+                    
+                    <div class="status-card">
+                        <div class="status-title">Security Score</div>
+                        <div class="status-value" id="security-score">100</div>
+                        <div class="status-label">/100</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="scan-status mt-6">
                 <div class="flex justify-between items-center mb-2">
                     <span>Scan Progress</span>
                     <span id="scan-progress">0%</span>
@@ -476,7 +544,7 @@
                 <div class="scan-progress">
                     <div class="scan-bar" id="scan-bar"></div>
                 </div>
-                <div class="text-sm text-gray-400" id="scan-message">Ready to scan</div>
+                <div class="text-sm text-gray-400" id="scan-status">Ready to scan</div>
             </div>
         </div>
 
