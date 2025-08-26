@@ -2937,7 +2937,7 @@ def handle_exception(e):
 
 # Basic route to test if Flask is working
 @app.route('/health')
-def health_check():
+def simple_health_check():
     """Simple health check to verify Flask is working"""
     try:
         return jsonify({
