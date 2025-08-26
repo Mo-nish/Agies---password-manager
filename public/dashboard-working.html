@@ -100,6 +100,56 @@
             border-color: rgba(99, 102, 241, 0.3);
         }
         
+        /* Ensure all dashboard elements are visible */
+        .dashboard-content {
+            opacity: 1 !important;
+            visibility: visible !important;
+            display: block !important;
+        }
+        
+        .dashboard-content * {
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+        
+        /* Force visibility of important elements */
+        .subscription-section,
+        .vaults-section,
+        .security-section,
+        .premium-features {
+            opacity: 1 !important;
+            visibility: visible !important;
+            display: block !important;
+            transform: none !important;
+        }
+        
+        /* Ensure cards are properly spaced */
+        .grid {
+            gap: 1.5rem !important;
+        }
+        
+        .grid > * {
+            margin-bottom: 1.5rem !important;
+        }
+        
+        /* Debug styles - remove in production */
+        .debug-visible {
+            border: 2px solid red !important;
+            background: rgba(255, 0, 0, 0.1) !important;
+        }
+        
+        /* Responsive fixes */
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr !important;
+            }
+            
+            .feature-card,
+            .vault-card {
+                margin-bottom: 1rem !important;
+            }
+        }
+        
         .maze-layer {
             position: absolute;
             border-radius: 50%;
@@ -407,23 +457,86 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Check authentication
             if (!window.authService || !window.authService.isAuthenticated()) {
-                window.location.href = '/login';
-                return;
+                console.log('⚠️ User not authenticated, showing demo mode');
+                // Show demo mode instead of redirecting
+                showDemoMode();
+            } else {
+                console.log('✅ User authenticated, loading full dashboard');
+                // Display user info
+                const user = window.authService.getCurrentUser();
+                const userEmailElement = document.getElementById('user-email');
+                if (userEmailElement && user) {
+                    userEmailElement.textContent = user.email;
+                }
+                
+                // Setup event listeners
+                setupEventListeners();
+                
+                // Load user data
+                loadUserData();
             }
-
-            // Display user info
-            const user = window.authService.getCurrentUser();
-            document.getElementById('user-email').textContent = user.email;
-
-            // Setup event listeners
-            setupEventListeners();
-            
-            // Load user data
-            loadUserData();
             
             // Initialize animations
             initializeAnimations();
         });
+
+        function showDemoMode() {
+            console.log('🎭 Showing demo mode dashboard');
+            
+            // Set demo user data
+            userSubscription = {
+                plan: 'free',
+                plan_name: 'Free',
+                status: 'active',
+                features: {
+                    max_passwords: 50,
+                    max_vaults: 3,
+                    dark_web_monitoring: false,
+                    ai_security: false,
+                    advanced_analytics: false,
+                    team_sharing: false
+                }
+            };
+            
+            userVaults = [
+                {
+                    id: 'demo-vault-1',
+                    name: 'Personal Accounts',
+                    description: 'Personal email and social media accounts',
+                    icon: '🏠',
+                    password_count: 5,
+                    created_at: new Date().toISOString()
+                },
+                {
+                    id: 'demo-vault-2',
+                    name: 'Work Accounts',
+                    description: 'Professional and business accounts',
+                    icon: '💼',
+                    password_count: 3,
+                    created_at: new Date().toISOString()
+                }
+            ];
+            
+            // Update UI
+            updateSubscriptionUI();
+            displayRecentVaults();
+            updateFeatureAccess();
+            
+            // Show demo message
+            const demoMessage = document.createElement('div');
+            demoMessage.className = 'demo-notice';
+            demoMessage.innerHTML = `
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px; border-radius: 10px; margin: 20px 0; text-align: center;">
+                    <h3>🎭 Demo Mode</h3>
+                    <p>You're viewing the dashboard in demo mode. <a href="/login" style="color: #ffd700; text-decoration: underline;">Login</a> to access your real vaults and passwords.</p>
+                </div>
+            `;
+            
+            const dashboardContent = document.querySelector('.dashboard-content') || document.querySelector('main') || document.body;
+            if (dashboardContent) {
+                dashboardContent.insertBefore(demoMessage, dashboardContent.firstChild);
+            }
+        }
 
         function setupEventListeners() {
             // Logout button
@@ -475,6 +588,13 @@
         async function loadSubscriptionInfo() {
             try {
                 console.log('🔍 Loading subscription info...');
+                
+                // Check if we have auth service and user is authenticated
+                if (!window.authService || !window.authService.isAuthenticated()) {
+                    console.log('⚠️ User not authenticated, using demo data');
+                    return; // Demo mode will handle this
+                }
+                
                 const response = await fetch('/api/user/subscription', {
                     headers: window.authService.getAuthHeaders()
                 });
@@ -525,6 +645,12 @@
 
         async function loadVaults() {
             try {
+                // Check if we have auth service and user is authenticated
+                if (!window.authService || !window.authService.isAuthenticated()) {
+                    console.log('⚠️ User not authenticated, using demo vaults');
+                    return; // Demo mode will handle this
+                }
+                
                 userVaults = await window.authService.getVaults();
                 displayRecentVaults();
             } catch (error) {
@@ -652,34 +778,74 @@
         }
 
         function initializeAnimations() {
-            gsap.registerPlugin(ScrollTrigger);
-            
-            // Animate feature cards
-            gsap.from(".feature-card", {
-                duration: 1,
-                opacity: 0,
+            // GSAP animations for dashboard elements
+            gsap.from('.feature-card', {
+                duration: 0.8,
                 y: 50,
-                ease: "power2.out",
+                opacity: 0,
                 stagger: 0.2,
-                scrollTrigger: {
-                    trigger: ".feature-card",
-                    start: "top 80%"
-                }
+                ease: 'power3.out'
             });
             
-            // Animate vault cards
-            gsap.from(".vault-card", {
-                duration: 1,
+            gsap.from('.vault-card', {
+                duration: 0.6,
+                y: 30,
                 opacity: 0,
-                y: 50,
-                ease: "power2.out",
                 stagger: 0.1,
-                scrollTrigger: {
-                    trigger: ".vault-card",
-                    start: "top 80%"
-                                    }
-                                });
-                            }
+                ease: 'power2.out'
+            });
+            
+            // Ensure all elements are visible
+            ensureDashboardVisibility();
+        }
+        
+        function ensureDashboardVisibility() {
+            console.log('🔍 Ensuring dashboard visibility...');
+            
+            // Force visibility of all important sections
+            const sections = [
+                '.subscription-section',
+                '.vaults-section', 
+                '.security-section',
+                '.premium-features',
+                '.recent-vaults',
+                '.create-vault-section'
+            ];
+            
+            sections.forEach(selector => {
+                const elements = document.querySelectorAll(selector);
+                elements.forEach(el => {
+                    if (el) {
+                        el.style.opacity = '1';
+                        el.style.visibility = 'visible';
+                        el.style.display = 'block';
+                        el.style.transform = 'none';
+                        console.log(`✅ Made visible: ${selector}`);
+                    }
+                });
+            });
+            
+            // Check for any hidden elements
+            const allElements = document.querySelectorAll('*');
+            const hiddenElements = Array.from(allElements).filter(el => {
+                const style = window.getComputedStyle(el);
+                return style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0';
+            });
+            
+            if (hiddenElements.length > 0) {
+                console.log(`⚠️ Found ${hiddenElements.length} hidden elements:`, hiddenElements);
+                hiddenElements.forEach(el => {
+                    console.log(`Hidden element:`, el.tagName, el.className, el.id);
+                });
+            }
+            
+            // Force grid layout
+            const grids = document.querySelectorAll('.grid');
+            grids.forEach(grid => {
+                grid.style.display = 'grid';
+                grid.style.gap = '1.5rem';
+            });
+        }
                             
         // Quick action functions
         function createVault() {
