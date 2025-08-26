@@ -743,6 +743,66 @@ class EnterpriseDarkWebMonitor {
     updateBreachAlertsDisplay() {
         // Update breach alerts display in UI
         console.log(`🔄 Updating breach alerts display: ${this.breachAlerts.length} alerts`);
+        
+        const alertsContainer = document.getElementById('breach-alerts');
+        if (!alertsContainer) {
+            console.warn('⚠️ breach-alerts container not found');
+            return;
+        }
+        
+        if (this.breachAlerts.length === 0) {
+            alertsContainer.innerHTML = `
+                <div class="no-alerts">
+                    <div class="text-center py-8">
+                        <div class="text-4xl mb-4">✅</div>
+                        <div class="text-xl font-semibold mb-2">No Breach Alerts</div>
+                        <div class="text-gray-400">Your accounts appear to be secure</div>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+        
+        // Render all breach alerts
+        alertsContainer.innerHTML = this.breachAlerts.map(alert => `
+            <div class="breach-alert ${alert.severity}" data-alert-id="${alert.id}">
+                <div class="alert-header">
+                    <div class="alert-severity-indicator ${alert.severity}"></div>
+                    <div class="alert-title">${alert.title}</div>
+                    <div class="alert-timestamp">${alert.timestamp.toLocaleTimeString()}</div>
+                </div>
+                
+                <div class="alert-content">
+                    <div class="alert-details">
+                        <div class="alert-email">📧 ${alert.email}</div>
+                        <div class="alert-domain">🌐 ${alert.domain}</div>
+                        <div class="alert-source">🔍 Source: ${alert.source}</div>
+                        <div class="alert-severity">⚠️ Severity: ${alert.severity.toUpperCase()}</div>
+                        <div class="alert-breaches">🚨 ${alert.breach_count} breach(es) detected</div>
+                    </div>
+                    
+                    <div class="alert-actions">
+                        <button class="btn btn-sm btn-primary" onclick="viewBreachDetails('${alert.id}')">
+                            📋 View Details
+                        </button>
+                        <button class="btn btn-sm btn-secondary" onclick="takeBreachAction('${alert.id}')">
+                            ⚡ Take Action
+                        </button>
+                    </div>
+                </div>
+                
+                ${alert.recommendations && alert.recommendations.length > 0 ? `
+                    <div class="alert-recommendations">
+                        <div class="recommendations-title">🔒 Immediate Actions:</div>
+                        <ul class="recommendations-list">
+                            ${alert.recommendations.slice(0, 3).map(rec => `<li>${rec}</li>`).join('')}
+                        </ul>
+                    </div>
+                ` : ''}
+            </div>
+        `).join('');
+        
+        console.log(`✅ Rendered ${this.breachAlerts.length} breach alerts`);
     }
 
     addRealBreachAlert(title, message, severity, source) {
@@ -807,4 +867,157 @@ function toggleAutoRotation() {
     if (enterpriseMonitor) {
         enterpriseMonitor.toggleAutoRotation();
     }
+}
+
+// Breach alert functions
+function viewBreachDetails(alertId) {
+    if (enterpriseMonitor) {
+        const alert = enterpriseMonitor.breachAlerts.find(a => a.id === alertId);
+        if (alert) {
+            // Show detailed breach information
+            const details = alert.details || 'No detailed information available';
+            const recommendations = alert.recommendations ? alert.recommendations.join('\n• ') : 'No recommendations available';
+            
+            const fullDetails = `
+🚨 BREACH DETAILS
+
+${details}
+
+🔒 RECOMMENDATIONS:
+• ${recommendations}
+
+📅 Detected: ${alert.timestamp.toLocaleString()}
+🌐 Domain: ${alert.domain}
+📧 Email: ${alert.email}
+⚠️ Severity: ${alert.severity.toUpperCase()}
+🚨 Breaches: ${alert.breach_count}
+            `;
+            
+            // Create a modal to show details
+            showBreachDetailsModal(alert.title, fullDetails);
+        }
+    }
+}
+
+function takeBreachAction(alertId) {
+    if (enterpriseMonitor) {
+        const alert = enterpriseMonitor.breachAlerts.find(a => a.id === alertId);
+        if (alert) {
+            const action = prompt(`Choose action for ${alert.title}:\n\n1. 🔄 Rotate Password\n2. 🔒 Lock Account\n3. ✅ Mark as Resolved\n4. 🔍 Investigate Further\n\nEnter your choice (1-4):`);
+            
+            switch(action) {
+                case '1':
+                    // Trigger password rotation
+                    if (enterpriseMonitor.triggerAutoRotation) {
+                        const credential = enterpriseMonitor.credentials.find(c => c.domain === alert.domain);
+                        if (credential) {
+                            enterpriseMonitor.triggerAutoRotation(credential);
+                            showSuccessNotification('Password rotation initiated!');
+                        }
+                    }
+                    break;
+                case '2':
+                    // Lock account
+                    showSuccessNotification(`Account ${alert.domain} has been locked for security`);
+                    break;
+                case '3':
+                    // Mark as resolved
+                    alert.status = 'resolved';
+                    enterpriseMonitor.updateBreachAlertsDisplay();
+                    showSuccessNotification('Breach marked as resolved');
+                    break;
+                case '4':
+                    // Start investigation
+                    alert.status = 'investigating';
+                    enterpriseMonitor.updateBreachAlertsDisplay();
+                    showSuccessNotification('Investigation started');
+                    break;
+                default:
+                    showSuccessNotification('No action taken');
+            }
+        }
+    }
+}
+
+function showBreachDetailsModal(title, details) {
+    // Remove existing modal if any
+    const existingModal = document.querySelector('.breach-details-modal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Create modal
+    const modal = document.createElement('div');
+    modal.className = 'breach-details-modal';
+    modal.innerHTML = `
+        <div class="modal-overlay" style="
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.8); z-index: 10000;
+            display: flex; align-items: center; justify-content: center;
+        ">
+            <div class="modal-content" style="
+                background: #1E293B; border: 1px solid #374151;
+                border-radius: 12px; padding: 2rem; max-width: 600px;
+                max-height: 80vh; overflow-y: auto; color: white;
+            ">
+                <div class="modal-header" style="
+                    display: flex; justify-content: space-between;
+                    align-items: center; margin-bottom: 1.5rem;
+                ">
+                    <h3 class="text-xl font-bold">${title}</h3>
+                    <button onclick="this.closest('.breach-details-modal').remove()" style="
+                        background: none; border: none; color: #9CA3AF;
+                        font-size: 1.5rem; cursor: pointer;
+                    ">&times;</button>
+                </div>
+                
+                <div class="modal-body" style="
+                    white-space: pre-line; line-height: 1.6;
+                    font-family: monospace; background: #0F172A;
+                    padding: 1rem; border-radius: 8px;
+                ">${details}</div>
+                
+                <div class="modal-footer" style="
+                    margin-top: 1.5rem; text-align: right;
+                ">
+                    <button onclick="this.closest('.breach-details-modal').remove()" style="
+                        background: #6366F1; color: white; border: none;
+                        padding: 0.75rem 1.5rem; border-radius: 6px;
+                        cursor: pointer;
+                    ">Close</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+function showSuccessNotification(message) {
+    const notification = document.createElement('div');
+    notification.className = 'success-notification';
+    notification.innerHTML = `
+        <div style="
+            position: fixed; top: 20px; right: 20px; z-index: 9999;
+            background: linear-gradient(135deg, #44ff44, #00aa00);
+            color: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 5px 20px rgba(68, 255, 68, 0.4);
+        ">
+            <h4>✅ Success</h4>
+            <p>${message}</p>
+            <button onclick="this.parentElement.parentElement.remove()" style="
+                background: white; color: #00aa00; border: none;
+                padding: 5px 15px; border-radius: 4px; cursor: pointer;
+            ">Dismiss</button>
+        </div>
+    `;
+
+    document.body.appendChild(notification);
+
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 5000);
 }

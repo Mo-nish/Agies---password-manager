@@ -451,6 +451,144 @@
         .monitoring-status {
             margin-top: 1.5rem;
         }
+        
+        /* Breach Alert Styles */
+        .breach-alert {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .breach-alert:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .breach-alert.critical {
+            border-left: 4px solid #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+        
+        .breach-alert.high {
+            border-left: 4px solid #f59e0b;
+            background: rgba(245, 158, 11, 0.1);
+        }
+        
+        .breach-alert.medium {
+            border-left: 4px solid #eab308;
+            background: rgba(234, 179, 8, 0.1);
+        }
+        
+        .breach-alert.low {
+            border-left: 4px solid #22c55e;
+            background: rgba(34, 197, 94, 0.1);
+        }
+        
+        .alert-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            gap: 1rem;
+        }
+        
+        .alert-severity-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .alert-severity-indicator.critical { background: #ef4444; }
+        .alert-severity-indicator.high { background: #f59e0b; }
+        .alert-severity-indicator.medium { background: #eab308; }
+        .alert-severity-indicator.low { background: #22c55e; }
+        
+        .alert-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            flex: 1;
+        }
+        
+        .alert-timestamp {
+            font-size: 0.875rem;
+            color: #9CA3AF;
+        }
+        
+        .alert-content {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 1.5rem;
+            align-items: start;
+        }
+        
+        .alert-details {
+            display: grid;
+            gap: 0.5rem;
+        }
+        
+        .alert-details > div {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .alert-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .alert-recommendations {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .recommendations-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #fbbf24;
+        }
+        
+        .recommendations-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .recommendations-list li {
+            padding: 0.25rem 0;
+            font-size: 0.875rem;
+            color: #d1d5db;
+        }
+        
+        .recommendations-list li:before {
+            content: "• ";
+            color: #6366F1;
+            font-weight: bold;
+        }
+        
+        .no-alerts {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #9CA3AF;
+        }
+        
+        .no-alerts .text-4xl {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .no-alerts .text-xl {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #F8FAFC;
+        }
     </style>
 </head>
 <body>
