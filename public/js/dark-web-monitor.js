@@ -738,6 +738,96 @@ class EnterpriseDarkWebMonitor {
     updateCredentialDisplay() {
         // Update credential display in UI
         console.log('🔄 Updating credential display');
+        
+        const credentialsContainer = document.getElementById('credential-monitoring');
+        if (!credentialsContainer) {
+            console.warn('⚠️ credential-monitoring container not found');
+            return;
+        }
+        
+        if (this.credentials.length === 0) {
+            credentialsContainer.innerHTML = `
+                <div class="no-credentials">
+                    <div class="text-center py-8">
+                        <div class="text-4xl mb-4">🔐</div>
+                        <div class="text-xl font-semibold mb-2">No Credentials Found</div>
+                        <div class="text-gray-400">Add credentials to start monitoring</div>
+                        <button class="btn btn-primary mt-4" onclick="addNewCredential()">
+                            ➕ Add Credential
+                        </button>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+        
+        // Render all credentials with monitoring status
+        credentialsContainer.innerHTML = `
+            <div class="credentials-header">
+                <div class="credentials-title">
+                    <span class="padlock-icon">🔐</span>
+                    <span>Credential Monitoring</span>
+                </div>
+                <div class="credentials-count">
+                    ${this.credentials.length} credential(s) monitored
+                </div>
+            </div>
+            
+            <div class="credentials-list">
+                ${this.credentials.map((credential, index) => `
+                    <div class="credential-card ${credential.status}" data-credential-id="${index}">
+                        <div class="credential-info">
+                            <div class="credential-email">
+                                <span class="email-icon">📧</span>
+                                <span class="email-text">${credential.email}</span>
+                            </div>
+                            <div class="credential-domain">
+                                <span class="domain-icon">🌐</span>
+                                <span class="domain-text">${credential.domain}</span>
+                            </div>
+                            <div class="credential-status">
+                                <span class="status-indicator ${credential.status}"></span>
+                                <span class="status-text">${credential.status.charAt(0).toUpperCase() + credential.status.slice(1)}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="credential-actions">
+                            <button class="btn btn-sm btn-outline" onclick="scanSpecificCredential(${index})">
+                                🔍 Scan Now
+                            </button>
+                            <button class="btn btn-sm btn-secondary" onclick="editCredential(${index})">
+                                ✏️ Edit
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="removeCredential(${index})">
+                                🗑️ Remove
+                            </button>
+                        </div>
+                        
+                        <div class="credential-monitoring">
+                            <div class="monitoring-status">
+                                <span class="monitoring-icon">📊</span>
+                                <span>Monitoring: ${credential.monitoring ? 'Active' : 'Inactive'}</span>
+                            </div>
+                            <div class="last-scan">
+                                <span class="scan-icon">⏰</span>
+                                <span>Last scan: ${credential.lastScan ? new Date(credential.lastScan).toLocaleString() : 'Never'}</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+            
+            <div class="credentials-footer">
+                <button class="btn btn-primary" onclick="addNewCredential()">
+                    ➕ Add New Credential
+                </button>
+                <button class="btn btn-secondary" onclick="bulkScanCredentials()">
+                    🔍 Scan All Credentials
+                </button>
+            </div>
+        `;
+        
+        console.log(`✅ Rendered ${this.credentials.length} credentials`);
     }
 
     updateBreachAlertsDisplay() {
@@ -836,6 +926,15 @@ let enterpriseMonitor = null;
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Initializing Enterprise Dark Web Monitor...');
     enterpriseMonitor = new EnterpriseDarkWebMonitor();
+    
+    // Initialize displays after a short delay to ensure DOM is ready
+    setTimeout(() => {
+        if (enterpriseMonitor) {
+            console.log('🔄 Initializing credential and breach displays...');
+            enterpriseMonitor.updateCredentialDisplay();
+            enterpriseMonitor.updateBreachAlertsDisplay();
+        }
+    }, 100);
 });
 
 // Global functions for HTML onclick handlers
@@ -1020,4 +1119,90 @@ function showSuccessNotification(message) {
             notification.remove();
         }
     }, 5000);
+}
+
+// Credential management functions
+function addNewCredential() {
+    const email = prompt('Enter email address:');
+    if (!email) return;
+    
+    const domain = email.split('@')[1] || 'unknown';
+    
+    if (enterpriseMonitor) {
+        const newCredential = {
+            email: email,
+            domain: domain,
+            status: 'active',
+            monitoring: true,
+            lastScan: null
+        };
+        
+        enterpriseMonitor.credentials.push(newCredential);
+        enterpriseMonitor.updateCredentialDisplay();
+        showSuccessNotification(`Credential ${email} added successfully!`);
+    }
+}
+
+function editCredential(index) {
+    if (!enterpriseMonitor || !enterpriseMonitor.credentials[index]) return;
+    
+    const credential = enterpriseMonitor.credentials[index];
+    const newEmail = prompt('Enter new email address:', credential.email);
+    
+    if (newEmail && newEmail !== credential.email) {
+        credential.email = newEmail;
+        credential.domain = newEmail.split('@')[1] || 'unknown';
+        enterpriseMonitor.updateCredentialDisplay();
+        showSuccessNotification(`Credential updated successfully!`);
+    }
+}
+
+function removeCredential(index) {
+    if (!enterpriseMonitor || !enterpriseMonitor.credentials[index]) return;
+    
+    const credential = enterpriseMonitor.credentials[index];
+    const confirm = window.confirm(`Are you sure you want to remove ${credential.email}?`);
+    
+    if (confirm) {
+        enterpriseMonitor.credentials.splice(index, 1);
+        enterpriseMonitor.updateCredentialDisplay();
+        showSuccessNotification(`Credential ${credential.email} removed successfully!`);
+    }
+}
+
+function scanSpecificCredential(index) {
+    if (!enterpriseMonitor || !enterpriseMonitor.credentials[index]) return;
+    
+    const credential = enterpriseMonitor.credentials[index];
+    showSuccessNotification(`Starting scan for ${credential.email}...`);
+    
+    // Update last scan time
+    credential.lastScan = new Date();
+    enterpriseMonitor.updateCredentialDisplay();
+    
+    // Trigger scan for this specific credential
+    if (enterpriseMonitor.startEnterpriseScan) {
+        enterpriseMonitor.startEnterpriseScan(credential.email);
+    }
+}
+
+function bulkScanCredentials() {
+    if (!enterpriseMonitor || enterpriseMonitor.credentials.length === 0) {
+        showSuccessNotification('No credentials to scan!');
+        return;
+    }
+    
+    showSuccessNotification(`Starting bulk scan for ${enterpriseMonitor.credentials.length} credentials...`);
+    
+    // Update all credentials with scan time
+    enterpriseMonitor.credentials.forEach(credential => {
+        credential.lastScan = new Date();
+    });
+    
+    enterpriseMonitor.updateCredentialDisplay();
+    
+    // Trigger bulk scan
+    if (enterpriseMonitor.startEnterpriseScan) {
+        enterpriseMonitor.startEnterpriseScan();
+    }
 }
