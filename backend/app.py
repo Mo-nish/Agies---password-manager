@@ -365,7 +365,7 @@ def enterprise_health_check():
     })
 
 @app.route('/api/enterprise/auth/login', methods=['POST'])
-def enterprise_login():
+def enterprise_login_api():
     """Enterprise login with advanced security"""
     try:
         data = request.get_json()
