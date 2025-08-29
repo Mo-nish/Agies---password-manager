@@ -24,5 +24,8 @@ services:
         source: /chrome-extension/*
         destination: /public/chrome-extension/*
       - type: rewrite
-        source: /(.*)
-        destination: /public/$1
+        source: /images/*
+        destination: /public/images/*
+      - type: rewrite
+        source: /fonts/*
+        destination: /public/fonts/*
