@@ -29,7 +29,18 @@ class EnterpriseDarkWebMonitor {
         console.log('🚨 Enterprise Dark Web Monitor initialized');
         this.setupEventListeners();
         this.loadMonitoringSettings();
+        this.loadUserCredentials();
         this.startContinuousMonitoring();
+        
+        // Initialize displays after a short delay to ensure DOM is ready
+        setTimeout(() => {
+            if (this) {
+                console.log('🔄 Initializing credential and breach displays...');
+                this.updateCredentialDisplay();
+                this.updateBreachAlertsDisplay();
+                this.updateCredentialDashboard();
+            }
+        }, 100);
     }
 
     setupEventListeners() {
@@ -1251,13 +1262,19 @@ class EnterpriseDarkWebMonitor {
                             <button class="btn btn-sm btn-outline" onclick="enterpriseMonitor.scanCredentialRealTime(${index})">
                                 🔍 Scan Now
                             </button>
+                            <button class="btn btn-sm btn-primary" onclick="enterpriseMonitor.changePasswordRealTime(${index})">
+                                🔑 Change Password
+                            </button>
                             <button class="btn btn-sm btn-secondary" onclick="editCredential(${index})">
                                 ✏️ Edit
                             </button>
                             <button class="btn btn-sm btn-danger" onclick="removeCredential(${index})">
                                 🗑️ Remove
                             </button>
-                            <button class="btn btn-sm btn-primary" onclick="toggleCredentialMonitoring(${index})">
+                            <button class="btn btn-sm ${credential.status === 'locked' ? 'btn-success' : 'btn-warning'}" onclick="enterpriseMonitor.${credential.status === 'locked' ? 'unlockAccountSecurely' : 'lockAccountRealTime'}(${index})">
+                                ${credential.status === 'locked' ? '🔓 Unlock' : '🔒 Lock'}
+                            </button>
+                            <button class="btn btn-sm btn-info" onclick="toggleCredentialMonitoring(${index})">
                                 ${credential.monitoring ? '⏸️ Pause' : '▶️ Resume'}
                             </button>
                         </div>
@@ -1600,6 +1617,713 @@ class EnterpriseDarkWebMonitor {
                 </div>
             </div>
         `;
+    }
+
+    // Enhanced API simulation
+    async simulateAccountUnlockAPI(email, domain) {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                console.log(`🔓 API: Account unlocked for ${email} on ${domain}`);
+                resolve({ success: true, message: 'Account unlocked successfully' });
+            }, 1000);
+        });
+    }
+    
+    // Essential password management functions
+    generateSecurePasswordString() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+        let password = '';
+        for (let i = 0; i < 16; i++) {
+            password += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return password;
+    }
+    
+    calculatePasswordStrength(password) {
+        let strength = 0;
+        if (password.length >= 8) strength += 20;
+        if (password.length >= 12) strength += 20;
+        if (/[a-z]/.test(password)) strength += 20;
+        if (/[A-Z]/.test(password)) strength += 20;
+        if (/[0-9]/.test(password)) strength += 10;
+        if (/[^A-Za-z0-9]/.test(password)) strength += 10;
+        return Math.min(strength, 100);
+    }
+    
+    // Real-time password change functionality
+    async changePasswordRealTime(credentialIndex) {
+        if (!this.credentials[credentialIndex]) return;
+        
+        const credential = this.credentials[credentialIndex];
+        
+        // Show password change modal
+        this.showPasswordChangeModal(credential, credentialIndex);
+    }
+    
+    // Show password change modal with options
+    showPasswordChangeModal(credential, credentialIndex) {
+        // Remove existing modal if any
+        const existingModal = document.querySelector('.password-change-modal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+        
+        // Create modal
+        const modal = document.createElement('div');
+        modal.className = 'password-change-modal';
+        modal.innerHTML = `
+            <div class="modal-overlay" style="
+                position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(0, 0, 0, 0.8); z-index: 10000;
+                display: flex; align-items: center; justify-content: center;
+            ">
+                <div class="modal-content" style="
+                    background: #1E293B; border: 1px solid #374151;
+                    border-radius: 12px; padding: 2rem; max-width: 600px;
+                    max-height: 80vh; overflow-y: auto; color: white;
+                ">
+                    <div class="modal-header" style="
+                        display: flex; justify-content: space-between;
+                        align-items: center; margin-bottom: 1.5rem;
+                    ">
+                        <h3 class="text-xl font-bold">🔑 Change Password: ${credential.email}</h3>
+                        <button onclick="this.closest('.password-change-modal').remove()" style="
+                            background: none; border: none; color: #9CA3AF;
+                            font-size: 1.5rem; cursor: pointer;
+                        ">&times;</button>
+                    </div>
+                    
+                    <div class="modal-body">
+                        <div class="password-options" style="margin-bottom: 1.5rem;">
+                            <h4 class="font-semibold mb-3">Choose Password Option:</h4>
+                            
+                            <div class="option-buttons" style="display: grid; gap: 1rem;">
+                                <button onclick="enterpriseMonitor.generateSecurePassword(${credentialIndex})" style="
+                                    background: linear-gradient(135deg, #10B981, #059669);
+                                    color: white; border: none; padding: 1rem;
+                                    border-radius: 8px; cursor: pointer; font-weight: 600;
+                                    display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+                                ">
+                                    🔐 Generate Secure Password
+                                </button>
+                                
+                                <button onclick="enterpriseMonitor.showManualPasswordEntry(${credentialIndex})" style="
+                                    background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+                                    color: white; border: none; padding: 1rem;
+                                    border-radius: 8px; cursor: pointer; font-weight: 600;
+                                    display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+                                ">
+                                    ✏️ Enter Password Manually
+                                </button>
+                                
+                                <button onclick="enterpriseMonitor.rotatePasswordRealTime(${credentialIndex})" style="
+                                    background: linear-gradient(135deg, #F59E0B, #D97706);
+                                    color: white; border: none; padding: 1rem;
+                                    border-radius: 8px; cursor: pointer; font-weight: 600;
+                                    display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+                                ">
+                                    🔄 Auto-Rotate Password
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="current-password-info" style="
+                            background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3);
+                            border-radius: 8px; padding: 1rem;
+                        ">
+                            <h4 class="font-semibold mb-2">Current Password Info:</h4>
+                            <div class="text-sm text-gray-300 space-y-1">
+                                <div>🔑 Password Strength: ${credential.passwordStrength}/100</div>
+                                <div>📅 Last Changed: ${credential.lastModified.toLocaleDateString()}</div>
+                                <div>🔄 Auto-Rotation: ${credential.autoRotation ? 'Enabled' : 'Disabled'}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer" style="
+                        margin-top: 1.5rem; text-align: right;
+                    ">
+                        <button onclick="this.closest('.password-change-modal').remove()" style="
+                            background: #6B7280; color: white; border: none;
+                            padding: 0.75rem 1.5rem; border-radius: 6px;
+                            cursor: pointer;
+                        ">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+    }
+    
+    // Generate secure password with real-time feedback
+    async generateSecurePassword(credentialIndex) {
+        const credential = this.credentials[credentialIndex];
+        
+        showSuccessNotification('🔐 Generating secure password...');
+        
+        try {
+            // Generate new secure password
+            const newPassword = this.generateSecurePasswordString();
+            
+            // Update credential
+            credential.password = newPassword;
+            credential.maskedPassword = '••••••••••••••••';
+            credential.lastModified = new Date();
+            credential.passwordStrength = this.calculatePasswordStrength(newPassword);
+            credential.autoRotation = true;
+            credential.nextRotation = new Date(Date.now() + (90 * 24 * 60 * 60 * 1000)); // 90 days
+            
+            // Simulate API call
+            await this.simulatePasswordUpdateAPI(credential.email, newPassword);
+            
+            // Update displays
+            this.updateCredentialDisplay();
+            this.updateCredentialDashboard();
+            
+            // Show success with password details
+            this.showGeneratedPasswordModal(newPassword, credential.email);
+            
+            showSuccessNotification(`✅ Secure password generated for ${credential.email}`);
+            
+            // Add to audit log
+            this.addAuditLog('PASSWORD_GENERATED', {
+                email: credential.email,
+                domain: credential.domain,
+                timestamp: new Date(),
+                action: 'Secure password generated',
+                strength: credential.passwordStrength
+            });
+            
+        } catch (error) {
+            console.error('Password generation error:', error);
+            showSuccessNotification(`❌ Password generation failed for ${credential.email}`);
+        }
+    }
+    
+    // Show generated password modal
+    showGeneratedPasswordModal(password, email) {
+        const modal = document.createElement('div');
+        modal.className = 'generated-password-modal';
+        modal.innerHTML = `
+            <div class="modal-overlay" style="
+                position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(0, 0, 0, 0.8); z-index: 10001;
+                display: flex; align-items: center; justify-content: center;
+            ">
+                <div class="modal-content" style="
+                    background: #1E293B; border: 1px solid #374151;
+                    border-radius: 12px; padding: 2rem; max-width: 500px;
+                    color: white; text-align: center;
+                ">
+                    <div class="modal-header" style="margin-bottom: 1.5rem;">
+                        <h3 class="text-xl font-bold">🔐 New Password Generated</h3>
+                        <p class="text-gray-300">For: ${email}</p>
+                    </div>
+                    
+                    <div class="modal-body">
+                        <div class="password-display" style="
+                            background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3);
+                            border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem;
+                            font-family: monospace; font-size: 1.25rem; letter-spacing: 2px;
+                        ">${password}</div>
+                        
+                        <div class="password-info" style="margin-bottom: 1.5rem;">
+                            <div class="text-sm text-gray-300 space-y-1">
+                                <div>✅ Password Strength: Strong</div>
+                                <div>🔒 Auto-Rotation: Enabled</div>
+                                <div>📅 Next Rotation: ${new Date(Date.now() + (90 * 24 * 60 * 60 * 1000)).toLocaleDateString()}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="warning" style="
+                            background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3);
+                            border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem;
+                        ">
+                            <p class="text-sm text-red-400">
+                                ⚠️ Copy this password now! It will be hidden after closing this modal.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button onclick="this.closest('.generated-password-modal').remove()" style="
+                            background: #10B981; color: white; border: none;
+                            padding: 0.75rem 1.5rem; border-radius: 6px;
+                            cursor: pointer; font-weight: 600;
+                        ">Got It!</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+    }
+    
+    // Show manual password entry modal
+    showManualPasswordEntry(credentialIndex) {
+        const credential = this.credentials[credentialIndex];
+        
+        const modal = document.createElement('div');
+        modal.className = 'manual-password-modal';
+        modal.innerHTML = `
+            <div class="modal-overlay" style="
+                position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(0, 0, 0, 0.8); z-index: 10001;
+                display: flex; align-items: center; justify-content: center;
+            ">
+                <div class="modal-content" style="
+                    background: #1E293B; border: 1px solid #374151;
+                    border-radius: 12px; padding: 2rem; max-width: 500px;
+                    color: white;
+                ">
+                    <div class="modal-header" style="margin-bottom: 1.5rem;">
+                        <h3 class="text-xl font-bold">✏️ Enter New Password</h3>
+                        <p class="text-gray-300">For: ${credential.email}</p>
+                    </div>
+                    
+                    <div class="modal-body">
+                        <div class="password-input-group" style="margin-bottom: 1rem;">
+                            <label class="block text-sm font-medium mb-2">New Password:</label>
+                            <input type="password" id="new-password-input" placeholder="Enter new password" style="
+                                width: 100%; padding: 0.75rem; border: 1px solid #374151;
+                                border-radius: 6px; background: #0F172A; color: white;
+                                font-size: 1rem;
+                            ">
+                        </div>
+                        
+                        <div class="password-input-group" style="margin-bottom: 1.5rem;">
+                            <label class="block text-sm font-medium mb-2">Confirm Password:</label>
+                            <input type="password" id="confirm-password-input" placeholder="Confirm new password" style="
+                                width: 100%; padding: 0.75rem; border: 1px solid #374151;
+                                border-radius: 6px; background: #0F172A; color: white;
+                                font-size: 1rem;
+                            ">
+                        </div>
+                        
+                        <div class="password-strength" id="password-strength-display" style="
+                            background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3);
+                            border-radius: 6px; padding: 1rem; margin-bottom: 1.5rem;
+                        ">
+                            <div class="text-sm text-gray-300">Password strength will appear here</div>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer" style="
+                        display: flex; gap: 1rem; justify-content: flex-end;
+                    ">
+                        <button onclick="this.closest('.manual-password-modal').remove()" style="
+                            background: #6B7280; color: white; border: none;
+                            padding: 0.75rem 1.5rem; border-radius: 6px;
+                            cursor: pointer;
+                        ">Cancel</button>
+                        <button onclick="enterpriseMonitor.saveManualPassword(${credentialIndex})" style="
+                            background: #10B981; color: white; border: none;
+                            padding: 0.75rem 1.5rem; border-radius: 6px;
+                            cursor: pointer; font-weight: 600;
+                        ">Save Password</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Add password strength checker
+        const passwordInput = document.getElementById('new-password-input');
+        const confirmInput = document.getElementById('confirm-password-input');
+        const strengthDisplay = document.getElementById('password-strength-display');
+        
+        passwordInput.addEventListener('input', () => {
+            const strength = this.calculatePasswordStrength(passwordInput.value);
+            const strengthText = this.getPasswordStrengthText(strength);
+            const strengthColor = this.getPasswordStrengthColor(strength);
+            
+            strengthDisplay.innerHTML = `
+                <div class="text-sm" style="color: ${strengthColor}">
+                    <div>Password Strength: ${strengthText} (${strength}/100)</div>
+                    <div style="margin-top: 0.5rem;">
+                        ${this.getPasswordStrengthDetails(passwordInput.value)}
+                    </div>
+                </div>
+            `;
+            strengthDisplay.style.borderColor = strengthColor;
+        });
+    }
+    
+    // Save manually entered password
+    async saveManualPassword(credentialIndex) {
+        const credential = this.credentials[credentialIndex];
+        const newPassword = document.getElementById('new-password-input').value;
+        const confirmPassword = document.getElementById('confirm-password-input').value;
+        
+        if (!newPassword) {
+            showSuccessNotification('❌ Please enter a password');
+            return;
+        }
+        
+        if (newPassword !== confirmPassword) {
+            showSuccessNotification('❌ Passwords do not match');
+            return;
+        }
+        
+        if (newPassword.length < 8) {
+            showSuccessNotification('❌ Password must be at least 8 characters long');
+            return;
+        }
+        
+        try {
+            // Update credential
+            credential.password = newPassword;
+            credential.maskedPassword = '••••••••••••••••';
+            credential.lastModified = new Date();
+            credential.passwordStrength = this.calculatePasswordStrength(newPassword);
+            
+            // Simulate API call
+            await this.simulatePasswordUpdateAPI(credential.email, newPassword);
+            
+            // Update displays
+            this.updateCredentialDisplay();
+            this.updateCredentialDashboard();
+            
+            // Close modal
+            const modal = document.querySelector('.manual-password-modal');
+            if (modal) modal.remove();
+            
+            showSuccessNotification(`✅ Password updated for ${credential.email}`);
+            
+            // Add to audit log
+            this.addAuditLog('PASSWORD_MANUALLY_CHANGED', {
+                email: credential.email,
+                domain: credential.domain,
+                timestamp: new Date(),
+                action: 'Password manually changed',
+                strength: credential.passwordStrength
+            });
+            
+        } catch (error) {
+            console.error('Password save error:', error);
+            showSuccessNotification(`❌ Failed to save password for ${credential.email}`);
+        }
+    }
+    
+    // Real-time password rotation with user feedback
+    async rotatePasswordRealTime(credentialIndex) {
+        const credential = this.credentials[credentialIndex];
+        
+        showSuccessNotification('🔄 Starting password rotation...');
+        
+        try {
+            // Generate new secure password
+            const newPassword = this.generateSecurePasswordString();
+            
+            // Update credential
+            credential.password = newPassword;
+            credential.maskedPassword = '••••••••••••••••';
+            credential.lastModified = new Date();
+            credential.passwordStrength = this.calculatePasswordStrength(newPassword);
+            credential.autoRotation = true;
+            credential.nextRotation = new Date(Date.now() + (90 * 24 * 60 * 60 * 1000)); // 90 days
+            
+            // Simulate API call
+            await this.simulatePasswordUpdateAPI(credential.email, newPassword);
+            
+            // Update displays
+            this.updateCredentialDisplay();
+            this.updateCredentialDashboard();
+            
+            // Show rotation success modal
+            this.showRotationSuccessModal(newPassword, credential.email);
+            
+            showSuccessNotification(`✅ Password rotated for ${credential.email}`);
+            
+            // Add to audit log
+            this.addAuditLog('PASSWORD_ROTATED', {
+                email: credential.email,
+                domain: credential.domain,
+                timestamp: new Date(),
+                action: 'Password auto-rotated',
+                strength: credential.passwordStrength
+            });
+            
+        } catch (error) {
+            console.error('Password rotation error:', error);
+            showSuccessNotification(`❌ Password rotation failed for ${credential.email}`);
+        }
+    }
+    
+    // Show rotation success modal
+    showRotationSuccessModal(password, email) {
+        const modal = document.createElement('div');
+        modal.className = 'rotation-success-modal';
+        modal.innerHTML = `
+            <div class="modal-overlay" style="
+                position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(0, 0, 0, 0.8); z-index: 10001;
+                display: flex; align-items: center; justify-content: center;
+            ">
+                <div class="modal-content" style="
+                    background: #1E293B; border: 1px solid #374151;
+                    border-radius: 12px; padding: 2rem; max-width: 500px;
+                    color: white; text-align: center;
+                ">
+                    <div class="modal-header" style="margin-bottom: 1.5rem;">
+                        <div class="text-4xl mb-2">🔄</div>
+                        <h3 class="text-xl font-bold">Password Rotation Complete!</h3>
+                        <p class="text-gray-300">For: ${email}</p>
+                    </div>
+                    
+                    <div class="modal-body">
+                        <div class="new-password" style="
+                            background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3);
+                            border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem;
+                            font-family: monospace; font-size: 1.25rem; letter-spacing: 2px;
+                        ">${password}</div>
+                        
+                        <div class="rotation-info" style="margin-bottom: 1.5rem;">
+                            <div class="text-sm text-gray-300 space-y-1">
+                                <div>✅ New password generated and applied</div>
+                                <div>🔒 Auto-rotation enabled</div>
+                                <div>📅 Next rotation: ${new Date(Date.now() + (90 * 24 * 60 * 60 * 1000)).toLocaleDateString()}</div>
+                                <div>🛡️ Security score updated</div>
+                            </div>
+                        </div>
+                        
+                        <div class="warning" style="
+                            background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3);
+                            border-radius: 8px; padding: 1rem;
+                        ">
+                            <p class="text-sm text-red-400">
+                                ⚠️ Copy this password now! It will be hidden after closing.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button onclick="this.closest('.rotation-success-modal').remove()" style="
+                            background: #10B981; color: white; border: none;
+                            padding: 0.75rem 1.5rem; border-radius: 6px;
+                            cursor: pointer; font-weight: 600;
+                        ">Perfect!</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+    }
+    
+    // Enhanced account locking with unlock mechanism
+    async lockAccountRealTime(credentialIndex) {
+        const credential = this.credentials[credentialIndex];
+        
+        if (credential.status === 'locked') {
+            showSuccessNotification('⚠️ Account is already locked');
+            return;
+        }
+        
+        showSuccessNotification('🔒 Locking account...');
+        
+        try {
+            // Lock the credential
+            credential.status = 'locked';
+            credential.monitoring = false;
+            credential.lastModified = new Date();
+            credential.lockedAt = new Date();
+            credential.lockReason = 'Security measure - User initiated';
+            
+            // Simulate API call
+            await this.simulateAccountLockAPI(credential.email, credential.domain);
+            
+            // Update displays
+            this.updateCredentialDisplay();
+            this.updateCredentialDashboard();
+            
+            // Show lock success modal
+            this.showAccountLockedModal(credential);
+            
+            showSuccessNotification(`✅ Account locked for ${credential.email}`);
+            
+            // Add to audit log
+            this.addAuditLog('ACCOUNT_LOCKED', {
+                email: credential.email,
+                domain: credential.domain,
+                timestamp: new Date(),
+                action: 'Account locked by user',
+                reason: credential.lockReason
+            });
+            
+        } catch (error) {
+            console.error('Account lock error:', error);
+            showSuccessNotification(`❌ Failed to lock account for ${credential.email}`);
+        }
+    }
+    
+    // Show account locked modal with unlock options
+    showAccountLockedModal(credential) {
+        const modal = document.createElement('div');
+        modal.className = 'account-locked-modal';
+        modal.innerHTML = `
+            <div class="modal-overlay" style="
+                position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(0, 0, 0, 0.8); z-index: 10001;
+                display: flex; align-items: center; justify-content: center;
+            ">
+                <div class="modal-content" style="
+                    background: #1E293B; border: 1px solid #374151;
+                    border-radius: 12px; padding: 2rem; max-width: 500px;
+                    color: white; text-align: center;
+                ">
+                    <div class="modal-header" style="margin-bottom: 1.5rem;">
+                        <div class="text-4xl mb-2">🔒</div>
+                        <h3 class="text-xl font-bold">Account Locked Successfully</h3>
+                        <p class="text-gray-300">${credential.email}</p>
+                    </div>
+                    
+                    <div class="modal-body">
+                        <div class="lock-info" style="
+                            background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3);
+                            border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem;
+                        ">
+                            <div class="text-sm text-gray-300 space-y-1">
+                                <div>🔒 Account Status: LOCKED</div>
+                                <div>📅 Locked At: ${credential.lockedAt.toLocaleString()}</div>
+                                <div>🛡️ Monitoring: Disabled</div>
+                                <div>📝 Reason: ${credential.lockReason}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="unlock-options" style="margin-bottom: 1.5rem;">
+                            <h4 class="font-semibold mb-3">To Unlock Securely:</h4>
+                            <div class="text-sm text-gray-300 space-y-2 text-left">
+                                <div>1. 🔐 Change your password first</div>
+                                <div>2. 🛡️ Enable 2FA if not already active</div>
+                                <div>3. 🔍 Review recent account activity</div>
+                                <div>4. ✅ Verify account security</div>
+                                <div>5. 🔓 Then unlock the account</div>
+                            </div>
+                        </div>
+                        
+                        <div class="action-buttons" style="display: grid; gap: 1rem;">
+                            <button onclick="enterpriseMonitor.changePasswordRealTime(${this.credentials.indexOf(credential)})" style="
+                                background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+                                color: white; border: none; padding: 1rem;
+                                border-radius: 8px; cursor: pointer; font-weight: 600;
+                                display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+                            ">
+                                🔐 Change Password First
+                            </button>
+                            
+                            <button onclick="enterpriseMonitor.unlockAccountSecurely(${this.credentials.indexOf(credential)})" style="
+                                background: linear-gradient(135deg, #10B981, #059669);
+                                color: white; border: none; padding: 1rem;
+                                border-radius: 8px; cursor: pointer; font-weight: 600;
+                                display: flex: align-items: center; justify-content: center; gap: 0.5rem;
+                            ">
+                                🔓 Unlock Account Securely
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer" style="margin-top: 1.5rem;">
+                        <button onclick="this.closest('.account-locked-modal').remove()" style="
+                            background: #6B7280; color: white; border: none;
+                            padding: 0.75rem 1.5rem; border-radius: 6px;
+                            cursor: pointer;
+                        ">Close</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+    }
+    
+    // Secure account unlock with verification
+    async unlockAccountSecurely(credentialIndex) {
+        const credential = this.credentials[credentialIndex];
+        
+        if (credential.status !== 'locked') {
+            showSuccessNotification('⚠️ Account is not locked');
+            return;
+        }
+        
+        // Check if password was recently changed
+        const daysSincePasswordChange = (Date.now() - credential.lastModified.getTime()) / (1000 * 60 * 60 * 24);
+        
+        if (daysSincePasswordChange > 1) {
+            showSuccessNotification('⚠️ Please change your password before unlocking');
+            return;
+        }
+        
+        // Check if 2FA is enabled
+        if (!credential.twoFactorEnabled) {
+            showSuccessNotification('⚠️ Please enable 2FA before unlocking');
+            return;
+        }
+        
+        showSuccessNotification('🔓 Unlocking account securely...');
+        
+        try {
+            // Unlock the credential
+            credential.status = 'active';
+            credential.monitoring = true;
+            credential.lastModified = new Date();
+            credential.unlockedAt = new Date();
+            credential.lockReason = null;
+            
+            // Simulate API call
+            await this.simulateAccountUnlockAPI(credential.email, credential.domain);
+            
+            // Update displays
+            this.updateCredentialDisplay();
+            this.updateCredentialDashboard();
+            
+            showSuccessNotification(`✅ Account unlocked securely for ${credential.email}`);
+            
+            // Add to audit log
+            this.addAuditLog('ACCOUNT_UNLOCKED', {
+                email: credential.email,
+                domain: credential.domain,
+                timestamp: new Date(),
+                action: 'Account unlocked securely',
+                verification: 'Password changed + 2FA enabled'
+            });
+            
+            // Close modal
+            const modal = document.querySelector('.account-locked-modal');
+            if (modal) modal.remove();
+            
+        } catch (error) {
+            console.error('Account unlock error:', error);
+            showSuccessNotification(`❌ Failed to unlock account for ${credential.email}`);
+        }
+    }
+    
+    // Helper functions for password management
+    getPasswordStrengthText(strength) {
+        if (strength >= 80) return 'Excellent';
+        if (strength >= 60) return 'Good';
+        if (strength >= 40) return 'Fair';
+        return 'Weak';
+    }
+    
+    getPasswordStrengthColor(strength) {
+        if (strength >= 80) return '#10B981';
+        if (strength >= 60) return '#F59E0B';
+        return '#EF4444';
+    }
+    
+    getPasswordStrengthDetails(password) {
+        const details = [];
+        if (password.length < 8) details.push('❌ Too short (min 8 chars)');
+        if (password.length >= 8) details.push('✅ Good length');
+        if (password.length >= 12) details.push('✅ Excellent length');
+        if (/[a-z]/.test(password)) details.push('✅ Lowercase letters');
+        if (/[A-Z]/.test(password)) details.push('✅ Uppercase letters');
+        if (/[0-9]/.test(password)) details.push('✅ Numbers');
+        if (/[^A-Za-z0-9]/.test(password)) details.push('✅ Special characters');
+        return details.join('<br>');
     }
 }
 

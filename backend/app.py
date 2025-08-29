@@ -87,15 +87,15 @@ SUBSCRIPTION_PLANS = {
 def init_db():
     try:
         print(f"🔍 Initializing database at: {DATABASE}")
-        conn = sqlite3.connect(DATABASE)
-        c = conn.cursor()
-        
+    conn = sqlite3.connect(DATABASE)
+    c = conn.cursor()
+    
         # Create users table with subscription info
-        c.execute('''
-            CREATE TABLE IF NOT EXISTS users (
-                id TEXT PRIMARY KEY,
-                email TEXT UNIQUE NOT NULL,
-                password_hash TEXT NOT NULL,
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id TEXT PRIMARY KEY,
+            email TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL,
                 subscription_plan TEXT DEFAULT 'free',
                 subscription_status TEXT DEFAULT 'active',
                 subscription_start_date TIMESTAMP,
@@ -104,38 +104,38 @@ def init_db():
                 payment_customer_id TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 last_login TIMESTAMP
-            )
-        ''')
-        
-        # Create vaults table
-        c.execute('''
-            CREATE TABLE IF NOT EXISTS vaults (
-                id TEXT PRIMARY KEY,
-                user_id TEXT NOT NULL,
-                name TEXT NOT NULL,
-                description TEXT,
-                icon TEXT DEFAULT '🔐',
-                password_count INTEGER DEFAULT 0,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users (id)
-            )
-        ''')
-        
-        # Create passwords table
-        c.execute('''
-            CREATE TABLE IF NOT EXISTS passwords (
-                id TEXT PRIMARY KEY,
-                vault_id TEXT NOT NULL,
-                title TEXT NOT NULL,
-                username TEXT NOT NULL,
-                password TEXT NOT NULL,
-                url TEXT,
-                notes TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (vault_id) REFERENCES vaults (id)
-            )
-        ''')
+        )
+    ''')
+    
+    # Create vaults table
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS vaults (
+            id TEXT PRIMARY KEY,
+            user_id TEXT NOT NULL,
+            name TEXT NOT NULL,
+            description TEXT,
+            icon TEXT DEFAULT '🔐',
+            password_count INTEGER DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+    ''')
+    
+    # Create passwords table
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS passwords (
+            id TEXT PRIMARY KEY,
+            vault_id TEXT NOT NULL,
+            title TEXT NOT NULL,
+            username TEXT NOT NULL,
+            password TEXT NOT NULL,
+            url TEXT,
+            notes TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (vault_id) REFERENCES vaults (id)
+        )
+    ''')
         
         # Create subscriptions table
         c.execute('''
@@ -190,8 +190,8 @@ def init_db():
                 FOREIGN KEY (payment_id) REFERENCES payments (id)
             )
         ''')
-        
-        conn.commit()
+    
+    conn.commit()
         print("✅ Database tables checked/created successfully.")
     except sqlite3.OperationalError as e:
         print(f"❌ Database error during initialization: {e}")
@@ -201,14 +201,14 @@ def init_db():
         print(f"❌ Unexpected error during database initialization: {e}")
     finally:
         if 'conn' in locals() and conn:
-            conn.close()
+    conn.close()
 
 def get_db():
     """Get database connection with row factory set to return dictionaries"""
     try:
-        conn = sqlite3.connect(DATABASE)
+    conn = sqlite3.connect(DATABASE)
         conn.row_factory = sqlite3.Row  # This will allow us to access columns by name
-        return conn
+    return conn
     except sqlite3.OperationalError as e:
         print(f"❌ Database connection error: {e}")
         return None
@@ -452,7 +452,7 @@ def home():
                 return send_from_directory(path, 'index.html')
         
         # If no path works, return debug info
-        return jsonify({
+    return jsonify({
             "error": "index.html not found",
             "possible_paths": possible_paths,
             "current_dir": os.getcwd(),
@@ -739,9 +739,9 @@ def health_check():
             "timestamp": datetime.now().isoformat(),
             "database": db_status,
             "app": app_status,
-            "version": "1.0.0"
-        })
-        
+        "version": "1.0.0"
+    })
+
     except Exception as e:
         print(f"❌ Health check failed: {str(e)}")
         return jsonify({
@@ -1558,7 +1558,7 @@ def create_upi_order():
         ''', (order_id, user_id, plan['price'], plan['currency'], payment_method, order_id, 'pending'))
         
         conn.commit()
-        conn.close()
+            conn.close()
         
         # Generate UPI payment link
         upi_payment_link = generate_upi_payment_link(order_id, plan['price'], plan['name'])
@@ -1982,7 +1982,7 @@ def get_user_subscription():
         ''', (user_id,))
         
         user = c.fetchone()
-        conn.close()
+            conn.close()
         
         if not user:
             print(f"❌ GET_USER_SUBSCRIPTION: User not found in database: {user_id}")
@@ -3002,7 +3002,7 @@ if __name__ == '__main__':
             print(f"❌ Enterprise function test failed: {enterprise_error}")
             print("🔄 Continuing with basic functionality...")
         
-        port = int(os.environ.get('PORT', 8000))
+    port = int(os.environ.get('PORT', 8000))
         debug_mode = os.environ.get('FLASK_ENV') == 'development'
         print(f"🌐 Starting Flask app on port {port}, debug={debug_mode}")
         

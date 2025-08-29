@@ -443,7 +443,7 @@ function testZeroKnowledge() {
 function testOneWayEntry() {
     alert('🚪 One-Way Entry Test\n\n✅ Easy data entry confirmed\n✅ Complex exit verification active\n✅ Biometric verification required\n✅ Multi-factor authentication enforced\n✅ Behavioral confirmation enabled\n✅ Time delay verification active\n✅ Geolocation check operational\n\nData enters easily but cannot exit without strict verification!');
     
-    if (window.securityDashboard) {
+            if (window.securityDashboard) {
         window.securityDashboard.addThreatLog('One-Way Entry system tested - exit security confirmed', 'low');
     }
 }
@@ -496,7 +496,7 @@ function generateReport() {
     
     alert(report);
     
-    if (window.securityDashboard) {
+            if (window.securityDashboard) {
         window.securityDashboard.addThreatLog('Security report generated', 'low');
     }
 }

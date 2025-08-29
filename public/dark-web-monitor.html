@@ -729,6 +729,415 @@
             margin-bottom: 0.5rem;
             color: #F8FAFC;
         }
+        
+        /* Enhanced Credential Monitoring Styles */
+        .credential-dashboard {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .stat-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+            color: #F8FAFC;
+        }
+        
+        .stat-label {
+            font-size: 0.75rem;
+            color: #9CA3AF;
+        }
+        
+        .credentials-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .credentials-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+        
+        .padlock-icon {
+            font-size: 1.25rem;
+        }
+        
+        .credentials-count {
+            font-size: 0.875rem;
+            color: #9CA3AF;
+        }
+        
+        .credentials-list {
+            display: grid;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .credential-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .credential-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .credential-card.locked {
+            border-left: 4px solid #EF4444;
+            background: rgba(239, 68, 68, 0.05);
+        }
+        
+        .credential-card.active {
+            border-left: 4px solid #10B981;
+        }
+        
+        .credential-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+        
+        .credential-title-section {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .credential-icon {
+            font-size: 1.5rem;
+        }
+        
+        .credential-main-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        
+        .credential-email {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            font-size: 1.125rem;
+        }
+        
+        .email-icon {
+            font-size: 1rem;
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-badge.active {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10B981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .status-badge.locked {
+            background: rgba(239, 68, 68, 0.2);
+            color: #EF4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        
+        .credential-username {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: #9CA3AF;
+        }
+        
+        .username-icon {
+            font-size: 0.875rem;
+        }
+        
+        .credential-security-score {
+            text-align: center;
+        }
+        
+        .security-score-circle {
+            margin-bottom: 0.5rem;
+        }
+        
+        .security-label {
+            font-size: 0.75rem;
+            color: #9CA3AF;
+        }
+        
+        .credential-details {
+            margin-bottom: 1.5rem;
+        }
+        
+        .detail-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .detail-icon {
+            font-size: 1rem;
+            width: 1.25rem;
+            text-align: center;
+        }
+        
+        .detail-label {
+            color: #9CA3AF;
+            min-width: 80px;
+        }
+        
+        .detail-value {
+            color: #F8FAFC;
+            font-weight: 500;
+        }
+        
+        .btn-toggle-password {
+            background: none;
+            border: none;
+            color: #9CA3AF;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 0.25rem;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-toggle-password:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #F8FAFC;
+        }
+        
+        .breach-history {
+            background: rgba(239, 68, 68, 0.05);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .breach-history-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: #EF4444;
+        }
+        
+        .breach-icon {
+            font-size: 1rem;
+        }
+        
+        .breach-items {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .breach-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            background: rgba(239, 68, 68, 0.1);
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+        }
+        
+        .breach-item.high {
+            border-left: 3px solid #EF4444;
+        }
+        
+        .breach-item.medium {
+            border-left: 3px solid #F59E0B;
+        }
+        
+        .breach-item.low {
+            border-left: 3px solid #10B981;
+        }
+        
+        .breach-date {
+            color: #9CA3AF;
+        }
+        
+        .breach-source {
+            color: #F8FAFC;
+        }
+        
+        .breach-severity {
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .breach-severity.high {
+            color: #EF4444;
+        }
+        
+        .breach-severity.medium {
+            color: #F59E0B;
+        }
+        
+        .breach-severity.low {
+            color: #10B981;
+        }
+        
+        .credential-notes {
+            background: rgba(59, 130, 246, 0.05);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+        
+        .notes-icon {
+            font-size: 1rem;
+            color: #3B82F6;
+            margin-top: 0.125rem;
+        }
+        
+        .notes-text {
+            color: #F8FAFC;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+        
+        .credential-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #6B7280, #4B5563);
+            color: white;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            color: #9CA3AF;
+            border: 1px solid rgba(156, 163, 175, 0.5);
+        }
+        
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #F8FAFC;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #EF4444, #DC2626);
+            color: white;
+        }
+        
+        .btn-sm {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.75rem;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #10B981, #059669);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #F59E0B, #D97706);
+            color: white;
+        }
+        
+        .btn-info {
+            background: linear-gradient(135deg, #06B6D4, #0891B2);
+            color: white;
+        }
+        
+        .text-green-400 {
+            color: #10B981;
+        }
+        
+        .text-red-400 {
+            color: #EF4444;
+        }
+        
+        .text-yellow-400 {
+            color: #F59E0B;
+        }
     </style>
 </head>
 <body>
@@ -837,7 +1246,14 @@
         <!-- Credential Monitoring -->
         <div class="credentials-section">
             <h2 class="text-2xl font-bold mb-6">🔐 Credential Monitoring</h2>
-            <div class="credential-grid" id="credential-grid">
+            
+            <!-- Credential Dashboard -->
+            <div class="credential-dashboard mb-6" id="credential-dashboard">
+                <!-- Dashboard stats will be populated here -->
+            </div>
+            
+            <!-- Credential Monitoring Container -->
+            <div class="credential-monitoring" id="credential-monitoring">
                 <!-- Credential cards will be populated here -->
             </div>
         </div>

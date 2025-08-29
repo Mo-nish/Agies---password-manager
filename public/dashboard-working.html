@@ -217,15 +217,15 @@
                     <a href="/vaults" class="text-white hover:text-blue-300 transition-colors">Vaults</a>
                     <a href="/pricing" class="text-white hover:text-blue-300 transition-colors">Pricing</a>
                     <a href="/admin" class="text-white hover:text-blue-300 transition-colors">Admin</a>
-                </div>
+                    </div>
                 
-                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-4">
                     <span id="user-email" class="text-gray-300"></span>
                     <button id="logout-btn" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-full text-white transition-colors">
                         Logout
-                    </button>
-                </div>
-            </div>
+                        </button>
+                    </div>
+                        </div>
                     </div>
     </nav>
 
@@ -460,7 +460,7 @@
                 console.log('⚠️ User not authenticated, showing demo mode');
                 // Show demo mode instead of redirecting
                 showDemoMode();
-            } else {
+                } else {
                 console.log('✅ User authenticated, loading full dashboard');
                 // Display user info
                 const user = window.authService.getCurrentUser();
@@ -529,8 +529,8 @@
                 <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px; border-radius: 10px; margin: 20px 0; text-align: center;">
                     <h3>🎭 Demo Mode</h3>
                     <p>You're viewing the dashboard in demo mode. <a href="/login" style="color: #ffd700; text-decoration: underline;">Login</a> to access your real vaults and passwords.</p>
-                </div>
-            `;
+                    </div>
+                `;
             
             const dashboardContent = document.querySelector('.dashboard-content') || document.querySelector('main') || document.body;
             if (dashboardContent) {
@@ -546,7 +546,7 @@
                     await window.authService.logout();
                     window.location.href = '/';
                 });
-            } else {
+                    } else {
                 console.warn('⚠️ logout-btn element not found');
             }
 
@@ -564,7 +564,7 @@
             const createVaultForm = document.getElementById('create-vault-form');
             if (createVaultForm) {
                 createVaultForm.addEventListener('submit', handleCreateVault);
-            } else {
+                        } else {
                 console.warn('⚠️ create-vault-form element not found');
             }
         }
@@ -878,7 +878,7 @@
                 if (error.message.includes('upgrade_required')) {
                     alert('Vault limit reached! Please upgrade your plan to create more vaults.');
                     window.location.href = '/pricing';
-                    } else {
+            } else {
                     alert('Error creating vault: ' + error.message);
                 }
             }
