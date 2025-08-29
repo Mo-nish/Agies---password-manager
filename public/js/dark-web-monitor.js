@@ -727,17 +727,59 @@ class EnterpriseDarkWebMonitor {
     }
 
     loadUserCredentials() {
-        // Load user credentials from storage or API
+        // Load user credentials from storage or API with detailed information
         this.credentials = [
-            { email: 'p.monishreddy19@gmail.com', domain: 'gmail.com', status: 'active' },
-            { email: 'monishhero143@gmail.com', domain: 'gmail.com', status: 'active' }
+            { 
+                email: 'p.monishreddy19@gmail.com', 
+                domain: 'gmail.com', 
+                username: 'p.monishreddy19',
+                password: '••••••••••••••••',
+                maskedPassword: '••••••••••••••••',
+                status: 'active',
+                monitoring: true,
+                lastScan: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+                createdDate: new Date('2024-01-15'),
+                lastModified: new Date('2024-12-20'),
+                securityLevel: 'high',
+                twoFactorEnabled: true,
+                passwordStrength: 95,
+                breachHistory: [
+                    { date: '2024-12-18', source: 'HaveIBeenPwned', severity: 'medium' }
+                ],
+                notes: 'Primary email account with 2FA enabled',
+                autoRotation: true,
+                rotationInterval: '90 days',
+                nextRotation: new Date('2025-03-20')
+            },
+            { 
+                email: 'monishhero143@gmail.com', 
+                domain: 'gmail.com', 
+                username: 'monishhero143',
+                password: '••••••••••••••••',
+                maskedPassword: '••••••••••••••••',
+                status: 'active',
+                monitoring: true,
+                lastScan: new Date(Date.now() - 6 * 60 * 60 * 1000), // 6 hours ago
+                createdDate: new Date('2024-03-10'),
+                lastModified: new Date('2024-12-19'),
+                securityLevel: 'medium',
+                twoFactorEnabled: false,
+                passwordStrength: 78,
+                breachHistory: [
+                    { date: '2024-12-15', source: 'Dark Web Scan', severity: 'high' }
+                ],
+                notes: 'Secondary email account - needs 2FA setup',
+                autoRotation: false,
+                rotationInterval: 'manual',
+                nextRotation: null
+            }
         ];
-        console.log(`📧 Loaded ${this.credentials.length} credentials for scanning`);
+        console.log(`📧 Loaded ${this.credentials.length} credentials with detailed information`);
     }
 
     updateCredentialDisplay() {
-        // Update credential display in UI
-        console.log('🔄 Updating credential display');
+        // Update credential display in UI with detailed information
+        console.log('🔄 Updating credential display with detailed information');
         
         const credentialsContainer = document.getElementById('credential-monitoring');
         if (!credentialsContainer) {
@@ -761,35 +803,159 @@ class EnterpriseDarkWebMonitor {
             return;
         }
         
-        // Render all credentials with monitoring status
+        // Render all credentials with comprehensive monitoring information
         credentialsContainer.innerHTML = `
             <div class="credentials-header">
                 <div class="credentials-title">
                     <span class="padlock-icon">🔐</span>
-                    <span>Credential Monitoring</span>
+                    <span>Credential Monitoring Dashboard</span>
                 </div>
                 <div class="credentials-count">
-                    ${this.credentials.length} credential(s) monitored
+                    ${this.credentials.length} credential(s) actively monitored
                 </div>
             </div>
             
             <div class="credentials-list">
                 ${this.credentials.map((credential, index) => `
                     <div class="credential-card ${credential.status}" data-credential-id="${index}">
-                        <div class="credential-info">
-                            <div class="credential-email">
-                                <span class="email-icon">📧</span>
-                                <span class="email-text">${credential.email}</span>
+                        <div class="credential-header">
+                            <div class="credential-title-section">
+                                <div class="credential-icon">🔐</div>
+                                <div class="credential-main-info">
+                                    <div class="credential-email">
+                                        <span class="email-icon">📧</span>
+                                        <span class="email-text">${credential.email}</span>
+                                        <span class="status-badge ${credential.status}">${credential.status.toUpperCase()}</span>
+                                    </div>
+                                    <div class="credential-username">
+                                        <span class="username-icon">👤</span>
+                                        <span class="username-text">Username: ${credential.username}</span>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="credential-domain">
-                                <span class="domain-icon">🌐</span>
-                                <span class="domain-text">${credential.domain}</span>
-                            </div>
-                            <div class="credential-status">
-                                <span class="status-indicator ${credential.status}"></span>
-                                <span class="status-text">${credential.status.charAt(0).toUpperCase() + credential.status.slice(1)}</span>
+                            <div class="credential-security-score">
+                                <div class="security-score-circle" style="
+                                    width: 60px; height: 60px; border-radius: 50%;
+                                    background: conic-gradient(from 0deg, 
+                                        ${credential.passwordStrength >= 80 ? '#10B981' : credential.passwordStrength >= 60 ? '#F59E0B' : '#EF4444'} 
+                                        ${credential.passwordStrength * 3.6}deg, 
+                                        #374151 ${credential.passwordStrength * 3.6}deg, 360deg
+                                    );
+                                    display: flex; align-items: center; justify-content: center;
+                                ">
+                                    <div style="
+                                        width: 45px; height: 45px; border-radius: 50%;
+                                        background: #1E293B; display: flex; align-items: center;
+                                        justify-content: center; font-weight: bold; font-size: 14px;
+                                    ">${credential.passwordStrength}</div>
+                                </div>
+                                <div class="security-label">Security Score</div>
                             </div>
                         </div>
+                        
+                        <div class="credential-details">
+                            <div class="detail-row">
+                                <div class="detail-item">
+                                    <span class="detail-icon">🌐</span>
+                                    <span class="detail-label">Domain:</span>
+                                    <span class="detail-value">${credential.domain}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-icon">🔑</span>
+                                    <span class="detail-label">Password:</span>
+                                    <span class="detail-value">${credential.maskedPassword}</span>
+                                    <button class="btn-toggle-password" onclick="togglePasswordVisibility(${index})" style="
+                                        background: none; border: none; color: #9CA3AF; cursor: pointer;
+                                        margin-left: 0.5rem; font-size: 12px;
+                                    ">👁️</button>
+                                </div>
+                            </div>
+                            
+                            <div class="detail-row">
+                                <div class="detail-item">
+                                    <span class="detail-icon">📅</span>
+                                    <span class="detail-label">Created:</span>
+                                    <span class="detail-value">${credential.createdDate.toLocaleDateString()}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-icon">🔄</span>
+                                    <span class="detail-label">Last Modified:</span>
+                                    <span class="detail-value">${credential.lastModified.toLocaleDateString()}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="detail-row">
+                                <div class="detail-item">
+                                    <span class="detail-icon">🛡️</span>
+                                    <span class="detail-label">2FA Status:</span>
+                                    <span class="detail-value ${credential.twoFactorEnabled ? 'text-green-400' : 'text-red-400'}">
+                                        ${credential.twoFactorEnabled ? '✅ Enabled' : '❌ Disabled'}
+                                    </span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-icon">🔄</span>
+                                    <span class="detail-label">Auto Rotation:</span>
+                                    <span class="detail-value ${credential.autoRotation ? 'text-green-400' : 'text-yellow-400'}">
+                                        ${credential.autoRotation ? '✅ Active' : '❌ Manual'}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="detail-row">
+                                <div class="detail-item">
+                                    <span class="detail-icon">⏰</span>
+                                    <span class="detail-label">Last Scan:</span>
+                                    <span class="detail-value">${credential.lastScan ? credential.lastScan.toLocaleString() : 'Never'}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-icon">📊</span>
+                                    <span class="detail-label">Monitoring:</span>
+                                    <span class="detail-value ${credential.monitoring ? 'text-green-400' : 'text-red-400'}">
+                                        ${credential.monitoring ? '🟢 Active' : '🔴 Inactive'}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            ${credential.autoRotation && credential.nextRotation ? `
+                                <div class="detail-row">
+                                    <div class="detail-item">
+                                        <span class="detail-icon">🔄</span>
+                                        <span class="detail-label">Next Rotation:</span>
+                                        <span class="detail-value">${credential.nextRotation.toLocaleDateString()}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-icon">📅</span>
+                                        <span class="detail-label">Rotation Interval:</span>
+                                        <span class="detail-value">${credential.rotationInterval}</span>
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                        
+                        ${credential.breachHistory && credential.breachHistory.length > 0 ? `
+                            <div class="breach-history">
+                                <div class="breach-history-title">
+                                    <span class="breach-icon">🚨</span>
+                                    <span>Breach History (${credential.breachHistory.length})</span>
+                                </div>
+                                <div class="breach-items">
+                                    ${credential.breachHistory.map(breach => `
+                                        <div class="breach-item ${breach.severity}">
+                                            <span class="breach-date">${breach.date}</span>
+                                            <span class="breach-source">${breach.source}</span>
+                                            <span class="breach-severity ${breach.severity}">${breach.severity.toUpperCase()}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        ${credential.notes ? `
+                            <div class="credential-notes">
+                                <span class="notes-icon">📝</span>
+                                <span class="notes-text">${credential.notes}</span>
+                            </div>
+                        ` : ''}
                         
                         <div class="credential-actions">
                             <button class="btn btn-sm btn-outline" onclick="scanSpecificCredential(${index})">
@@ -801,17 +967,9 @@ class EnterpriseDarkWebMonitor {
                             <button class="btn btn-sm btn-danger" onclick="removeCredential(${index})">
                                 🗑️ Remove
                             </button>
-                        </div>
-                        
-                        <div class="credential-monitoring">
-                            <div class="monitoring-status">
-                                <span class="monitoring-icon">📊</span>
-                                <span>Monitoring: ${credential.monitoring ? 'Active' : 'Inactive'}</span>
-                            </div>
-                            <div class="last-scan">
-                                <span class="scan-icon">⏰</span>
-                                <span>Last scan: ${credential.lastScan ? new Date(credential.lastScan).toLocaleString() : 'Never'}</span>
-                            </div>
+                            <button class="btn btn-sm btn-primary" onclick="toggleCredentialMonitoring(${index})">
+                                ${credential.monitoring ? '⏸️ Pause' : '▶️ Resume'}
+                            </button>
                         </div>
                     </div>
                 `).join('')}
@@ -824,10 +982,13 @@ class EnterpriseDarkWebMonitor {
                 <button class="btn btn-secondary" onclick="bulkScanCredentials()">
                     🔍 Scan All Credentials
                 </button>
+                <button class="btn btn-outline" onclick="exportCredentials()">
+                    📤 Export Credentials
+                </button>
             </div>
         `;
         
-        console.log(`✅ Rendered ${this.credentials.length} credentials`);
+        console.log(`✅ Rendered ${this.credentials.length} credentials with detailed information`);
     }
 
     updateBreachAlertsDisplay() {
@@ -1127,14 +1288,28 @@ function addNewCredential() {
     if (!email) return;
     
     const domain = email.split('@')[1] || 'unknown';
+    const username = email.split('@')[0] || 'unknown';
     
     if (enterpriseMonitor) {
         const newCredential = {
             email: email,
             domain: domain,
+            username: username,
+            password: '••••••••••••••••',
+            maskedPassword: '••••••••••••••••',
             status: 'active',
             monitoring: true,
-            lastScan: null
+            lastScan: null,
+            createdDate: new Date(),
+            lastModified: new Date(),
+            securityLevel: 'medium',
+            twoFactorEnabled: false,
+            passwordStrength: 65,
+            breachHistory: [],
+            notes: '',
+            autoRotation: false,
+            rotationInterval: 'manual',
+            nextRotation: null
         };
         
         enterpriseMonitor.credentials.push(newCredential);
@@ -1152,6 +1327,8 @@ function editCredential(index) {
     if (newEmail && newEmail !== credential.email) {
         credential.email = newEmail;
         credential.domain = newEmail.split('@')[1] || 'unknown';
+        credential.username = newEmail.split('@')[0] || 'unknown';
+        credential.lastModified = new Date();
         enterpriseMonitor.updateCredentialDisplay();
         showSuccessNotification(`Credential updated successfully!`);
     }
@@ -1205,4 +1382,79 @@ function bulkScanCredentials() {
     if (enterpriseMonitor.startEnterpriseScan) {
         enterpriseMonitor.startEnterpriseScan();
     }
+}
+
+function exportCredentials() {
+    if (!enterpriseMonitor || enterpriseMonitor.credentials.length === 0) {
+        showSuccessNotification('No credentials to export!');
+        return;
+    }
+    
+    // Create export data
+    const exportData = {
+        exportDate: new Date().toISOString(),
+        totalCredentials: enterpriseMonitor.credentials.length,
+        credentials: enterpriseMonitor.credentials.map(cred => ({
+            email: cred.email,
+            domain: cred.domain,
+            username: cred.username,
+            status: cred.status,
+            securityLevel: cred.securityLevel,
+            twoFactorEnabled: cred.twoFactorEnabled,
+            passwordStrength: cred.passwordStrength,
+            monitoring: cred.monitoring,
+            lastScan: cred.lastScan,
+            createdDate: cred.createdDate,
+            notes: cred.notes
+        }))
+    };
+    
+    // Create and download file
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `credentials-export-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    showSuccessNotification(`📤 Exported ${enterpriseMonitor.credentials.length} credentials successfully!`);
+}
+
+function togglePasswordVisibility(index) {
+    if (!enterpriseMonitor || !enterpriseMonitor.credentials[index]) return;
+    
+    const credential = enterpriseMonitor.credentials[index];
+    const toggleBtn = document.querySelector(`[data-credential-id="${index}"] .btn-toggle-password`);
+    
+    if (credential.maskedPassword === credential.password) {
+        // Show password
+        credential.maskedPassword = credential.password;
+        if (toggleBtn) toggleBtn.textContent = '🙈';
+    } else {
+        // Hide password
+        credential.maskedPassword = '••••••••••••••••';
+        if (toggleBtn) toggleBtn.textContent = '👁️';
+    }
+    
+    enterpriseMonitor.updateCredentialDisplay();
+}
+
+function toggleCredentialMonitoring(index) {
+    if (!enterpriseMonitor || !enterpriseMonitor.credentials[index]) return;
+    
+    const credential = enterpriseMonitor.credentials[index];
+    credential.monitoring = !credential.monitoring;
+    
+    if (credential.monitoring) {
+        showSuccessNotification(`🟢 Monitoring resumed for ${credential.email}`);
+    } else {
+        showSuccessNotification(`⏸️ Monitoring paused for ${credential.email}`);
+    }
+    
+    enterpriseMonitor.updateCredentialDisplay();
 }
