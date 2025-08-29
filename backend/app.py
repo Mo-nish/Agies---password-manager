@@ -424,7 +424,7 @@ def enterprise_login_api():
             conn.close()
 
 @app.route('/api/enterprise/auth/register', methods=['POST'])
-def enterprise_register():
+def enterprise_register_api():
     """Enterprise registration with advanced security"""
     try:
         data = request.get_json()
