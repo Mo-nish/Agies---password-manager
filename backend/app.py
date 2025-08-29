@@ -95,6 +95,22 @@ def init_db():
             )
         ''')
         
+        # Create breach alerts table
+        c.execute('''
+            CREATE TABLE IF NOT EXISTS breach_alerts (
+                id TEXT PRIMARY KEY,
+                user_id TEXT NOT NULL,
+                email TEXT NOT NULL,
+                domain TEXT NOT NULL,
+                breach_type TEXT NOT NULL,
+                severity TEXT DEFAULT 'medium',
+                status TEXT DEFAULT 'active',
+                details TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users (id)
+            )
+        ''')
+        
         conn.commit()
         print("✅ Database tables created successfully")
         
@@ -191,7 +207,14 @@ def health_check():
     return jsonify({
         'status': 'healthy',
         'timestamp': datetime.now().isoformat(),
-        'service': 'Maze Password Manager Backend'
+        'service': 'Maze Password Manager Backend',
+        'features': [
+            'Enterprise Security Monitoring',
+            'Real-time Threat Detection',
+            'Credential Management',
+            'Breach Alert System',
+            'Password Health Analysis'
+        ]
     })
 
 @app.route('/api/auth/login', methods=['POST'])
@@ -333,6 +356,77 @@ def breach_check():
         
     except Exception as e:
         return jsonify({'error': f'Breach check failed: {str(e)}'}), 500
+
+@app.route('/api/security/credentials', methods=['GET'])
+@require_auth
+def get_credentials():
+    """Get user credentials for monitoring"""
+    try:
+        user_id = request.headers.get('X-User-ID')
+        
+        # Simulate credential data
+        credentials = [
+            {
+                'id': '1',
+                'email': 'user@example.com',
+                'domain': 'example.com',
+                'username': 'user123',
+                'password': '••••••••••••••••',
+                'status': 'active',
+                'security_level': 'high',
+                'two_factor_enabled': True,
+                'password_strength': 85,
+                'monitoring': True,
+                'last_scan': datetime.now().isoformat(),
+                'created_date': datetime.now().isoformat(),
+                'notes': 'Primary account'
+            }
+        ]
+        
+        return jsonify({
+            'success': True,
+            'credentials': credentials,
+            'total_count': len(credentials)
+        })
+        
+    except Exception as e:
+        return jsonify({'error': f'Failed to get credentials: {str(e)}'}), 500
+
+@app.route('/api/security/breach-alerts', methods=['GET'])
+@require_auth
+def get_breach_alerts():
+    """Get breach alerts for user"""
+    try:
+        user_id = request.headers.get('X-User-ID')
+        
+        # Simulate breach alerts
+        alerts = [
+            {
+                'id': '1',
+                'title': 'Security Scan Completed',
+                'email': 'user@example.com',
+                'domain': 'example.com',
+                'severity': 'low',
+                'breach_count': 0,
+                'source': 'Security Monitor',
+                'timestamp': datetime.now().isoformat(),
+                'status': 'resolved',
+                'type': 'security_scan',
+                'recommendations': [
+                    'Continue monitoring account activity',
+                    'Enable 2FA if not already enabled'
+                ]
+            }
+        ]
+        
+        return jsonify({
+            'success': True,
+            'alerts': alerts,
+            'total_count': len(alerts)
+        })
+        
+    except Exception as e:
+        return jsonify({'error': f'Failed to get breach alerts: {str(e)}'}), 500
 
 # Utility functions
 def hash_password(password):
