@@ -128,32 +128,61 @@ def require_auth(f):
 @app.route('/')
 def index():
     """Serve the main application"""
+    print(f"🌐 Serving index.html for route: /")
     return send_from_directory('../public', 'index.html')
+
+@app.route('/login')
+def login_page():
+    """Serve the login page"""
+    print(f"🔐 Serving login.html for route: /login")
+    return send_from_directory('../public', 'login.html')
+
+@app.route('/register')
+def register_page():
+    """Serve the register page"""
+    print(f"📝 Serving register.html for route: /register")
+    return send_from_directory('../public', 'register.html')
 
 @app.route('/dark-web-monitor')
 def dark_web_monitor():
     """Serve the dark web monitor page"""
+    print(f"🚨 Serving dark-web-monitor.html for route: /dark-web-monitor")
     return send_from_directory('../public', 'dark-web-monitor.html')
 
 @app.route('/dashboard')
 def dashboard():
     """Serve the dashboard page"""
+    print(f"📊 Serving dashboard.html for route: /dashboard")
     return send_from_directory('../public', 'dashboard.html')
 
 @app.route('/security-dashboard')
 def security_dashboard():
     """Serve the security dashboard page"""
+    print(f"🛡️ Serving security-dashboard.html for route: /security-dashboard")
     return send_from_directory('../public', 'security-dashboard.html')
 
 @app.route('/vaults')
 def vaults():
     """Serve the vaults page"""
+    print(f"🔐 Serving vaults.html for route: /vaults")
     return send_from_directory('../public', 'vaults.html')
 
 @app.route('/pricing')
 def pricing():
     """Serve the pricing page"""
+    print(f"💰 Serving pricing.html for route: /pricing")
     return send_from_directory('../public', 'pricing.html')
+
+@app.route('/<path:filename>')
+def serve_static(filename):
+    """Serve static files from public directory"""
+    print(f"📁 Serving static file: {filename}")
+    try:
+        return send_from_directory('../public', filename)
+    except FileNotFoundError:
+        print(f"⚠️ File not found: {filename}, serving index.html instead")
+        # If file not found, try to serve index.html for SPA routing
+        return send_from_directory('../public', 'index.html')
 
 # API Routes
 @app.route('/api/health')
