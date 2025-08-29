@@ -2325,6 +2325,49 @@ class EnterpriseDarkWebMonitor {
         if (/[^A-Za-z0-9]/.test(password)) details.push('✅ Special characters');
         return details.join('<br>');
     }
+    
+    // Add missing addAuditLog method to the class
+    addAuditLog(action, details) {
+        if (!this.auditLog) {
+            this.auditLog = [];
+        }
+        
+        this.auditLog.push({
+            id: `AUDIT_${Date.now()}`,
+            action: action,
+            details: details,
+            timestamp: new Date(),
+            userId: this.getUserId()
+        });
+        
+        console.log('📋 Audit log entry added:', action, details);
+    }
+    
+    // Add missing getUserId method
+    getUserId() {
+        // Get user ID from auth service or localStorage
+        return localStorage.getItem('user_id') || 'demo_user';
+    }
+    
+    // Add missing simulatePasswordUpdateAPI method to the class
+    async simulatePasswordUpdateAPI(email, newPassword) {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                console.log(`🔐 API: Password updated for ${email}`);
+                resolve({ success: true, message: 'Password updated successfully' });
+            }, 1000);
+        });
+    }
+    
+    // Add missing simulateAccountLockAPI method to the class
+    async simulateAccountLockAPI(email, domain) {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                console.log(`🔒 API: Account locked for ${email} on ${domain}`);
+                resolve({ success: true, message: 'Account locked successfully' });
+            }, 800);
+        });
+    }
 }
 
 // Initialize Enterprise Dark Web Monitor
