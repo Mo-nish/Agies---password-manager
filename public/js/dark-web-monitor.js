@@ -4098,3 +4098,353 @@ setInterval(updateURLHistory, 30000);
 
 // Initial update
 setTimeout(updateURLHistory, 1000);
+
+// 🔍 HISTORY VIEWING FUNCTIONS
+function showCompleteHistory() {
+    console.log('📋 Showing complete monitoring history...');
+    
+    if (!window.enterpriseActivityMonitor) {
+        alert('⚠️ Monitoring system not available. Please start monitoring first.');
+        return;
+    }
+    
+    const comprehensiveData = window.enterpriseActivityMonitor.getComprehensiveMonitoringData();
+    showHistoryModal('Complete Monitoring History', comprehensiveData);
+}
+
+function showBrowserHistory() {
+    console.log('🌐 Showing browser history...');
+    
+    if (!window.enterpriseActivityMonitor) {
+        alert('⚠️ Monitoring system not available. Please start monitoring first.');
+        return;
+    }
+    
+    const comprehensiveData = window.enterpriseActivityMonitor.getComprehensiveMonitoringData();
+    const browserData = {
+        title: 'Browser Activity History',
+        data: comprehensiveData.urls || [],
+        summary: {
+            totalUrls: comprehensiveData.urls?.length || 0,
+            uniqueDomains: getUniqueDomains(comprehensiveData.urls || []),
+            totalTime: calculateTotalTime(comprehensiveData.urls || [])
+        }
+    };
+    
+    showHistoryModal('Browser Activity History', browserData);
+}
+
+function showSystemHistory() {
+    console.log('💻 Showing system history...');
+    
+    if (!window.enterpriseActivityMonitor) {
+        alert('⚠️ Monitoring system not available. Please start monitoring first.');
+        return;
+    }
+    
+    const comprehensiveData = window.enterpriseActivityMonitor.getComprehensiveMonitoringData();
+    const systemData = {
+        title: 'System Activity History',
+        data: comprehensiveData.systemTools || [],
+        summary: {
+            totalActivities: comprehensiveData.systemTools?.length || 0,
+            categories: getActivityCategories(comprehensiveData.systemTools || []),
+            timeRange: getTimeRange(comprehensiveData.systemTools || [])
+        }
+    };
+    
+    showHistoryModal('System Activity History', systemData);
+}
+
+function showSecurityHistory() {
+    console.log('🛡️ Showing security history...');
+    
+    if (!window.enterpriseActivityMonitor) {
+        alert('⚠️ Monitoring system not available. Please start monitoring first.');
+        return;
+    }
+    
+    const comprehensiveData = window.enterpriseActivityMonitor.getComprehensiveMonitoringData();
+    const securityData = {
+        title: 'Security Events History',
+        data: comprehensiveData.downloads || [],
+        summary: {
+            totalEvents: comprehensiveData.downloads?.length || 0,
+            riskLevels: getRiskLevels(comprehensiveData.downloads || []),
+            recentActivity: getRecentActivity(comprehensiveData.downloads || [])
+        }
+    };
+    
+    showHistoryModal('Security Events History', securityData);
+}
+
+function showNetworkHistory() {
+    console.log('🌐 Showing network history...');
+    
+    if (!window.enterpriseActivityMonitor) {
+        alert('⚠️ Monitoring system not available. Please start monitoring first.');
+        return;
+    }
+    
+    const comprehensiveData = window.enterpriseActivityMonitor.getComprehensiveMonitoringData();
+    const networkData = {
+        title: 'Network Activity History',
+        data: comprehensiveData.crossBrowserActivity || [],
+        summary: {
+            totalConnections: comprehensiveData.crossBrowserActivity?.length || 0,
+            connectionTypes: getConnectionTypes(comprehensiveData.crossBrowserActivity || []),
+            bandwidth: calculateBandwidth(comprehensiveData.crossBrowserActivity || [])
+        }
+    };
+    
+    showHistoryModal('Network Activity History', networkData);
+}
+
+// 🎨 SHOW HISTORY MODAL
+function showHistoryModal(title, data) {
+    // Create modal HTML
+    const modalHTML = `
+        <div id="history-modal" class="history-modal">
+            <div class="history-modal-content">
+                <div class="history-modal-header">
+                    <h2>${title}</h2>
+                    <button class="close-modal" onclick="closeHistoryModal()">&times;</button>
+                </div>
+                
+                <div class="history-modal-body">
+                    ${generateHistoryContent(data)}
+                </div>
+                
+                <div class="history-modal-footer">
+                    <button class="btn-download" onclick="downloadHistoryData('${title}', ${JSON.stringify(data).replace(/"/g, '&quot;')})">
+                        📥 Download History
+                    </button>
+                    <button class="btn-close" onclick="closeHistoryModal()">Close</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Add modal to page
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Show modal
+    setTimeout(() => {
+        document.getElementById('history-modal').classList.add('show');
+    }, 10);
+}
+
+// 🚪 CLOSE HISTORY MODAL
+function closeHistoryModal() {
+    const modal = document.getElementById('history-modal');
+    if (modal) {
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modal.remove();
+        }, 300);
+    }
+}
+
+// 📝 GENERATE HISTORY CONTENT
+function generateHistoryContent(data) {
+    let content = '';
+    
+    // Add summary if available
+    if (data.summary) {
+        content += `
+            <div class="history-summary">
+                <h3>📊 Summary</h3>
+                <div class="summary-grid">
+        `;
+        
+        Object.entries(data.summary).forEach(([key, value]) => {
+            content += `
+                <div class="summary-item">
+                    <span class="summary-label">${key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}:</span>
+                    <span class="summary-value">${value}</span>
+                </div>
+            `;
+        });
+        
+        content += `
+                </div>
+            </div>
+        `;
+    }
+    
+    // Add data list
+    if (data.data && Array.isArray(data.data)) {
+        content += `
+            <div class="history-data">
+                <h3>📋 Activity Details</h3>
+                <div class="data-list">
+        `;
+        
+        data.data.slice(0, 50).forEach((item, index) => {
+            content += `
+                <div class="data-item">
+                    <div class="data-header">
+                        <span class="data-index">#${index + 1}</span>
+                        <span class="data-time">${formatTime(item.timestamp)}</span>
+                        <span class="data-type">${item.type || 'activity'}</span>
+                    </div>
+                    <div class="data-content">
+                        ${generateDataItemContent(item)}
+                    </div>
+                </div>
+            `;
+        });
+        
+        if (data.data.length > 50) {
+            content += `
+                <div class="data-more">
+                    <p>... and ${data.data.length - 50} more activities</p>
+                </div>
+            `;
+        }
+        
+        content += `
+                </div>
+            </div>
+        `;
+    }
+    
+    return content;
+}
+
+// 📄 GENERATE DATA ITEM CONTENT
+function generateDataItemContent(item) {
+    let content = '';
+    
+    if (item.url) {
+        content += `<div class="data-url"><strong>URL:</strong> ${item.url}</div>`;
+    }
+    
+    if (item.title) {
+        content += `<div class="data-title"><strong>Title:</strong> ${item.title}</div>`;
+    }
+    
+    if (item.action) {
+        content += `<div class="data-action"><strong>Action:</strong> ${item.action}</div>`;
+    }
+    
+    if (item.file_name) {
+        content += `<div class="data-file"><strong>File:</strong> ${item.file_name}</div>`;
+    }
+    
+    if (item.category) {
+        content += `<div class="data-category"><strong>Category:</strong> ${item.category}</div>`;
+    }
+    
+    if (item.priority) {
+        content += `<div class="data-priority"><strong>Priority:</strong> ${item.priority}</div>`;
+    }
+    
+    if (item.duration_on_page) {
+        content += `<div class="data-duration"><strong>Duration:</strong> ${Math.round(item.duration_on_page / 1000)}s</div>`;
+    }
+    
+    return content;
+}
+
+// 🧮 UTILITY FUNCTIONS FOR HISTORY
+function getUniqueDomains(urls) {
+    const domains = new Set();
+    urls.forEach(url => {
+        try {
+            const domain = new URL(url.url || url).hostname;
+            domains.add(domain);
+        } catch (e) {
+            // Invalid URL, skip
+        }
+    });
+    return Array.from(domains).length;
+}
+
+function calculateTotalTime(urls) {
+    let totalTime = 0;
+    urls.forEach(url => {
+        if (url.time_spent) {
+            totalTime += url.time_spent;
+        }
+    });
+    return Math.round(totalTime / 1000);
+}
+
+function getActivityCategories(activities) {
+    const categories = new Set();
+    activities.forEach(activity => {
+        if (activity.category) {
+            categories.add(activity.category);
+        }
+    });
+    return Array.from(categories).join(', ');
+}
+
+function getTimeRange(activities) {
+    if (activities.length === 0) return 'No data';
+    
+    const timestamps = activities.map(a => new Date(a.timestamp).getTime());
+    const start = new Date(Math.min(...timestamps));
+    const end = new Date(Math.max(...timestamps));
+    
+    return `${start.toLocaleDateString()} - ${end.toLocaleDateString()}`;
+}
+
+function getRiskLevels(activities) {
+    const riskLevels = new Set();
+    activities.forEach(activity => {
+        if (activity.priority) {
+            riskLevels.add(activity.priority);
+        }
+    });
+    return Array.from(riskLevels).join(', ');
+}
+
+function getRecentActivity(activities) {
+    if (activities.length === 0) return 'No recent activity';
+    
+    const recent = activities.slice(0, 3);
+    return recent.map(a => a.action || a.type).join(', ');
+}
+
+function getConnectionTypes(activities) {
+    const types = new Set();
+    activities.forEach(activity => {
+        if (activity.type) {
+            types.add(activity.type);
+        }
+    });
+    return Array.from(types).join(', ');
+}
+
+function calculateBandwidth(activities) {
+    // Simplified bandwidth calculation
+    return `${activities.length * 10} KB estimated`;
+}
+
+function formatTime(timestamp) {
+    try {
+        return new Date(timestamp).toLocaleString();
+    } catch (e) {
+        return 'Unknown time';
+    }
+}
+
+// 📥 DOWNLOAD HISTORY DATA
+function downloadHistoryData(title, data) {
+    const filename = `${title.replace(/\s+/g, '-')}-${Date.now()}.json`;
+    const content = JSON.stringify(data, null, 2);
+    
+    const blob = new Blob([content], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    console.log(`✅ History data downloaded: ${filename}`);
+}

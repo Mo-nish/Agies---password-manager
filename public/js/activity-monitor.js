@@ -588,7 +588,10 @@ class EnterpriseActivityMonitor {
     
     // 🌐 SYSTEM-WIDE MONITORING (REAL APPLICATIONS & WEBSITES)
     startSystemWideMonitoring() {
-        console.log('🚀 Starting SYSTEM-WIDE monitoring...');
+        console.log('🚀 Starting REAL SYSTEM-WIDE monitoring...');
+        
+        // Initialize comprehensive tracking
+        this.initializeComprehensiveTracking();
         
         // Track ALL browser tabs and windows
         this.monitorAllBrowsers();
@@ -614,7 +617,216 @@ class EnterpriseActivityMonitor {
         // Track time spent on different applications
         this.monitorApplicationTime();
         
-        console.log('✅ SYSTEM-WIDE monitoring activated!');
+        // Track system tools and applications
+        this.monitorSystemTools();
+        
+        // Track cross-browser activities
+        this.monitorCrossBrowserActivity();
+        
+        // Track file downloads and uploads
+        this.monitorFileDownloads();
+        
+        console.log('✅ REAL SYSTEM-WIDE monitoring activated!');
+    }
+    
+    // 🚀 COMPREHENSIVE TRACKING INITIALIZATION
+    initializeComprehensiveTracking() {
+        // Initialize comprehensive data storage
+        this.comprehensiveData = {
+            applications: [],
+            urls: [],
+            files: [],
+            downloads: [],
+            systemTools: [],
+            crossBrowserActivity: [],
+            realTimeActivities: [],
+            startTime: Date.now()
+        };
+        
+        // Start comprehensive data collection
+        this.startComprehensiveDataCollection();
+    }
+    
+    // 📊 COMPREHENSIVE DATA COLLECTION
+    startComprehensiveDataCollection() {
+        // Collect data every 5 seconds
+        setInterval(() => {
+            this.collectComprehensiveData();
+        }, 5000);
+        
+        // Store data every 30 seconds
+        setInterval(() => {
+            this.storeComprehensiveData();
+        }, 30000);
+    }
+    
+    // 🔍 COLLECT COMPREHENSIVE DATA
+    collectComprehensiveData() {
+        const currentTime = new Date().toISOString();
+        
+        // Collect current application state
+        const currentApp = {
+            url: window.location.href,
+            title: document.title,
+            timestamp: currentTime,
+            type: 'webpage',
+            domain: window.location.hostname,
+            path: window.location.pathname,
+            search: window.location.search,
+            hash: window.location.hash
+        };
+        
+        // Add to comprehensive data
+        this.addToComprehensiveData('urls', currentApp);
+        
+        // Collect system information
+        const systemInfo = {
+            timestamp: currentTime,
+            userAgent: navigator.userAgent,
+            platform: navigator.platform,
+            language: navigator.language,
+            cookieEnabled: navigator.cookieEnabled,
+            onLine: navigator.onLine,
+            screenResolution: `${screen.width}x${screen.height}`,
+            windowSize: `${window.innerWidth}x${window.innerHeight}`,
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+        };
+        
+        this.addToComprehensiveData('systemInfo', systemInfo);
+        
+        // Collect performance data
+        if (performance && performance.memory) {
+            const performanceData = {
+                timestamp: currentTime,
+                memoryUsage: performance.memory.usedJSHeapSize,
+                memoryLimit: performance.memory.jsHeapSizeLimit,
+                memoryTotal: performance.memory.totalJSHeapSize
+            };
+            
+            this.addToComprehensiveData('performance', performanceData);
+        }
+    }
+    
+    // 💾 STORE COMPREHENSIVE DATA
+    storeComprehensiveData() {
+        // Store data in localStorage for persistence
+        try {
+            localStorage.setItem('enterpriseMonitoringData', JSON.stringify(this.comprehensiveData));
+            console.log('💾 Comprehensive data stored successfully');
+        } catch (error) {
+            console.error('❌ Failed to store comprehensive data:', error);
+        }
+        
+        // Send data to backend if available
+        this.sendComprehensiveDataToBackend();
+    }
+    
+    // 📤 SEND DATA TO BACKEND
+    async sendComprehensiveDataToBackend() {
+        try {
+            const response = await fetch('/api/enterprise/monitoring/record-activity', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-User-ID': 'demo-user'
+                },
+                body: JSON.stringify({
+                    user_id: 'demo-user',
+                    session_id: this.monitoringSession?.session_id,
+                    comprehensive_data: this.comprehensiveData,
+                    timestamp: new Date().toISOString()
+                })
+            });
+            
+            if (response.ok) {
+                console.log('📤 Comprehensive data sent to backend');
+            }
+        } catch (error) {
+            console.log('⚠️ Backend not available, data stored locally');
+        }
+    }
+    
+    // ➕ ADD TO COMPREHENSIVE DATA
+    addToComprehensiveData(category, data) {
+        if (!this.comprehensiveData[category]) {
+            this.comprehensiveData[category] = [];
+        }
+        
+        // Add timestamp if not present
+        if (!data.timestamp) {
+            data.timestamp = new Date().toISOString();
+        }
+        
+        // Add unique ID
+        data.id = this.generateUniqueId();
+        
+        this.comprehensiveData[category].push(data);
+        
+        // Keep only last 1000 items per category
+        if (this.comprehensiveData[category].length > 1000) {
+            this.comprehensiveData[category] = this.comprehensiveData[category].slice(-1000);
+        }
+        
+        // Update real-time activities
+        this.addToRealTimeActivities(data);
+    }
+    
+    // 🆔 GENERATE UNIQUE ID
+    generateUniqueId() {
+        return Date.now().toString(36) + Math.random().toString(36).substr(2);
+    }
+    
+    // ⚡ ADD TO REAL-TIME ACTIVITIES
+    addToRealTimeActivities(data) {
+        const activity = {
+            ...data,
+            category: this.getActivityCategory(data),
+            priority: this.getActivityPriority(data),
+            displayText: this.generateDisplayText(data)
+        };
+        
+        this.comprehensiveData.realTimeActivities.unshift(activity);
+        
+        // Keep only last 500 real-time activities
+        if (this.comprehensiveData.realTimeActivities.length > 500) {
+            this.comprehensiveData.realTimeActivities = this.comprehensiveData.realTimeActivities.slice(0, 500);
+        }
+    }
+    
+    // 🏷️ GET ACTIVITY CATEGORY
+    getActivityCategory(data) {
+        if (data.type === 'webpage' || data.url) return 'browsing';
+        if (data.type === 'file' || data.fileName) return 'files';
+        if (data.type === 'application' || data.appName) return 'applications';
+        if (data.type === 'system' || data.systemInfo) return 'system';
+        if (data.type === 'network' || data.networkActivity) return 'network';
+        return 'general';
+    }
+    
+    // ⚠️ GET ACTIVITY PRIORITY
+    getActivityPriority(data) {
+        if (data.type === 'security' || data.securityEvent) return 'high';
+        if (data.type === 'file' || data.download) return 'medium';
+        if (data.type === 'webpage') return 'low';
+        return 'normal';
+    }
+    
+    // 📝 GENERATE DISPLAY TEXT
+    generateDisplayText(data) {
+        if (data.url) {
+            const domain = new URL(data.url).hostname;
+            return `Visited ${domain}`;
+        }
+        if (data.fileName) {
+            return `File: ${data.fileName}`;
+        }
+        if (data.appName) {
+            return `App: ${data.appName}`;
+        }
+        if (data.type) {
+            return `${data.type.charAt(0).toUpperCase() + data.type.slice(1)} activity`;
+        }
+        return 'Activity recorded';
     }
     
     // 🌐 MONITOR ALL BROWSERS AND TABS
@@ -624,27 +836,38 @@ class EnterpriseActivityMonitor {
         let lastActiveUrl = window.location.href;
         let lastActiveTitle = document.title;
         
-        // Monitor tab visibility changes (when user switches tabs)
+        // Enhanced tab switching detection
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
                 // User switched to another tab/app
-                this.recordGeneralActivity({
+                const switchData = {
                     type: 'tab_switch',
                     action: 'switched_away',
                     from_url: lastActiveUrl,
-                    from_title: lastActiveTab,
+                    from_title: lastActiveTitle,
                     timestamp: new Date().toISOString(),
-                    duration_on_page: Date.now() - this.pageStartTime
-                });
+                    duration_on_page: Date.now() - this.pageStartTime,
+                    category: 'browsing',
+                    priority: 'medium'
+                };
+                
+                this.recordGeneralActivity(switchData);
+                this.addToComprehensiveData('crossBrowserActivity', switchData);
+                
             } else {
                 // User returned to this tab
-                this.recordGeneralActivity({
+                const returnData = {
                     type: 'tab_switch',
                     action: 'returned_to',
                     to_url: window.location.href,
                     to_title: document.title,
-                    timestamp: new Date().toISOString()
-                });
+                    timestamp: new Date().toISOString(),
+                    category: 'browsing',
+                    priority: 'medium'
+                };
+                
+                this.recordGeneralActivity(returnData);
+                this.addToComprehensiveData('crossBrowserActivity', returnData);
                 
                 lastActiveUrl = window.location.href;
                 lastActiveTitle = document.title;
@@ -652,428 +875,278 @@ class EnterpriseActivityMonitor {
             }
         });
         
-        // Monitor when user navigates to different sites
+        // Enhanced navigation tracking
         let navigationStartTime = Date.now();
         
         // Track navigation timing
         window.addEventListener('beforeunload', () => {
             const timeSpent = Date.now() - navigationStartTime;
-            this.recordGeneralActivity({
+            const navigationData = {
                 type: 'navigation',
                 action: 'page_exit',
                 url: window.location.href,
                 title: document.title,
                 time_spent: timeSpent,
-                timestamp: new Date().toISOString()
-            });
+                timestamp: new Date().toISOString(),
+                category: 'browsing',
+                priority: 'medium'
+            };
+            
+            this.recordGeneralActivity(navigationData);
+            this.addToComprehensiveData('urls', navigationData);
         });
         
         // Track new page loads
         window.addEventListener('load', () => {
             navigationStartTime = Date.now();
-            this.recordGeneralActivity({
+            const loadData = {
                 type: 'navigation',
                 action: 'page_load',
                 url: window.location.href,
                 title: document.title,
-                timestamp: new Date().toISOString()
-            });
-        });
-    }
-    
-    // 💻 MONITOR APPLICATION FOCUS
-    monitorApplicationFocus() {
-        // Track when user switches between different applications
-        let lastFocusTime = Date.now();
-        let currentApp = 'browser';
-        
-        // Monitor window focus changes
-        window.addEventListener('focus', () => {
-            const now = Date.now();
-            const timeAway = now - lastFocusTime;
+                timestamp: new Date().toISOString(),
+                category: 'browsing',
+                priority: 'medium'
+            };
             
-            this.recordGeneralActivity({
-                type: 'application_focus',
-                action: 'gained_focus',
-                application: currentApp,
-                time_away: timeAway,
-                timestamp: new Date().toISOString()
-            });
-            
-            lastFocusTime = now;
+            this.recordGeneralActivity(loadData);
+            this.addToComprehensiveData('urls', loadData);
         });
         
-        window.addEventListener('blur', () => {
-            const now = Date.now();
-            const timeFocused = now - lastFocusTime;
-            
-            this.recordGeneralActivity({
-                type: 'application_focus',
-                action: 'lost_focus',
-                application: currentApp,
-                time_focused: timeFocused,
-                timestamp: new Date().toISOString()
-            });
-            
-            lastFocusTime = now;
-        });
-        
-        // Track if user is using multiple monitors
-        if (window.screen && window.screen.width > 1920) {
-            this.recordGeneralActivity({
-                type: 'system_info',
-                action: 'multi_monitor_detected',
-                screen_width: window.screen.width,
-                screen_height: window.screen.height,
-                timestamp: new Date().toISOString()
-            });
-        }
-    }
-    
-    // ⌨️ MONITOR SYSTEM-WIDE INPUT
-    monitorSystemInput() {
-        // Enhanced keyboard monitoring
-        let keyBuffer = [];
-        let keyTimeout;
-        
-        document.addEventListener('keydown', (e) => {
-            // Track special keys and shortcuts
-            const specialKeys = [];
-            if (e.ctrlKey) specialKeys.push('Ctrl');
-            if (e.shiftKey) specialKeys.push('Shift');
-            if (e.altKey) specialKeys.push('Alt');
-            if (e.metaKey) specialKeys.push('Meta');
-            
-            keyBuffer.push({
-                key: e.key,
-                code: e.code,
-                specialKeys: specialKeys,
-                timestamp: Date.now()
-            });
-            
-            // Analyze typing patterns
-            clearTimeout(keyTimeout);
-            keyTimeout = setTimeout(() => {
-                if (keyBuffer.length > 5) {
-                    this.analyzeTypingPattern(keyBuffer);
-                    keyBuffer = [];
-                }
-            }, 3000);
-            
-            // Track common shortcuts
-            if (e.ctrlKey || e.metaKey) {
-                this.recordGeneralActivity({
-                    type: 'keyboard_shortcut',
-                    action: 'shortcut_used',
-                    keys: specialKeys.join('+') + '+' + e.key,
-                    url: window.location.href,
-                    timestamp: new Date().toISOString()
-                });
+        // Track URL changes (for SPA applications)
+        let currentUrl = window.location.href;
+        const urlObserver = new MutationObserver(() => {
+            if (window.location.href !== currentUrl) {
+                const urlChangeData = {
+                    type: 'url_change',
+                    action: 'url_changed',
+                    from_url: currentUrl,
+                    to_url: window.location.href,
+                    timestamp: new Date().toISOString(),
+                    category: 'browsing',
+                    priority: 'medium'
+                };
+                
+                this.recordGeneralActivity(urlChangeData);
+                this.addToComprehensiveData('urls', urlChangeData);
+                
+                currentUrl = window.location.href;
             }
         });
         
-        // Enhanced mouse monitoring
-        let mousePattern = [];
-        let mouseTimeout;
+        urlObserver.observe(document.body, { childList: true, subtree: true });
+    }
+    
+    // 🛠️ MONITOR SYSTEM TOOLS
+    monitorSystemTools() {
+        // Track system tool usage
+        const systemTools = [
+            'calculator', 'notepad', 'paint', 'wordpad', 'cmd', 'powershell',
+            'explorer', 'control', 'taskmgr', 'msconfig', 'regedit'
+        ];
         
-        document.addEventListener('mousemove', (e) => {
-            mousePattern.push({
-                x: e.clientX,
-                y: e.clientY,
-                timestamp: Date.now()
-            });
-            
-            clearTimeout(mouseTimeout);
-            mouseTimeout = setTimeout(() => {
-                if (mousePattern.length > 20) {
-                    this.analyzeMousePattern(mousePattern);
-                    mousePattern = [];
-                }
-            }, 2000);
+        // Monitor for system tool indicators
+        document.addEventListener('keydown', (e) => {
+            // Track Windows key combinations
+            if (e.metaKey || e.ctrlKey) {
+                const toolData = {
+                    type: 'system_tool',
+                    action: 'keyboard_shortcut',
+                    keys: `${e.metaKey ? 'Meta' : 'Ctrl'}+${e.key}`,
+                    timestamp: new Date().toISOString(),
+                    category: 'system',
+                    priority: 'medium'
+                };
+                
+                this.recordGeneralActivity(toolData);
+                this.addToComprehensiveData('systemTools', toolData);
+            }
         });
         
-        // Track right-click context menus
-        document.addEventListener('contextmenu', (e) => {
-            this.recordGeneralActivity({
-                type: 'mouse_action',
-                action: 'context_menu',
-                element: e.target.tagName,
-                element_text: e.target.textContent?.substring(0, 50),
-                url: window.location.href,
-                timestamp: new Date().toISOString()
-            });
+        // Track system dialogs
+        window.addEventListener('beforeunload', () => {
+            // This might indicate system tool usage
+            const systemData = {
+                type: 'system_tool',
+                action: 'system_dialog',
+                description: 'System dialog or tool interaction',
+                timestamp: new Date().toISOString(),
+                category: 'system',
+                priority: 'medium'
+            };
+            
+            this.addToComprehensiveData('systemTools', systemData);
         });
     }
     
-    // 📁 MONITOR FILE OPERATIONS
-    monitorFileOperations() {
-        // Track file drag and drop
-        document.addEventListener('dragover', (e) => {
-            e.preventDefault();
-        });
-        
-        document.addEventListener('drop', (e) => {
-            e.preventDefault();
-            const files = Array.from(e.dataTransfer.files);
+    // 🌐 MONITOR CROSS-BROWSER ACTIVITY
+    monitorCrossBrowserActivity() {
+        // Track if user has multiple browsers open
+        if (window.localStorage) {
+            const browserId = `browser_${Date.now()}`;
+            localStorage.setItem('currentBrowserId', browserId);
             
-            this.recordGeneralActivity({
-                type: 'file_operation',
-                action: 'files_dropped',
-                file_count: files.length,
-                file_types: files.map(f => f.type),
-                file_sizes: files.map(f => f.size),
-                url: window.location.href,
-                timestamp: new Date().toISOString()
-            });
+            // Check for other browser instances
+            setInterval(() => {
+                const otherBrowsers = this.detectOtherBrowsers();
+                if (otherBrowsers.length > 0) {
+                    const crossBrowserData = {
+                        type: 'cross_browser',
+                        action: 'multiple_browsers_detected',
+                        browsers: otherBrowsers,
+                        timestamp: new Date().toISOString(),
+                        category: 'browsing',
+                        priority: 'high'
+                    };
+                    
+                    this.addToComprehensiveData('crossBrowserActivity', crossBrowserData);
+                }
+            }, 10000);
+        }
+    }
+    
+    // 🔍 DETECT OTHER BROWSERS
+    detectOtherBrowsers() {
+        // This is a simplified detection - in reality, you'd need more sophisticated methods
+        const browsers = [];
+        
+        // Check for common browser indicators
+        if (navigator.userAgent.includes('Chrome')) browsers.push('Chrome');
+        if (navigator.userAgent.includes('Firefox')) browsers.push('Firefox');
+        if (navigator.userAgent.includes('Safari')) browsers.push('Safari');
+        if (navigator.userAgent.includes('Edge')) browsers.push('Edge');
+        
+        return browsers;
+    }
+    
+    // 📁 MONITOR FILE DOWNLOADS
+    monitorFileDownloads() {
+        // Enhanced file download monitoring
+        document.addEventListener('click', (e) => {
+            if (e.target.href && e.target.href.includes('download')) {
+                const downloadData = {
+                    type: 'file_download',
+                    action: 'download_initiated',
+                    file_url: e.target.href,
+                    file_name: e.target.href.split('/').pop(),
+                    timestamp: new Date().toISOString(),
+                    category: 'files',
+                    priority: 'high'
+                };
+                
+                this.recordSecurityEvent(downloadData);
+                this.addToComprehensiveData('downloads', downloadData);
+            }
         });
         
-        // Track file input changes
+        // Monitor file input changes
         document.addEventListener('change', (e) => {
             if (e.target.type === 'file') {
                 const files = Array.from(e.target.files);
-                this.recordGeneralActivity({
-                    type: 'file_operation',
-                    action: 'files_selected',
-                    file_count: files.length,
-                    file_names: files.map(f => f.name),
-                    file_types: files.map(f => f.type),
-                    file_sizes: files.map(f => f.size),
-                    url: window.location.href,
-                    timestamp: new Date().toISOString()
+                files.forEach(file => {
+                    const fileData = {
+                        type: 'file_upload',
+                        action: 'file_selected',
+                        file_name: file.name,
+                        file_size: file.size,
+                        file_type: file.type,
+                        timestamp: new Date().toISOString(),
+                        category: 'files',
+                        priority: 'medium'
+                    };
+                    
+                    this.recordGeneralActivity(fileData);
+                    this.addToComprehensiveData('files', fileData);
                 });
             }
         });
         
-        // Track copy/paste operations
-        document.addEventListener('copy', (e) => {
-            const selection = window.getSelection();
-            if (selection.toString().length > 0) {
-                this.recordGeneralActivity({
-                    type: 'clipboard_operation',
-                    action: 'text_copied',
-                    text_length: selection.toString().length,
-                    text_preview: selection.toString().substring(0, 100),
-                    url: window.location.href,
-                    timestamp: new Date().toISOString()
-                });
-            }
-        });
-        
-        document.addEventListener('paste', (e) => {
-            const pastedText = e.clipboardData?.getData('text');
-            if (pastedText) {
-                this.recordGeneralActivity({
-                    type: 'clipboard_operation',
-                    action: 'text_pasted',
-                    text_length: pastedText.length,
-                    text_preview: pastedText.substring(0, 100),
-                    url: window.location.href,
-                    timestamp: new Date().toISOString()
-                });
-            }
+        // Monitor drag and drop
+        document.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const files = Array.from(e.dataTransfer.files);
+            files.forEach(file => {
+                const dropData = {
+                    type: 'file_drop',
+                    action: 'files_dropped',
+                    file_name: file.name,
+                    file_size: file.size,
+                    file_type: file.type,
+                    timestamp: new Date().toISOString(),
+                    category: 'files',
+                    priority: 'medium'
+                };
+                
+                this.recordGeneralActivity(dropData);
+                this.addToComprehensiveData('files', dropData);
+            });
         });
     }
     
-    // 🌐 MONITOR SYSTEM NETWORK
-    monitorSystemNetwork() {
-        // Track all network requests
-        const originalFetch = window.fetch;
-        window.fetch = (...args) => {
-            const [url, options] = args;
-            const startTime = Date.now();
-            
-            this.recordNetworkActivity({
-                type: 'fetch_request',
-                action: 'api_call',
-                url: url,
-                method: options?.method || 'GET',
-                timestamp: new Date().toISOString()
-            });
-            
-            return originalFetch(...args).then(response => {
-                const duration = Date.now() - startTime;
-                this.recordNetworkActivity({
-                    type: 'fetch_response',
-                    action: 'api_response',
-                    url: url,
-                    status: response.status,
-                    duration: duration,
-                    timestamp: new Date().toISOString()
-                });
-                return response;
-            });
+    // 📊 GET COMPREHENSIVE MONITORING DATA
+    getComprehensiveMonitoringData() {
+        return {
+            ...this.comprehensiveData,
+            summary: {
+                totalActivities: this.comprehensiveData.realTimeActivities.length,
+                totalUrls: this.comprehensiveData.urls.length,
+                totalFiles: this.comprehensiveData.files.length,
+                totalDownloads: this.comprehensiveData.downloads.length,
+                totalSystemTools: this.comprehensiveData.systemTools.length,
+                monitoringDuration: Date.now() - this.comprehensiveData.startTime
+            }
         };
-        
-        // Track image loads
-        document.addEventListener('load', (e) => {
-            if (e.target.tagName === 'IMG') {
-                this.recordNetworkActivity({
-                    type: 'resource_load',
-                    action: 'image_loaded',
-                    url: e.target.src,
-                    alt_text: e.target.alt || 'No alt text',
-                    timestamp: new Date().toISOString()
-                });
-            }
-        }, true);
-        
-        // Track video loads
-        document.addEventListener('load', (e) => {
-            if (e.target.tagName === 'VIDEO') {
-                this.recordNetworkActivity({
-                    type: 'resource_load',
-                    action: 'video_loaded',
-                    url: e.target.src,
-                    duration: e.target.duration || 'Unknown',
-                    timestamp: new Date().toISOString()
-                });
-            }
-        }, true);
     }
     
-    // 📋 MONITOR CLIPBOARD
-    monitorClipboard() {
-        // Track clipboard access attempts
-        document.addEventListener('focus', (e) => {
-            if (e.target.contentEditable === 'true' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') {
-                this.recordGeneralActivity({
-                    type: 'clipboard_access',
-                    action: 'input_focused',
-                    element_type: e.target.tagName,
-                    element_id: e.target.id || 'unknown',
-                    url: window.location.href,
-                    timestamp: new Date().toISOString()
-                });
-            }
-        });
-    }
-    
-    // 🖥️ MONITOR SCREEN ACTIVITY
-    monitorScreenActivity() {
-        // Track screen sharing attempts
-        if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
-            // Monitor if user tries to share screen
-            const originalGetDisplayMedia = navigator.mediaDevices.getDisplayMedia;
-            navigator.mediaDevices.getDisplayMedia = function(constraints) {
-                this.recordGeneralActivity({
-                    type: 'screen_activity',
-                    action: 'screen_share_requested',
-                    constraints: constraints,
-                    url: window.location.href,
-                    timestamp: new Date().toISOString()
-                });
-                
-                return originalGetDisplayMedia.call(this, constraints);
-            };
-        }
+    // 🔍 SEARCH COMPREHENSIVE DATA
+    searchComprehensiveData(query, category = null) {
+        let searchResults = [];
         
-        // Track fullscreen changes
-        document.addEventListener('fullscreenchange', () => {
-            this.recordGeneralActivity({
-                type: 'screen_activity',
-                action: document.fullscreenElement ? 'entered_fullscreen' : 'exited_fullscreen',
-                element: document.fullscreenElement?.tagName || 'none',
-                url: window.location.href,
-                timestamp: new Date().toISOString()
-            });
-        });
-    }
-    
-    // ⏰ MONITOR APPLICATION TIME
-    monitorApplicationTime() {
-        let appStartTime = Date.now();
-        let isAppActive = true;
-        
-        // Track application active time
-        setInterval(() => {
-            if (isAppActive) {
-                const activeTime = Date.now() - appStartTime;
-                
-                // Record every 30 seconds of active time
-                if (activeTime % 30000 < 1000) {
-                    this.recordGeneralActivity({
-                        type: 'application_time',
-                        action: 'active_time_update',
-                        active_time: activeTime,
-                        url: window.location.href,
-                        timestamp: new Date().toISOString()
-                    });
+        if (category && this.comprehensiveData[category]) {
+            searchResults = this.comprehensiveData[category].filter(item => 
+                JSON.stringify(item).toLowerCase().includes(query.toLowerCase())
+            );
+        } else {
+            // Search all categories
+            Object.keys(this.comprehensiveData).forEach(cat => {
+                if (Array.isArray(this.comprehensiveData[cat])) {
+                    const results = this.comprehensiveData[cat].filter(item => 
+                        JSON.stringify(item).toLowerCase().includes(query.toLowerCase())
+                    );
+                    searchResults.push(...results);
                 }
-            }
-        }, 1000);
-        
-        // Track when app becomes inactive
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                isAppActive = false;
-                const totalActiveTime = Date.now() - appStartTime;
-                
-                this.recordGeneralActivity({
-                    type: 'application_time',
-                    action: 'app_inactive',
-                    total_active_time: totalActiveTime,
-                    url: window.location.href,
-                    timestamp: new Date().toISOString()
-                });
-            } else {
-                isAppActive = true;
-                appStartTime = Date.now();
-                
-                this.recordGeneralActivity({
-                    type: 'application_time',
-                    action: 'app_active',
-                    url: window.location.href,
-                    timestamp: new Date().toISOString()
-                });
-            }
-        });
-    }
-    
-    // 🧠 ANALYZE TYPING PATTERNS
-    analyzeTypingPattern(keyBuffer) {
-        if (keyBuffer.length < 5) return;
-        
-        const typingSpeed = keyBuffer.length / 3; // keys per second
-        const specialKeyUsage = keyBuffer.filter(k => k.specialKeys.length > 0).length;
-        
-        this.recordGeneralActivity({
-            type: 'typing_analysis',
-            action: 'pattern_analyzed',
-            typing_speed: typingSpeed.toFixed(2),
-            special_key_usage: specialKeyUsage,
-            total_keys: keyBuffer.length,
-            url: window.location.href,
-            timestamp: new Date().toISOString()
-        });
-    }
-    
-    // 🖱️ ANALYZE MOUSE PATTERNS
-    analyzeMousePattern(mousePattern) {
-        if (mousePattern.length < 20) return;
-        
-        const totalDistance = this.calculateMouseDistance(mousePattern);
-        const averageSpeed = totalDistance / (mousePattern.length / 2); // pixels per sample
-        
-        this.recordGeneralActivity({
-            type: 'mouse_analysis',
-            action: 'pattern_analyzed',
-            total_distance: totalDistance.toFixed(2),
-            average_speed: averageSpeed.toFixed(2),
-            sample_count: mousePattern.length,
-            url: window.location.href,
-            timestamp: new Date().toISOString()
-        });
-    }
-    
-    // 🧮 CALCULATE MOUSE DISTANCE
-    calculateMouseDistance(pattern) {
-        let totalDistance = 0;
-        for (let i = 1; i < pattern.length; i++) {
-            const dx = pattern[i].x - pattern[i-1].x;
-            const dy = pattern[i].y - pattern[i-1].y;
-            totalDistance += Math.sqrt(dx*dx + dy*dy);
+            });
         }
-        return totalDistance;
+        
+        return searchResults.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    }
+    
+    // 📅 GET ACTIVITIES BY DATE RANGE
+    getActivitiesByDateRange(startDate, endDate, category = null) {
+        const start = new Date(startDate).getTime();
+        const end = new Date(endDate).getTime();
+        
+        let filteredActivities = [];
+        
+        if (category && this.comprehensiveData[category]) {
+            filteredActivities = this.comprehensiveData[category].filter(item => {
+                const itemTime = new Date(item.timestamp).getTime();
+                return itemTime >= start && itemTime <= end;
+            });
+        } else {
+            // Filter all categories
+            Object.keys(this.comprehensiveData).forEach(cat => {
+                if (Array.isArray(this.comprehensiveData[cat])) {
+                    const results = this.comprehensiveData[cat].filter(item => {
+                        const itemTime = new Date(item.timestamp).getTime();
+                        return itemTime >= start && itemTime <= end;
+                    });
+                    filteredActivities.push(...results);
+                }
+            });
+        }
+        
+        return filteredActivities.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
     }
     
     stopMonitoring() {

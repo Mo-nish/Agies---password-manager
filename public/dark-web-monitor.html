@@ -1197,6 +1197,43 @@
             transform: translateY(-2px);
         }
 
+        .btn-history {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .btn-history:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-view-history {
+            background: rgba(99, 102, 241, 0.1);
+            color: #6366f1;
+            border: 1px solid #6366f1;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.8rem;
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        .btn-view-history:hover {
+            background: #6366f1;
+            color: white;
+            transform: translateY(-1px);
+        }
+
         .monitoring-select {
             padding: 0.5rem 1rem;
             border-radius: 0.5rem;
@@ -1579,6 +1616,210 @@
             color: white;
         }
 
+        /* 🎨 HISTORY MODAL STYLES */
+        .history-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .history-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .history-modal-content {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border-radius: 1rem;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .history-modal-header {
+            background: rgba(99, 102, 241, 0.1);
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-modal-header h2 {
+            color: white;
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            padding: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .close-modal:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .history-modal-body {
+            padding: 1.5rem;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .history-summary {
+            margin-bottom: 2rem;
+        }
+
+        .history-summary h3 {
+            color: #e2e8f0;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .summary-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .summary-label {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-value {
+            color: #e2e8f0;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .history-data h3 {
+            color: #e2e8f0;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .data-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .data-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+        }
+
+        .data-header {
+            background: rgba(99, 102, 241, 0.1);
+            padding: 0.75rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .data-index {
+            color: #6366f1;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .data-time {
+            color: #94a3b8;
+            font-size: 0.8rem;
+        }
+
+        .data-type {
+            color: #e2e8f0;
+            font-size: 0.8rem;
+            background: rgba(99, 102, 241, 0.2);
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+        }
+
+        .data-content {
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .data-content > div {
+            color: #e2e8f0;
+            font-size: 0.9rem;
+        }
+
+        .data-content strong {
+            color: #6366f1;
+        }
+
+        .data-more {
+            text-align: center;
+            padding: 1rem;
+            color: #94a3b8;
+            font-style: italic;
+        }
+
+        .history-modal-footer {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .btn-close {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .dashboard-grid {
@@ -1799,6 +2040,13 @@
                     <div class="control-item">
                         <span class="monitoring-status" id="monitoring-status">🟡 Ready</span>
                     </div>
+                    
+                    <!-- View All History Button -->
+                    <div class="control-item">
+                        <button id="view-all-history" class="btn-history" onclick="showCompleteHistory()">
+                            📋 View All History
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -1866,6 +2114,9 @@
                                 <span class="activity-value" id="window-focus">Active</span>
                             </div>
                         </div>
+                        <button class="btn-view-history" onclick="showSystemHistory()">
+                            🔍 View System History
+                        </button>
                     </div>
 
                     <!-- Security Events -->
@@ -1888,6 +2139,9 @@
                                 <span class="activity-value" id="external-links">0</span>
                             </div>
                         </div>
+                        <button class="btn-view-history" onclick="showSecurityHistory()">
+                            🔍 View Security History
+                        </button>
                     </div>
 
                     <!-- Network Activity -->
@@ -1910,6 +2164,9 @@
                                 <span class="activity-value" id="data-transfer">0KB</span>
                             </div>
                         </div>
+                        <button class="btn-view-history" onclick="showNetworkHistory()">
+                            🔍 View Network History
+                        </button>
                     </div>
                 </div>
             </div>
