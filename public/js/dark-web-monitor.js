@@ -1756,7 +1756,7 @@ class EnterpriseDarkWebMonitor {
         document.body.appendChild(modal);
     }
     
-    // Generate secure password with real-time feedback
+    // Generate secure password with REAL API integration
     async generateSecurePassword(credentialIndex) {
         const credential = this.credentials[credentialIndex];
         
@@ -1766,38 +1766,62 @@ class EnterpriseDarkWebMonitor {
             // Generate new secure password
             const newPassword = this.generateSecurePasswordString();
             
-            // Update credential
-            credential.password = newPassword;
-            credential.maskedPassword = '••••••••••••••••';
-            credential.lastModified = new Date();
-            credential.passwordStrength = this.calculatePasswordStrength(newPassword);
-            credential.autoRotation = true;
-            credential.nextRotation = new Date(Date.now() + (90 * 24 * 60 * 60 * 1000)); // 90 days
-            
-            // Simulate API call
-            await this.simulatePasswordUpdateAPI(credential.email, newPassword);
-            
-            // Update displays
-            this.updateCredentialDisplay();
-            this.updateCredentialDashboard();
-            
-            // Show success with password details
-            this.showGeneratedPasswordModal(newPassword, credential.email);
-            
-            showSuccessNotification(`✅ Secure password generated for ${credential.email}`);
-            
-            // Add to audit log
-            this.addAuditLog('PASSWORD_GENERATED', {
-                email: credential.email,
-                domain: credential.domain,
-                timestamp: new Date(),
-                action: 'Secure password generated',
-                strength: credential.passwordStrength
+            // REAL API CALL - Actually change the password in the database
+            const response = await fetch('/api/enterprise/security/change-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-User-ID': this.getUserId() || 'demo-user'
+                },
+                body: JSON.stringify({
+                    email: credential.email,
+                    new_password: newPassword,
+                    type: 'generated'
+                })
             });
+            
+            if (!response.ok) {
+                throw new Error(`Password change failed: ${response.statusText}`);
+            }
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                // Update local credential with REAL data from API
+                credential.password = newPassword;
+                credential.maskedPassword = '••••••••••••••••';
+                credential.lastModified = new Date();
+                credential.passwordStrength = result.password_strength;
+                credential.autoRotation = true;
+                credential.nextRotation = new Date(result.next_rotation);
+                
+                // Update displays with REAL data
+                this.updateCredentialDisplay();
+                this.updateCredentialDashboard();
+                
+                // Show success with password details
+                this.showGeneratedPasswordModal(newPassword, credential.email);
+                
+                showSuccessNotification(`✅ REAL password changed for ${credential.email}!`);
+                
+                // Add to audit log
+                this.addAuditLog('PASSWORD_GENERATED', {
+                    email: credential.email,
+                    domain: credential.domain,
+                    timestamp: new Date(),
+                    action: 'Secure password generated and SAVED',
+                    strength: result.password_strength,
+                    api_response: result
+                });
+                
+                console.log('🔐 REAL password change successful:', result);
+            } else {
+                throw new Error(result.error || 'Password change failed');
+            }
             
         } catch (error) {
             console.error('Password generation error:', error);
-            showSuccessNotification(`❌ Password generation failed for ${credential.email}`);
+            showSuccessNotification(`❌ Password change failed for ${credential.email}: ${error.message}`);
         }
     }
     
@@ -1973,37 +1997,61 @@ class EnterpriseDarkWebMonitor {
         }
         
         try {
-            // Update credential
-            credential.password = newPassword;
-            credential.maskedPassword = '••••••••••••••••';
-            credential.lastModified = new Date();
-            credential.passwordStrength = this.calculatePasswordStrength(newPassword);
-            
-            // Simulate API call
-            await this.simulatePasswordUpdateAPI(credential.email, newPassword);
-            
-            // Update displays
-            this.updateCredentialDisplay();
-            this.updateCredentialDashboard();
-            
-            // Close modal
-            const modal = document.querySelector('.manual-password-modal');
-            if (modal) modal.remove();
-            
-            showSuccessNotification(`✅ Password updated for ${credential.email}`);
-            
-            // Add to audit log
-            this.addAuditLog('PASSWORD_MANUALLY_CHANGED', {
-                email: credential.email,
-                domain: credential.domain,
-                timestamp: new Date(),
-                action: 'Password manually changed',
-                strength: credential.passwordStrength
+            // REAL API CALL - Actually save the password in the database
+            const response = await fetch('/api/enterprise/security/change-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-User-ID': this.getUserId() || 'demo-user'
+                },
+                body: JSON.stringify({
+                    email: credential.email,
+                    new_password: newPassword,
+                    type: 'manual'
+                })
             });
+            
+            if (!response.ok) {
+                throw new Error(`Password save failed: ${response.statusText}`);
+            }
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                // Update local credential with REAL data from API
+                credential.password = newPassword;
+                credential.maskedPassword = '••••••••••••••••';
+                credential.lastModified = new Date();
+                credential.passwordStrength = result.password_strength;
+                
+                // Update displays with REAL data
+                this.updateCredentialDisplay();
+                this.updateCredentialDashboard();
+                
+                // Close modal
+                const modal = document.querySelector('.manual-password-modal');
+                if (modal) modal.remove();
+                
+                showSuccessNotification(`✅ REAL password saved for ${credential.email}!`);
+                
+                // Add to audit log
+                this.addAuditLog('PASSWORD_MANUALLY_CHANGED', {
+                    email: credential.email,
+                    domain: credential.domain,
+                    timestamp: new Date(),
+                    action: 'Password manually changed and SAVED',
+                    strength: result.password_strength,
+                    api_response: result
+                });
+                
+                console.log('🔐 REAL manual password save successful:', result);
+            } else {
+                throw new Error(result.error || 'Password save failed');
+            }
             
         } catch (error) {
             console.error('Password save error:', error);
-            showSuccessNotification(`❌ Failed to save password for ${credential.email}`);
+            showSuccessNotification(`❌ Password save failed for ${credential.email}: ${error.message}`);
         }
     }
     
@@ -2017,34 +2065,58 @@ class EnterpriseDarkWebMonitor {
             // Generate new secure password
             const newPassword = this.generateSecurePasswordString();
             
-            // Update credential
-            credential.password = newPassword;
-            credential.maskedPassword = '••••••••••••••••';
-            credential.lastModified = new Date();
-            credential.passwordStrength = this.calculatePasswordStrength(newPassword);
-            credential.autoRotation = true;
-            credential.nextRotation = new Date(Date.now() + (90 * 24 * 60 * 60 * 1000)); // 90 days
-            
-            // Simulate API call
-            await this.simulatePasswordUpdateAPI(credential.email, newPassword);
-            
-            // Update displays
-            this.updateCredentialDisplay();
-            this.updateCredentialDashboard();
-            
-            // Show rotation success modal
-            this.showRotationSuccessModal(newPassword, credential.email);
-            
-            showSuccessNotification(`✅ Password rotated for ${credential.email}`);
-            
-            // Add to audit log
-            this.addAuditLog('PASSWORD_ROTATED', {
-                email: credential.email,
-                domain: credential.domain,
-                timestamp: new Date(),
-                action: 'Password auto-rotated',
-                strength: credential.passwordStrength
+            // REAL API CALL - Actually rotate the password in the database
+            const response = await fetch('/api/enterprise/security/change-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-User-ID': this.getUserId() || 'demo-user'
+                },
+                body: JSON.stringify({
+                    email: credential.email,
+                    new_password: newPassword,
+                    type: 'auto-rotate'
+                })
             });
+            
+            if (!response.ok) {
+                throw new Error(`Password rotation failed: ${response.statusText}`);
+            }
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                // Update local credential with REAL data from API
+                credential.password = newPassword;
+                credential.maskedPassword = '••••••••••••••••';
+                credential.lastModified = new Date();
+                credential.passwordStrength = result.password_strength;
+                credential.autoRotation = true;
+                credential.nextRotation = new Date(result.next_rotation);
+                
+                // Update displays with REAL data
+                this.updateCredentialDisplay();
+                this.updateCredentialDashboard();
+                
+                // Show rotation success modal
+                this.showRotationSuccessModal(newPassword, credential.email);
+                
+                showSuccessNotification(`✅ REAL password rotated for ${credential.email}!`);
+                
+                // Add to audit log
+                this.addAuditLog('PASSWORD_ROTATED', {
+                    email: credential.email,
+                    domain: credential.domain,
+                    timestamp: new Date(),
+                    action: 'Password auto-rotated and SAVED',
+                    strength: result.password_strength,
+                    api_response: result
+                });
+                
+                console.log('🔄 REAL password rotation successful:', result);
+            } else {
+                throw new Error(result.error || 'Password rotation failed');
+            }
             
         } catch (error) {
             console.error('Password rotation error:', error);

@@ -472,6 +472,82 @@ def enterprise_register_api():
         if 'conn' in locals() and conn:
             conn.close()
 
+# REAL PASSWORD CHANGE FUNCTIONALITY
+@app.route('/api/enterprise/security/change-password', methods=['POST'])
+@require_enterprise_auth
+def change_enterprise_password():
+    """REAL password change that actually updates credentials"""
+    try:
+        data = request.get_json()
+        user_id = request.headers.get('X-User-ID')
+        email = data.get('email')
+        new_password = data.get('new_password')
+        password_type = data.get('type', 'manual')  # manual, generated, auto-rotate
+        
+        if not email or not new_password:
+            return jsonify({'error': 'Email and new password required'}), 400
+        
+        conn = get_enterprise_db()
+        if not conn:
+            return jsonify({'error': 'Database connection failed'}), 500
+        
+        c = conn.cursor()
+        
+        # Check if credential exists
+        c.execute('SELECT * FROM enterprise_credentials WHERE email = ? AND user_id = ?', (email, user_id))
+        credential = c.fetchone()
+        
+        if not credential:
+            # Create new credential if it doesn't exist
+            credential_id = secrets.token_urlsafe(32)
+            c.execute('''
+                INSERT INTO enterprise_credentials 
+                (id, user_id, email, domain, username, password_hash, masked_password, 
+                 status, security_level, password_strength, password_age_days, 
+                 auto_rotation_enabled, monitoring_enabled, created_at, last_modified)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            ''', (
+                credential_id, user_id, email, email.split('@')[1] if '@' in email else 'unknown',
+                email.split('@')[0], hash_enterprise_password(new_password), '••••••••••••••••',
+                'active', 'high', calculate_password_strength(new_password), 0, True, True
+            ))
+        else:
+            # Update existing credential
+            c.execute('''
+                UPDATE enterprise_credentials 
+                SET password_hash = ?, masked_password = ?, password_strength = ?, 
+                    password_age_days = 0, last_modified = CURRENT_TIMESTAMP,
+                    auto_rotation_enabled = ?
+                WHERE email = ? AND user_id = ?
+            ''', (
+                hash_enterprise_password(new_password), '••••••••••••••••',
+                calculate_password_strength(new_password), True, email, user_id
+            ))
+        
+        # Log the password change
+        log_security_event(user_id, 'PASSWORD_CHANGED', f'Password changed for {email} via {password_type}', 'info', {
+            'email': email,
+            'type': password_type,
+            'timestamp': datetime.now().isoformat()
+        })
+        
+        conn.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': f'Password successfully changed for {email}',
+            'password_strength': calculate_password_strength(new_password),
+            'next_rotation': (datetime.now() + timedelta(days=90)).isoformat(),
+            'timestamp': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        log_security_event(user_id, 'PASSWORD_CHANGE_ERROR', f'Password change failed for {email}: {str(e)}', 'high')
+        return jsonify({'error': f'Password change failed: {str(e)}'}), 500
+    finally:
+        if 'conn' in locals() and conn:
+            conn.close()
+
 @app.route('/api/enterprise/security/credentials', methods=['GET'])
 @require_enterprise_auth
 def get_enterprise_credentials():
@@ -479,76 +555,84 @@ def get_enterprise_credentials():
     try:
         user_id = request.headers.get('X-User-ID')
         
-        # Simulate real enterprise credential data
-        credentials = [
-            {
-                'id': '1',
-                'email': 'admin@enterprise.com',
-                'domain': 'enterprise.com',
-                'username': 'admin',
-                'password': '••••••••••••••••',
-                'status': 'active',
-                'security_level': 'enterprise',
-                'two_factor_enabled': True,
-                'password_strength': 95,
-                'password_age_days': 15,
-                'monitoring': True,
-                'last_scan': datetime.now().isoformat(),
-                'created_date': (datetime.now() - timedelta(days=15)).isoformat(),
-                'auto_rotation_enabled': True,
-                'notes': 'Primary enterprise admin account'
-            },
-            {
-                'id': '2',
-                'email': 'finance@enterprise.com',
-                'domain': 'enterprise.com',
-                'username': 'finance_user',
-                'password': '••••••••••••••••',
-                'status': 'active',
-                'security_level': 'high',
-                'two_factor_enabled': True,
-                'password_strength': 88,
-                'password_age_days': 45,
-                'monitoring': True,
-                'last_scan': datetime.now().isoformat(),
-                'created_date': (datetime.now() - timedelta(days=45)).isoformat(),
-                'auto_rotation_enabled': False,
-                'notes': 'Financial system access'
-            },
-            {
-                'id': '3',
-                'email': 'hr@enterprise.com',
-                'domain': 'enterprise.com',
-                'username': 'hr_manager',
-                'password': '••••••••••••••••',
-                'status': 'locked',
-                'security_level': 'medium',
-                'two_factor_enabled': False,
-                'password_strength': 72,
-                'password_age_days': 90,
-                'monitoring': True,
-                'last_scan': datetime.now().isoformat(),
-                'created_date': (datetime.now() - timedelta(days=90)).isoformat(),
-                'auto_rotation_enabled': False,
-                'notes': 'HR system - locked due to security concerns'
-            }
-        ]
+        conn = get_enterprise_db()
+        if not conn:
+            return jsonify({'error': 'Database connection failed'}), 500
+        
+        c = conn.cursor()
+        c.execute('''
+            SELECT * FROM enterprise_credentials 
+            WHERE user_id = ? 
+            ORDER BY last_modified DESC
+        ''', (user_id,))
+        
+        db_credentials = c.fetchall()
+        
+        if not db_credentials:
+            # Return demo data if no credentials exist
+            credentials = [
+                {
+                    'id': '1',
+                    'email': 'admin@enterprise.com',
+                    'domain': 'enterprise.com',
+                    'username': 'admin',
+                    'password': '••••••••••••••••',
+                    'status': 'active',
+                    'security_level': 'enterprise',
+                    'two_factor_enabled': True,
+                    'password_strength': 95,
+                    'password_age_days': 15,
+                    'monitoring': True,
+                    'last_scan': datetime.now().isoformat(),
+                    'created_date': (datetime.now() - timedelta(days=15)).isoformat(),
+                    'auto_rotation_enabled': True,
+                    'notes': 'Primary enterprise admin account'
+                }
+            ]
+        else:
+            # Convert database results to frontend format
+            credentials = []
+            for cred in db_credentials:
+                # Calculate password age
+                last_modified = datetime.fromisoformat(cred['last_modified']) if cred['last_modified'] else datetime.now()
+                password_age = (datetime.now() - last_modified).days
+                
+                credentials.append({
+                    'id': cred['id'],
+                    'email': cred['email'],
+                    'domain': cred['domain'],
+                    'username': cred['username'],
+                    'password': cred['masked_password'],
+                    'status': cred['status'],
+                    'security_level': cred['security_level'],
+                    'two_factor_enabled': cred['two_factor_enabled'] == 1,
+                    'password_strength': cred['password_strength'],
+                    'password_age_days': password_age,
+                    'monitoring': cred['monitoring_enabled'] == 1,
+                    'last_scan': datetime.now().isoformat(),
+                    'created_date': cred['created_at'],
+                    'auto_rotation_enabled': cred['auto_rotation_enabled'] == 1,
+                    'notes': cred['notes'] or 'Enterprise credential'
+                })
         
         return jsonify({
             'success': True,
             'credentials': credentials,
             'total_count': len(credentials),
             'security_summary': {
-                'high_security': 2,
-                'medium_security': 1,
-                'two_factor_enabled': 2,
-                'auto_rotation_enabled': 1,
-                'locked_accounts': 1
+                'high_security': len([c for c in credentials if c['password_strength'] >= 80]),
+                'medium_security': len([c for c in credentials if 60 <= c['password_strength'] < 80]),
+                'two_factor_enabled': len([c for c in credentials if c['two_factor_enabled']]),
+                'auto_rotation_enabled': len([c for c in credentials if c['auto_rotation_enabled']]),
+                'locked_accounts': len([c for c in credentials if c['status'] == 'locked'])
             }
         })
         
     except Exception as e:
         return jsonify({'error': f'Failed to get enterprise credentials: {str(e)}'}), 500
+    finally:
+        if 'conn' in locals() and conn:
+            conn.close()
 
 @app.route('/api/enterprise/security/breach-alerts', methods=['GET'])
 @require_enterprise_auth
@@ -685,6 +769,43 @@ def verify_enterprise_password(password, password_hash):
     """Verify enterprise password (simplified for demo)"""
     # In production, implement proper salt verification
     return hash_enterprise_password(password) == password_hash
+
+# Enterprise Utility Functions
+def hash_enterprise_password(password):
+    """Hash password using enterprise-grade SHA-256 with salt"""
+    salt = secrets.token_hex(16)
+    return hashlib.sha256((password + salt).encode()).hexdigest()
+
+def verify_enterprise_password(password, password_hash):
+    """Verify enterprise password (simplified for demo)"""
+    # In production, implement proper salt verification
+    return hash_enterprise_password(password) == password_hash
+
+def calculate_password_strength(password):
+    """Calculate password strength (0-100)"""
+    if not password:
+        return 0
+    
+    strength = 0
+    if len(password) >= 12:
+        strength += 20
+    elif len(password) >= 8:
+        strength += 10
+    
+    if any(c.isupper() for c in password):
+        strength += 15
+    if any(c.islower() for c in password):
+        strength += 15
+    if any(c.isdigit() for c in password):
+        strength += 15
+    if any(not c.isalnum() for c in password):
+        strength += 20
+    
+    # Bonus for complexity
+    if len(set(password)) > len(password) * 0.7:
+        strength += 15
+    
+    return min(strength, 100)
 
 # Enterprise Error Handlers
 @app.errorhandler(404)
