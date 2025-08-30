@@ -31,6 +31,9 @@ class EnterpriseActivityMonitor {
         // AI insights cache
         this.aiInsights = {};
         
+        // Page timing
+        this.pageStartTime = Date.now();
+        
         this.init();
     }
     
@@ -511,14 +514,16 @@ class EnterpriseActivityMonitor {
         }
     }
     
+    // 📤 SEND ACTIVITY BUFFER
     async sendActivityBuffer() {
-        if (this.activityBuffer.length === 0) return;
-        
+        if (this.activityBuffer.length === 0) {
+            return;
+        }
+
         try {
-            const activities = [...this.activityBuffer];
-            this.activityBuffer = [];
-            
-            // Send to backend
+            const activitiesToSend = [...this.activityBuffer];
+            this.activityBuffer = []; // Clear buffer
+
             const response = await fetch('/api/enterprise/monitoring/record-activity', {
                 method: 'POST',
                 headers: {
@@ -528,23 +533,20 @@ class EnterpriseActivityMonitor {
                 body: JSON.stringify({
                     user_id: 'demo-user',
                     session_id: this.monitoringSession?.session_id,
-                    activities: activities
+                    activities: activitiesToSend,
+                    timestamp: new Date().toISOString()
                 })
             });
-            
+
             if (response.ok) {
-                const result = await response.json();
-                console.log('📊 Activities sent successfully:', result);
-                
-                // Update AI insights
-                if (result.ai_insights) {
-                    this.aiInsights = { ...this.aiInsights, ...result.ai_insights };
-                }
+                console.log('📤 Activity buffer sent successfully');
+            } else {
+                console.log('⚠️ Failed to send activity buffer:', response.status);
             }
         } catch (error) {
             console.error('❌ Failed to send activities:', error);
-            // Re-add activities to buffer for retry
-            this.activityBuffer.unshift(...activities);
+            // Put activities back in buffer for retry
+            this.activityBuffer.unshift(...activitiesToSend);
         }
     }
     
@@ -814,8 +816,13 @@ class EnterpriseActivityMonitor {
     // 📝 GENERATE DISPLAY TEXT
     generateDisplayText(data) {
         if (data.url) {
-            const domain = new URL(data.url).hostname;
-            return `Visited ${domain}`;
+            try {
+                const domain = new URL(data.url).hostname;
+                return `Visited ${domain}`;
+            } catch (error) {
+                // Handle invalid URLs safely
+                return `Activity with URL: ${data.url.substring(0, 50)}...`;
+            }
         }
         if (data.fileName) {
             return `File: ${data.fileName}`;
@@ -835,6 +842,11 @@ class EnterpriseActivityMonitor {
         let lastActiveTab = document.title;
         let lastActiveUrl = window.location.href;
         let lastActiveTitle = document.title;
+        
+        // Initialize page start time if not already set
+        if (!this.pageStartTime) {
+            this.pageStartTime = Date.now();
+        }
         
         // Enhanced tab switching detection
         document.addEventListener('visibilitychange', () => {
