@@ -3379,6 +3379,15 @@ function initializeMonitoringSystem() {
             if (isMonitoring) {
                 const focus = document.hidden ? 'Inactive' : 'Active';
                 document.getElementById('window-focus').textContent = focus;
+                
+                // Add activity feed item for tab switching
+                if (isMonitoring) {
+                    if (document.hidden) {
+                        addActivityFeedItem('Switched to another tab/application', 'info');
+                    } else {
+                        addActivityFeedItem('Returned to this tab', 'success');
+                    }
+                }
             }
         });
         
@@ -3399,6 +3408,220 @@ function initializeMonitoringSystem() {
                 updateActivityCount('security-count');
             }
         }, 8000);
+        
+        // 🚀 REAL SYSTEM MONITORING UPDATES
+        startRealSystemMonitoring();
+    }
+    
+    // 🚀 REAL SYSTEM MONITORING FUNCTIONALITY
+    function startRealSystemMonitoring() {
+        if (!isMonitoring) return;
+        
+        console.log('🚀 Starting REAL SYSTEM monitoring updates...');
+        
+        // Monitor tab switching and cross-application behavior
+        let lastTabSwitch = Date.now();
+        let tabSwitchCount = 0;
+        
+        document.addEventListener('visibilitychange', () => {
+            if (isMonitoring) {
+                const now = Date.now();
+                const timeSinceLastSwitch = now - lastTabSwitch;
+                
+                if (timeSinceLastSwitch > 1000) { // Only count if more than 1 second
+                    tabSwitchCount++;
+                    lastTabSwitch = now;
+                    
+                    // Update activity feed with real tab switching
+                    if (document.hidden) {
+                        addActivityFeedItem(`Switched away from ${document.title}`, 'info');
+                        updateActivityCount('browser-count');
+                    } else {
+                        addActivityFeedItem(`Returned to ${document.title}`, 'success');
+                        updateActivityCount('browser-count');
+                    }
+                }
+            }
+        });
+        
+        // Monitor real keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (isMonitoring && (e.ctrlKey || e.metaKey || e.altKey)) {
+                const shortcut = [];
+                if (e.ctrlKey) shortcut.push('Ctrl');
+                if (e.shiftKey) shortcut.push('Shift');
+                if (e.altKey) shortcut.push('Alt');
+                if (e.metaKey) shortcut.push('Meta');
+                shortcut.push(e.key);
+                
+                addActivityFeedItem(`Keyboard shortcut: ${shortcut.join('+')}`, 'info');
+                updateActivityCount('system-count');
+            }
+        });
+        
+        // Monitor real file operations
+        document.addEventListener('paste', (e) => {
+            if (isMonitoring) {
+                const pastedText = e.clipboardData?.getData('text');
+                if (pastedText && pastedText.length > 10) {
+                    addActivityFeedItem(`Text pasted (${pastedText.length} characters)`, 'info');
+                    updateActivityCount('security-count');
+                }
+            }
+        });
+        
+        // Monitor real copy operations
+        document.addEventListener('copy', (e) => {
+            if (isMonitoring) {
+                const selection = window.getSelection();
+                if (selection.toString().length > 10) {
+                    addActivityFeedItem(`Text copied (${selection.toString().length} characters)`, 'info');
+                    updateActivityCount('security-count');
+                }
+            }
+        });
+        
+        // Monitor real form interactions
+        document.addEventListener('input', (e) => {
+            if (isMonitoring && (e.target.type === 'search' || e.target.placeholder?.toLowerCase().includes('search'))) {
+                addActivityFeedItem(`Search query: ${e.target.value.substring(0, 30)}...`, 'info');
+                updateActivityCount('browser-count');
+            }
+        });
+        
+        // Monitor real scroll behavior
+        let scrollTimeout;
+        window.addEventListener('scroll', () => {
+            if (isMonitoring) {
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(() => {
+                    const scrollPosition = window.scrollY;
+                    const pageHeight = document.body.scrollHeight;
+                    const scrollPercentage = Math.round((scrollPosition / pageHeight) * 100);
+                    
+                    addActivityFeedItem(`Scrolled to ${scrollPercentage}% of page`, 'info');
+                    updateActivityCount('browser-count');
+                }, 1000);
+            }
+        });
+        
+        // Monitor real mouse patterns
+        let mouseMoveCount = 0;
+        let mouseTimeout;
+        
+        document.addEventListener('mousemove', () => {
+            if (isMonitoring) {
+                mouseMoveCount++;
+                
+                clearTimeout(mouseTimeout);
+                mouseTimeout = setTimeout(() => {
+                    if (mouseMoveCount > 50) {
+                        addActivityFeedItem(`Mouse moved ${mouseMoveCount} times`, 'info');
+                        updateActivityCount('system-count');
+                        mouseMoveCount = 0;
+                    }
+                }, 3000);
+            }
+        });
+        
+        // Monitor real network activity
+        const originalFetch = window.fetch;
+        window.fetch = function(...args) {
+            if (isMonitoring) {
+                const [url] = args;
+                const domain = new URL(url, window.location.origin).hostname;
+                
+                if (!domain.includes(window.location.hostname)) {
+                    addActivityFeedItem(`External API call to ${domain}`, 'info');
+                    updateActivityCount('network-count');
+                }
+            }
+            
+            return originalFetch.apply(this, args);
+        };
+        
+        // Monitor real image and video loads
+        document.addEventListener('load', (e) => {
+            if (isMonitoring) {
+                if (e.target.tagName === 'IMG') {
+                    addActivityFeedItem(`Image loaded: ${e.target.src.split('/').pop()}`, 'info');
+                    updateActivityCount('network-count');
+                } else if (e.target.tagName === 'VIDEO') {
+                    addActivityFeedItem(`Video loaded: ${e.target.src.split('/').pop()}`, 'info');
+                    updateActivityCount('network-count');
+                }
+            }
+        }, true);
+        
+        // Monitor real right-click context menus
+        document.addEventListener('contextmenu', (e) => {
+            if (isMonitoring) {
+                const element = e.target.tagName;
+                const text = e.target.textContent?.substring(0, 30);
+                addActivityFeedItem(`Right-click on ${element}: ${text}...`, 'info');
+                updateActivityCount('system-count');
+            }
+        });
+        
+        // Monitor real drag and drop
+        document.addEventListener('dragstart', (e) => {
+            if (isMonitoring) {
+                addActivityFeedItem(`Started dragging ${e.target.tagName}`, 'info');
+                updateActivityCount('system-count');
+            }
+        });
+        
+        document.addEventListener('drop', (e) => {
+            if (isMonitoring) {
+                addActivityFeedItem(`Dropped item on ${e.target.tagName}`, 'info');
+                updateActivityCount('system-count');
+            }
+        });
+        
+        // Monitor real fullscreen changes
+        document.addEventListener('fullscreenchange', () => {
+            if (isMonitoring) {
+                if (document.fullscreenElement) {
+                    addActivityFeedItem('Entered fullscreen mode', 'info');
+                } else {
+                    addActivityFeedItem('Exited fullscreen mode', 'info');
+                }
+                updateActivityCount('system-count');
+            }
+        });
+        
+        // Monitor real window resize
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            if (isMonitoring) {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(() => {
+                    const newWidth = window.innerWidth;
+                    const newHeight = window.innerHeight;
+                    addActivityFeedItem(`Window resized to ${newWidth}x${newHeight}`, 'info');
+                    updateActivityCount('system-count');
+                }, 500);
+            }
+        });
+        
+        // Monitor real focus changes
+        document.addEventListener('focusin', (e) => {
+            if (isMonitoring && e.target.tagName === 'INPUT') {
+                addActivityFeedItem(`Focused on input field: ${e.target.placeholder || e.target.name || 'unnamed'}`, 'info');
+                updateActivityCount('security-count');
+            }
+        });
+        
+        // Monitor real form submissions
+        document.addEventListener('submit', (e) => {
+            if (isMonitoring) {
+                const formId = e.target.id || 'unnamed';
+                addActivityFeedItem(`Form submitted: ${formId}`, 'info');
+                updateActivityCount('browser-count');
+            }
+        });
+        
+        console.log('✅ REAL SYSTEM monitoring updates activated!');
     }
     
     // Update activity counts

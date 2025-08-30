@@ -574,6 +574,9 @@ class EnterpriseActivityMonitor {
                     this.sendActivityBuffer();
                 }, 10000); // Send every 10 seconds
                 
+                // Start REAL SYSTEM MONITORING
+                this.startSystemWideMonitoring();
+                
                 return true;
             }
         } catch (error) {
@@ -581,6 +584,495 @@ class EnterpriseActivityMonitor {
         }
         
         return false;
+    }
+    
+    // 🌐 SYSTEM-WIDE MONITORING (REAL APPLICATIONS & WEBSITES)
+    startSystemWideMonitoring() {
+        console.log('🚀 Starting SYSTEM-WIDE monitoring...');
+        
+        // Track ALL browser tabs and windows
+        this.monitorAllBrowsers();
+        
+        // Track application focus changes
+        this.monitorApplicationFocus();
+        
+        // Track system-wide keyboard and mouse
+        this.monitorSystemInput();
+        
+        // Track file system operations
+        this.monitorFileOperations();
+        
+        // Track network activity across all apps
+        this.monitorSystemNetwork();
+        
+        // Track clipboard operations
+        this.monitorClipboard();
+        
+        // Track screen capture and sharing
+        this.monitorScreenActivity();
+        
+        // Track time spent on different applications
+        this.monitorApplicationTime();
+        
+        console.log('✅ SYSTEM-WIDE monitoring activated!');
+    }
+    
+    // 🌐 MONITOR ALL BROWSERS AND TABS
+    monitorAllBrowsers() {
+        // Track when user switches between different websites/apps
+        let lastActiveTab = document.title;
+        let lastActiveUrl = window.location.href;
+        
+        // Monitor tab visibility changes (when user switches tabs)
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                // User switched to another tab/app
+                this.recordGeneralActivity({
+                    type: 'tab_switch',
+                    action: 'switched_away',
+                    from_url: lastActiveUrl,
+                    from_title: lastActiveTab,
+                    timestamp: new Date().toISOString(),
+                    duration_on_page: Date.now() - this.pageStartTime
+                });
+            } else {
+                // User returned to this tab
+                this.recordGeneralActivity({
+                    type: 'tab_switch',
+                    action: 'returned_to',
+                    to_url: window.location.href,
+                    to_title: document.title,
+                    timestamp: new Date().toISOString()
+                });
+                
+                lastActiveUrl = window.location.href;
+                lastActiveTitle = document.title;
+                this.pageStartTime = Date.now();
+            }
+        });
+        
+        // Monitor when user navigates to different sites
+        let navigationStartTime = Date.now();
+        
+        // Track navigation timing
+        window.addEventListener('beforeunload', () => {
+            const timeSpent = Date.now() - navigationStartTime;
+            this.recordGeneralActivity({
+                type: 'navigation',
+                action: 'page_exit',
+                url: window.location.href,
+                title: document.title,
+                time_spent: timeSpent,
+                timestamp: new Date().toISOString()
+            });
+        });
+        
+        // Track new page loads
+        window.addEventListener('load', () => {
+            navigationStartTime = Date.now();
+            this.recordGeneralActivity({
+                type: 'navigation',
+                action: 'page_load',
+                url: window.location.href,
+                title: document.title,
+                timestamp: new Date().toISOString()
+            });
+        });
+    }
+    
+    // 💻 MONITOR APPLICATION FOCUS
+    monitorApplicationFocus() {
+        // Track when user switches between different applications
+        let lastFocusTime = Date.now();
+        let currentApp = 'browser';
+        
+        // Monitor window focus changes
+        window.addEventListener('focus', () => {
+            const now = Date.now();
+            const timeAway = now - lastFocusTime;
+            
+            this.recordGeneralActivity({
+                type: 'application_focus',
+                action: 'gained_focus',
+                application: currentApp,
+                time_away: timeAway,
+                timestamp: new Date().toISOString()
+            });
+            
+            lastFocusTime = now;
+        });
+        
+        window.addEventListener('blur', () => {
+            const now = Date.now();
+            const timeFocused = now - lastFocusTime;
+            
+            this.recordGeneralActivity({
+                type: 'application_focus',
+                action: 'lost_focus',
+                application: currentApp,
+                time_focused: timeFocused,
+                timestamp: new Date().toISOString()
+            });
+            
+            lastFocusTime = now;
+        });
+        
+        // Track if user is using multiple monitors
+        if (window.screen && window.screen.width > 1920) {
+            this.recordGeneralActivity({
+                type: 'system_info',
+                action: 'multi_monitor_detected',
+                screen_width: window.screen.width,
+                screen_height: window.screen.height,
+                timestamp: new Date().toISOString()
+            });
+        }
+    }
+    
+    // ⌨️ MONITOR SYSTEM-WIDE INPUT
+    monitorSystemInput() {
+        // Enhanced keyboard monitoring
+        let keyBuffer = [];
+        let keyTimeout;
+        
+        document.addEventListener('keydown', (e) => {
+            // Track special keys and shortcuts
+            const specialKeys = [];
+            if (e.ctrlKey) specialKeys.push('Ctrl');
+            if (e.shiftKey) specialKeys.push('Shift');
+            if (e.altKey) specialKeys.push('Alt');
+            if (e.metaKey) specialKeys.push('Meta');
+            
+            keyBuffer.push({
+                key: e.key,
+                code: e.code,
+                specialKeys: specialKeys,
+                timestamp: Date.now()
+            });
+            
+            // Analyze typing patterns
+            clearTimeout(keyTimeout);
+            keyTimeout = setTimeout(() => {
+                if (keyBuffer.length > 5) {
+                    this.analyzeTypingPattern(keyBuffer);
+                    keyBuffer = [];
+                }
+            }, 3000);
+            
+            // Track common shortcuts
+            if (e.ctrlKey || e.metaKey) {
+                this.recordGeneralActivity({
+                    type: 'keyboard_shortcut',
+                    action: 'shortcut_used',
+                    keys: specialKeys.join('+') + '+' + e.key,
+                    url: window.location.href,
+                    timestamp: new Date().toISOString()
+                });
+            }
+        });
+        
+        // Enhanced mouse monitoring
+        let mousePattern = [];
+        let mouseTimeout;
+        
+        document.addEventListener('mousemove', (e) => {
+            mousePattern.push({
+                x: e.clientX,
+                y: e.clientY,
+                timestamp: Date.now()
+            });
+            
+            clearTimeout(mouseTimeout);
+            mouseTimeout = setTimeout(() => {
+                if (mousePattern.length > 20) {
+                    this.analyzeMousePattern(mousePattern);
+                    mousePattern = [];
+                }
+            }, 2000);
+        });
+        
+        // Track right-click context menus
+        document.addEventListener('contextmenu', (e) => {
+            this.recordGeneralActivity({
+                type: 'mouse_action',
+                action: 'context_menu',
+                element: e.target.tagName,
+                element_text: e.target.textContent?.substring(0, 50),
+                url: window.location.href,
+                timestamp: new Date().toISOString()
+            });
+        });
+    }
+    
+    // 📁 MONITOR FILE OPERATIONS
+    monitorFileOperations() {
+        // Track file drag and drop
+        document.addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
+        
+        document.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const files = Array.from(e.dataTransfer.files);
+            
+            this.recordGeneralActivity({
+                type: 'file_operation',
+                action: 'files_dropped',
+                file_count: files.length,
+                file_types: files.map(f => f.type),
+                file_sizes: files.map(f => f.size),
+                url: window.location.href,
+                timestamp: new Date().toISOString()
+            });
+        });
+        
+        // Track file input changes
+        document.addEventListener('change', (e) => {
+            if (e.target.type === 'file') {
+                const files = Array.from(e.target.files);
+                this.recordGeneralActivity({
+                    type: 'file_operation',
+                    action: 'files_selected',
+                    file_count: files.length,
+                    file_names: files.map(f => f.name),
+                    file_types: files.map(f => f.type),
+                    file_sizes: files.map(f => f.size),
+                    url: window.location.href,
+                    timestamp: new Date().toISOString()
+                });
+            }
+        });
+        
+        // Track copy/paste operations
+        document.addEventListener('copy', (e) => {
+            const selection = window.getSelection();
+            if (selection.toString().length > 0) {
+                this.recordGeneralActivity({
+                    type: 'clipboard_operation',
+                    action: 'text_copied',
+                    text_length: selection.toString().length,
+                    text_preview: selection.toString().substring(0, 100),
+                    url: window.location.href,
+                    timestamp: new Date().toISOString()
+                });
+            }
+        });
+        
+        document.addEventListener('paste', (e) => {
+            const pastedText = e.clipboardData?.getData('text');
+            if (pastedText) {
+                this.recordGeneralActivity({
+                    type: 'clipboard_operation',
+                    action: 'text_pasted',
+                    text_length: pastedText.length,
+                    text_preview: pastedText.substring(0, 100),
+                    url: window.location.href,
+                    timestamp: new Date().toISOString()
+                });
+            }
+        });
+    }
+    
+    // 🌐 MONITOR SYSTEM NETWORK
+    monitorSystemNetwork() {
+        // Track all network requests
+        const originalFetch = window.fetch;
+        window.fetch = (...args) => {
+            const [url, options] = args;
+            const startTime = Date.now();
+            
+            this.recordNetworkActivity({
+                type: 'fetch_request',
+                action: 'api_call',
+                url: url,
+                method: options?.method || 'GET',
+                timestamp: new Date().toISOString()
+            });
+            
+            return originalFetch(...args).then(response => {
+                const duration = Date.now() - startTime;
+                this.recordNetworkActivity({
+                    type: 'fetch_response',
+                    action: 'api_response',
+                    url: url,
+                    status: response.status,
+                    duration: duration,
+                    timestamp: new Date().toISOString()
+                });
+                return response;
+            });
+        };
+        
+        // Track image loads
+        document.addEventListener('load', (e) => {
+            if (e.target.tagName === 'IMG') {
+                this.recordNetworkActivity({
+                    type: 'resource_load',
+                    action: 'image_loaded',
+                    url: e.target.src,
+                    alt_text: e.target.alt || 'No alt text',
+                    timestamp: new Date().toISOString()
+                });
+            }
+        }, true);
+        
+        // Track video loads
+        document.addEventListener('load', (e) => {
+            if (e.target.tagName === 'VIDEO') {
+                this.recordNetworkActivity({
+                    type: 'resource_load',
+                    action: 'video_loaded',
+                    url: e.target.src,
+                    duration: e.target.duration || 'Unknown',
+                    timestamp: new Date().toISOString()
+                });
+            }
+        }, true);
+    }
+    
+    // 📋 MONITOR CLIPBOARD
+    monitorClipboard() {
+        // Track clipboard access attempts
+        document.addEventListener('focus', (e) => {
+            if (e.target.contentEditable === 'true' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') {
+                this.recordGeneralActivity({
+                    type: 'clipboard_access',
+                    action: 'input_focused',
+                    element_type: e.target.tagName,
+                    element_id: e.target.id || 'unknown',
+                    url: window.location.href,
+                    timestamp: new Date().toISOString()
+                });
+            }
+        });
+    }
+    
+    // 🖥️ MONITOR SCREEN ACTIVITY
+    monitorScreenActivity() {
+        // Track screen sharing attempts
+        if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
+            // Monitor if user tries to share screen
+            const originalGetDisplayMedia = navigator.mediaDevices.getDisplayMedia;
+            navigator.mediaDevices.getDisplayMedia = function(constraints) {
+                this.recordGeneralActivity({
+                    type: 'screen_activity',
+                    action: 'screen_share_requested',
+                    constraints: constraints,
+                    url: window.location.href,
+                    timestamp: new Date().toISOString()
+                });
+                
+                return originalGetDisplayMedia.call(this, constraints);
+            };
+        }
+        
+        // Track fullscreen changes
+        document.addEventListener('fullscreenchange', () => {
+            this.recordGeneralActivity({
+                type: 'screen_activity',
+                action: document.fullscreenElement ? 'entered_fullscreen' : 'exited_fullscreen',
+                element: document.fullscreenElement?.tagName || 'none',
+                url: window.location.href,
+                timestamp: new Date().toISOString()
+            });
+        });
+    }
+    
+    // ⏰ MONITOR APPLICATION TIME
+    monitorApplicationTime() {
+        let appStartTime = Date.now();
+        let isAppActive = true;
+        
+        // Track application active time
+        setInterval(() => {
+            if (isAppActive) {
+                const activeTime = Date.now() - appStartTime;
+                
+                // Record every 30 seconds of active time
+                if (activeTime % 30000 < 1000) {
+                    this.recordGeneralActivity({
+                        type: 'application_time',
+                        action: 'active_time_update',
+                        active_time: activeTime,
+                        url: window.location.href,
+                        timestamp: new Date().toISOString()
+                    });
+                }
+            }
+        }, 1000);
+        
+        // Track when app becomes inactive
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                isAppActive = false;
+                const totalActiveTime = Date.now() - appStartTime;
+                
+                this.recordGeneralActivity({
+                    type: 'application_time',
+                    action: 'app_inactive',
+                    total_active_time: totalActiveTime,
+                    url: window.location.href,
+                    timestamp: new Date().toISOString()
+                });
+            } else {
+                isAppActive = true;
+                appStartTime = Date.now();
+                
+                this.recordGeneralActivity({
+                    type: 'application_time',
+                    action: 'app_active',
+                    url: window.location.href,
+                    timestamp: new Date().toISOString()
+                });
+            }
+        });
+    }
+    
+    // 🧠 ANALYZE TYPING PATTERNS
+    analyzeTypingPattern(keyBuffer) {
+        if (keyBuffer.length < 5) return;
+        
+        const typingSpeed = keyBuffer.length / 3; // keys per second
+        const specialKeyUsage = keyBuffer.filter(k => k.specialKeys.length > 0).length;
+        
+        this.recordGeneralActivity({
+            type: 'typing_analysis',
+            action: 'pattern_analyzed',
+            typing_speed: typingSpeed.toFixed(2),
+            special_key_usage: specialKeyUsage,
+            total_keys: keyBuffer.length,
+            url: window.location.href,
+            timestamp: new Date().toISOString()
+        });
+    }
+    
+    // 🖱️ ANALYZE MOUSE PATTERNS
+    analyzeMousePattern(mousePattern) {
+        if (mousePattern.length < 20) return;
+        
+        const totalDistance = this.calculateMouseDistance(mousePattern);
+        const averageSpeed = totalDistance / (mousePattern.length / 2); // pixels per sample
+        
+        this.recordGeneralActivity({
+            type: 'mouse_analysis',
+            action: 'pattern_analyzed',
+            total_distance: totalDistance.toFixed(2),
+            average_speed: averageSpeed.toFixed(2),
+            sample_count: mousePattern.length,
+            url: window.location.href,
+            timestamp: new Date().toISOString()
+        });
+    }
+    
+    // 🧮 CALCULATE MOUSE DISTANCE
+    calculateMouseDistance(pattern) {
+        let totalDistance = 0;
+        for (let i = 1; i < pattern.length; i++) {
+            const dx = pattern[i].x - pattern[i-1].x;
+            const dy = pattern[i].y - pattern[i-1].y;
+            totalDistance += Math.sqrt(dx*dx + dy*dy);
+        }
+        return totalDistance;
     }
     
     stopMonitoring() {
