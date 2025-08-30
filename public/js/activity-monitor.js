@@ -1005,6 +1005,511 @@ class EnterpriseActivityMonitor {
         }
     }
     
+    // 💻 MONITOR APPLICATION FOCUS
+    monitorApplicationFocus() {
+        // Track when user switches between different applications
+        let lastFocusTime = Date.now();
+        let currentApp = 'browser';
+        
+        // Monitor window focus changes
+        window.addEventListener('focus', () => {
+            const now = Date.now();
+            const timeAway = now - lastFocusTime;
+            
+            const focusData = {
+                type: 'application_focus',
+                action: 'gained_focus',
+                application: currentApp,
+                time_away: timeAway,
+                timestamp: new Date().toISOString(),
+                category: 'system',
+                priority: 'medium'
+            };
+            
+            this.recordGeneralActivity(focusData);
+            this.addToComprehensiveData('applications', focusData);
+            
+            lastFocusTime = now;
+        });
+        
+        window.addEventListener('blur', () => {
+            const now = Date.now();
+            const timeFocused = now - lastFocusTime;
+            
+            const blurData = {
+                type: 'application_focus',
+                action: 'lost_focus',
+                application: currentApp,
+                time_focused: timeFocused,
+                timestamp: new Date().toISOString(),
+                category: 'system',
+                priority: 'medium'
+            };
+            
+            this.recordGeneralActivity(blurData);
+            this.addToComprehensiveData('applications', blurData);
+            
+            lastFocusTime = now;
+        });
+        
+        // Track if user is using multiple monitors
+        if (window.screen && window.screen.width > 1920) {
+            const multiMonitorData = {
+                type: 'system_info',
+                action: 'multi_monitor_detected',
+                screen_width: window.screen.width,
+                screen_height: window.screen.height,
+                timestamp: new Date().toISOString(),
+                category: 'system',
+                priority: 'low'
+            };
+            
+            this.recordGeneralActivity(multiMonitorData);
+            this.addToComprehensiveData('systemInfo', multiMonitorData);
+        }
+    }
+    
+    // ⌨️ MONITOR SYSTEM-WIDE INPUT
+    monitorSystemInput() {
+        // Enhanced keyboard monitoring
+        let keyBuffer = [];
+        let keyTimeout;
+        
+        document.addEventListener('keydown', (e) => {
+            // Track special keys and shortcuts
+            const specialKeys = [];
+            if (e.ctrlKey) specialKeys.push('Ctrl');
+            if (e.shiftKey) specialKeys.push('Shift');
+            if (e.altKey) specialKeys.push('Alt');
+            if (e.metaKey) specialKeys.push('Meta');
+            
+            keyBuffer.push({
+                key: e.key,
+                code: e.code,
+                specialKeys: specialKeys,
+                timestamp: Date.now()
+            });
+            
+            // Analyze typing patterns
+            clearTimeout(keyTimeout);
+            keyTimeout = setTimeout(() => {
+                if (keyBuffer.length > 5) {
+                    this.analyzeTypingPattern(keyBuffer);
+                    keyBuffer = [];
+                }
+            }, 3000);
+            
+            // Track common shortcuts
+            if (e.ctrlKey || e.metaKey) {
+                const shortcutData = {
+                    type: 'keyboard_shortcut',
+                    action: 'shortcut_used',
+                    keys: specialKeys.join('+') + '+' + e.key,
+                    url: window.location.href,
+                    timestamp: new Date().toISOString(),
+                    category: 'system',
+                    priority: 'medium'
+                };
+                
+                this.recordGeneralActivity(shortcutData);
+                this.addToComprehensiveData('systemTools', shortcutData);
+            }
+        });
+        
+        // Enhanced mouse monitoring
+        let mousePattern = [];
+        let mouseTimeout;
+        
+        document.addEventListener('mousemove', (e) => {
+            mousePattern.push({
+                x: e.clientX,
+                y: e.clientY,
+                timestamp: Date.now()
+            });
+            
+            clearTimeout(mouseTimeout);
+            mouseTimeout = setTimeout(() => {
+                if (mousePattern.length > 20) {
+                    this.analyzeMousePattern(mousePattern);
+                    mousePattern = [];
+                }
+            }, 2000);
+        });
+        
+        // Track right-click context menus
+        document.addEventListener('contextmenu', (e) => {
+            const contextMenuData = {
+                type: 'mouse_action',
+                action: 'context_menu',
+                element: e.target.tagName,
+                element_text: e.target.textContent?.substring(0, 50),
+                url: window.location.href,
+                timestamp: new Date().toISOString(),
+                category: 'system',
+                priority: 'low'
+            };
+            
+            this.recordGeneralActivity(contextMenuData);
+            this.addToComprehensiveData('systemTools', contextMenuData);
+        });
+    }
+    
+    // 📁 MONITOR FILE OPERATIONS
+    monitorFileOperations() {
+        // Track file drag and drop
+        document.addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
+        
+        document.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const files = Array.from(e.dataTransfer.files);
+            
+            files.forEach(file => {
+                const dropData = {
+                    type: 'file_operation',
+                    action: 'files_dropped',
+                    file_count: files.length,
+                    file_name: file.name,
+                    file_type: file.type,
+                    file_size: file.size,
+                    url: window.location.href,
+                    timestamp: new Date().toISOString(),
+                    category: 'files',
+                    priority: 'medium'
+                };
+                
+                this.recordGeneralActivity(dropData);
+                this.addToComprehensiveData('files', dropData);
+            });
+        });
+        
+        // Track file input changes
+        document.addEventListener('change', (e) => {
+            if (e.target.type === 'file') {
+                const files = Array.from(e.target.files);
+                files.forEach(file => {
+                    const fileData = {
+                        type: 'file_operation',
+                        action: 'files_selected',
+                        file_name: file.name,
+                        file_type: file.type,
+                        file_size: file.size,
+                        url: window.location.href,
+                        timestamp: new Date().toISOString(),
+                        category: 'files',
+                        priority: 'medium'
+                    };
+                    
+                    this.recordGeneralActivity(fileData);
+                    this.addToComprehensiveData('files', fileData);
+                });
+            }
+        });
+        
+        // Track copy/paste operations
+        document.addEventListener('copy', (e) => {
+            const selection = window.getSelection();
+            if (selection.toString().length > 0) {
+                const copyData = {
+                    type: 'clipboard_operation',
+                    action: 'text_copied',
+                    text_length: selection.toString().length,
+                    text_preview: selection.toString().substring(0, 100),
+                    url: window.location.href,
+                    timestamp: new Date().toISOString(),
+                    category: 'system',
+                    priority: 'low'
+                };
+                
+                this.recordGeneralActivity(copyData);
+                this.addToComprehensiveData('systemTools', copyData);
+            }
+        });
+        
+        document.addEventListener('paste', (e) => {
+            const pastedText = e.clipboardData?.getData('text');
+            if (pastedText) {
+                const pasteData = {
+                    type: 'clipboard_operation',
+                    action: 'text_pasted',
+                    text_length: pastedText.length,
+                    text_preview: pastedText.substring(0, 100),
+                    url: window.location.href,
+                    timestamp: new Date().toISOString(),
+                    category: 'system',
+                    priority: 'low'
+                };
+                
+                this.recordGeneralActivity(pasteData);
+                this.addToComprehensiveData('systemTools', pasteData);
+            }
+        });
+    }
+    
+    // 🌐 MONITOR SYSTEM NETWORK
+    monitorSystemNetwork() {
+        // Track all network requests
+        const originalFetch = window.fetch;
+        window.fetch = (...args) => {
+            const [url, options] = args;
+            const startTime = Date.now();
+            
+            const fetchData = {
+                type: 'fetch_request',
+                action: 'api_call',
+                url: url,
+                method: options?.method || 'GET',
+                timestamp: new Date().toISOString(),
+                category: 'network',
+                priority: 'medium'
+            };
+            
+            this.recordNetworkActivity(fetchData);
+            this.addToComprehensiveData('crossBrowserActivity', fetchData);
+            
+            return originalFetch(...args).then(response => {
+                const duration = Date.now() - startTime;
+                const responseData = {
+                    type: 'fetch_response',
+                    action: 'api_response',
+                    url: url,
+                    status: response.status,
+                    duration: duration,
+                    timestamp: new Date().toISOString(),
+                    category: 'network',
+                    priority: 'medium'
+                };
+                
+                this.recordNetworkActivity(responseData);
+                this.addToComprehensiveData('crossBrowserActivity', responseData);
+                return response;
+            });
+        };
+        
+        // Track image loads
+        document.addEventListener('load', (e) => {
+            if (e.target.tagName === 'IMG') {
+                const imageData = {
+                    type: 'resource_load',
+                    action: 'image_loaded',
+                    url: e.target.src,
+                    alt_text: e.target.alt || 'No alt text',
+                    timestamp: new Date().toISOString(),
+                    category: 'network',
+                    priority: 'low'
+                };
+                
+                this.recordNetworkActivity(imageData);
+                this.addToComprehensiveData('crossBrowserActivity', imageData);
+            }
+        }, true);
+        
+        // Track video loads
+        document.addEventListener('load', (e) => {
+            if (e.target.tagName === 'VIDEO') {
+                const videoData = {
+                    type: 'resource_load',
+                    action: 'video_loaded',
+                    url: e.target.src,
+                    duration: e.target.duration || 'Unknown',
+                    timestamp: new Date().toISOString(),
+                    category: 'network',
+                    priority: 'low'
+                };
+                
+                this.recordNetworkActivity(videoData);
+                this.addToComprehensiveData('crossBrowserActivity', videoData);
+            }
+        }, true);
+    }
+    
+    // 📋 MONITOR CLIPBOARD
+    monitorClipboard() {
+        // Track clipboard access attempts
+        document.addEventListener('focus', (e) => {
+            if (e.target.contentEditable === 'true' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') {
+                const clipboardData = {
+                    type: 'clipboard_access',
+                    action: 'input_focused',
+                    element_type: e.target.tagName,
+                    element_id: e.target.id || 'unknown',
+                    url: window.location.href,
+                    timestamp: new Date().toISOString(),
+                    category: 'system',
+                    priority: 'low'
+                };
+                
+                this.recordGeneralActivity(clipboardData);
+                this.addToComprehensiveData('systemTools', clipboardData);
+            }
+        });
+    }
+    
+    // 🖥️ MONITOR SCREEN ACTIVITY
+    monitorScreenActivity() {
+        // Track screen sharing attempts
+        if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
+            // Monitor if user tries to share screen
+            const originalGetDisplayMedia = navigator.mediaDevices.getDisplayMedia;
+            navigator.mediaDevices.getDisplayMedia = function(constraints) {
+                const screenData = {
+                    type: 'screen_activity',
+                    action: 'screen_share_requested',
+                    constraints: constraints,
+                    url: window.location.href,
+                    timestamp: new Date().toISOString(),
+                    category: 'system',
+                    priority: 'high'
+                };
+                
+                this.recordGeneralActivity(screenData);
+                this.addToComprehensiveData('systemTools', screenData);
+                
+                return originalGetDisplayMedia.call(this, constraints);
+            };
+        }
+        
+        // Track fullscreen changes
+        document.addEventListener('fullscreenchange', () => {
+            const fullscreenData = {
+                type: 'screen_activity',
+                action: document.fullscreenElement ? 'entered_fullscreen' : 'exited_fullscreen',
+                element: document.fullscreenElement?.tagName || 'none',
+                url: window.location.href,
+                timestamp: new Date().toISOString(),
+                category: 'system',
+                priority: 'low'
+            };
+            
+            this.recordGeneralActivity(fullscreenData);
+            this.addToComprehensiveData('systemTools', fullscreenData);
+        });
+    }
+    
+    // ⏰ MONITOR APPLICATION TIME
+    monitorApplicationTime() {
+        let appStartTime = Date.now();
+        let isAppActive = true;
+        
+        // Track application active time
+        setInterval(() => {
+            if (isAppActive) {
+                const activeTime = Date.now() - appStartTime;
+                
+                // Record every 30 seconds of active time
+                if (activeTime % 30000 < 1000) {
+                    const timeData = {
+                        type: 'application_time',
+                        action: 'active_time_update',
+                        active_time: activeTime,
+                        url: window.location.href,
+                        timestamp: new Date().toISOString(),
+                        category: 'system',
+                        priority: 'low'
+                    };
+                    
+                    this.recordGeneralActivity(timeData);
+                    this.addToComprehensiveData('applications', timeData);
+                }
+            }
+        }, 1000);
+        
+        // Track when app becomes inactive
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                isAppActive = false;
+                const totalActiveTime = Date.now() - appStartTime;
+                
+                const inactiveData = {
+                    type: 'application_time',
+                    action: 'app_inactive',
+                    total_active_time: totalActiveTime,
+                    url: window.location.href,
+                    timestamp: new Date().toISOString(),
+                    category: 'system',
+                    priority: 'low'
+                };
+                
+                this.recordGeneralActivity(inactiveData);
+                this.addToComprehensiveData('applications', inactiveData);
+            } else {
+                isAppActive = true;
+                appStartTime = Date.now();
+                
+                const activeData = {
+                    type: 'application_time',
+                    action: 'app_active',
+                    url: window.location.href,
+                    timestamp: new Date().toISOString(),
+                    timestamp: new Date().toISOString(),
+                    category: 'system',
+                    priority: 'low'
+                };
+                
+                this.recordGeneralActivity(activeData);
+                this.addToComprehensiveData('applications', activeData);
+            }
+        });
+    }
+    
+    // 🧠 ANALYZE TYPING PATTERNS
+    analyzeTypingPattern(keyBuffer) {
+        if (keyBuffer.length < 5) return;
+        
+        const typingSpeed = keyBuffer.length / 3; // keys per second
+        const specialKeyUsage = keyBuffer.filter(k => k.specialKeys.length > 0).length;
+        
+        const patternData = {
+            type: 'typing_analysis',
+            action: 'pattern_analyzed',
+            typing_speed: typingSpeed.toFixed(2),
+            special_key_usage: specialKeyUsage,
+            total_keys: keyBuffer.length,
+            url: window.location.href,
+            timestamp: new Date().toISOString(),
+            category: 'system',
+            priority: 'low'
+        };
+        
+        this.recordGeneralActivity(patternData);
+        this.addToComprehensiveData('systemTools', patternData);
+    }
+    
+    // 🖱️ ANALYZE MOUSE PATTERNS
+    analyzeMousePattern(mousePattern) {
+        if (mousePattern.length < 20) return;
+        
+        const totalDistance = this.calculateMouseDistance(mousePattern);
+        const averageSpeed = totalDistance / (mousePattern.length / 2); // pixels per sample
+        
+        const mouseData = {
+            type: 'mouse_analysis',
+            action: 'pattern_analyzed',
+            total_distance: totalDistance.toFixed(2),
+            average_speed: averageSpeed.toFixed(2),
+            sample_count: mousePattern.length,
+            url: window.location.href,
+            timestamp: new Date().toISOString(),
+            category: 'system',
+            priority: 'low'
+        };
+        
+        this.recordGeneralActivity(mouseData);
+        this.addToComprehensiveData('systemTools', mouseData);
+    }
+    
+    // 🧮 CALCULATE MOUSE DISTANCE
+    calculateMouseDistance(pattern) {
+        let totalDistance = 0;
+        for (let i = 1; i < pattern.length; i++) {
+            const dx = pattern[i].x - pattern[i-1].x;
+            const dy = pattern[i].y - pattern[i-1].y;
+            totalDistance += Math.sqrt(dx*dx + dy*dy);
+        }
+        return totalDistance;
+    }
+    
     // 🔍 DETECT OTHER BROWSERS
     detectOtherBrowsers() {
         // This is a simplified detection - in reality, you'd need more sophisticated methods
