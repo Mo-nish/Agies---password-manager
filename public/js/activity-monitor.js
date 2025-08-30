@@ -622,6 +622,7 @@ class EnterpriseActivityMonitor {
         // Track when user switches between different websites/apps
         let lastActiveTab = document.title;
         let lastActiveUrl = window.location.href;
+        let lastActiveTitle = document.title;
         
         // Monitor tab visibility changes (when user switches tabs)
         document.addEventListener('visibilitychange', () => {

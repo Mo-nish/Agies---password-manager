@@ -1425,6 +1425,160 @@
             font-size: 0.9rem;
         }
 
+        /* URL History Panel Styles */
+        .url-history-panel {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .url-history-panel h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-bottom: 0.75rem;
+        }
+
+        .url-list {
+            max-height: 150px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .url-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .url-text {
+            color: #e2e8f0;
+            font-size: 0.8rem;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .url-time {
+            color: #6366f1;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* 📥 DOWNLOAD & EXPORT OPTIONS */
+        .download-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .download-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .download-card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .download-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .download-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .download-header h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+
+        .download-icon {
+            font-size: 1.5rem;
+            color: #6366f1;
+        }
+
+        .download-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .download-content p {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .download-buttons {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-download {
+            padding: 0.75rem 1.5rem;
+            border: 1px solid #6366f1;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            color: #6366f1;
+        }
+
+        .btn-download:hover {
+            background: #6366f1;
+            color: white;
+        }
+
+        .download-card.featured {
+            grid-column: span 2; /* Make featured card span two columns */
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border: none;
+            color: white;
+        }
+
+        .download-card.featured .download-header h3 {
+            color: white;
+        }
+
+        .download-card.featured .download-icon {
+            color: white;
+        }
+
+        .download-card.featured .btn-download {
+            background: white;
+            color: #6366f1;
+            border: none;
+        }
+
+        .download-card.featured .btn-download:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .dashboard-grid {
@@ -1438,6 +1592,14 @@
             .control-panel {
                 flex-direction: column;
                 align-items: stretch;
+            }
+
+            .download-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .download-card.featured {
+                grid-column: span 1; /* Revert to single column for smaller screens */
             }
         }
     </style>
@@ -1662,6 +1824,25 @@
                                 <span class="activity-label">Clicks:</span>
                                 <span class="activity-value" id="click-count">0</span>
                             </div>
+                            <div class="activity-item">
+                                <span class="activity-label">Total URLs Visited:</span>
+                                <span class="activity-value" id="total-urls">0</span>
+                            </div>
+                            <div class="activity-item">
+                                <span class="activity-label">Active Tabs:</span>
+                                <span class="activity-value" id="active-tabs">1</span>
+                            </div>
+                        </div>
+                        
+                        <!-- URL History Panel -->
+                        <div class="url-history-panel">
+                            <h4>📚 URL History</h4>
+                            <div class="url-list" id="url-history">
+                                <div class="url-item">
+                                    <span class="url-text">No URLs visited yet</span>
+                                    <span class="url-time">-</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -1789,6 +1970,145 @@
                     <div class="alert-item info">
                         <span class="alert-icon">ℹ️</span>
                         <span class="alert-message">No active security alerts</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 📥 DOWNLOAD & EXPORT OPTIONS -->
+            <div class="download-section mb-6">
+                <h2 class="text-2xl font-bold mb-6">📥 Download & Export Options</h2>
+                
+                <div class="download-grid">
+                    <!-- Activity Data Export -->
+                    <div class="download-card">
+                        <div class="download-header">
+                            <h3>📊 Activity Data</h3>
+                            <span class="download-icon">📊</span>
+                        </div>
+                        <div class="download-content">
+                            <p>Export all monitored activities and events</p>
+                            <div class="download-buttons">
+                                <button class="btn-download" onclick="downloadActivityData('json')">
+                                    📄 JSON Export
+                                </button>
+                                <button class="btn-download" onclick="downloadActivityData('csv')">
+                                    📊 CSV Export
+                                </button>
+                                <button class="btn-download" onclick="downloadActivityData('txt')">
+                                    📝 Text Export
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- URL History Export -->
+                    <div class="download-card">
+                        <div class="download-header">
+                            <h3>🌐 URL History</h3>
+                            <span class="download-icon">🌐</span>
+                        </div>
+                        <div class="download-content">
+                            <p>Export complete browsing history and patterns</p>
+                            <div class="download-buttons">
+                                <button class="btn-download" onclick="downloadURLHistory('json')">
+                                    📄 JSON Export
+                                </button>
+                                <button class="btn-download" onclick="downloadURLHistory('csv')">
+                                    📊 CSV Export
+                                </button>
+                                <button class="btn-download" onclick="downloadURLHistory('txt')">
+                                    📝 Text Export
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security Report Export -->
+                    <div class="download-card">
+                        <div class="download-header">
+                            <h3>🛡️ Security Report</h3>
+                            <span class="download-icon">🛡️</span>
+                        </div>
+                        <div class="download-content">
+                            <p>Export security analysis and threat reports</p>
+                            <div class="download-buttons">
+                                <button class="btn-download" onclick="downloadSecurityReport('json')">
+                                    📄 JSON Export
+                                </button>
+                                <button class="btn-download" onclick="downloadSecurityReport('pdf')">
+                                    📄 PDF Report
+                                </button>
+                                <button class="btn-download" onclick="downloadSecurityReport('html')">
+                                    🌐 HTML Report
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- System Activity Export -->
+                    <div class="download-card">
+                        <div class="download-header">
+                            <h3>💻 System Activity</h3>
+                            <span class="download-icon">💻</span>
+                        </div>
+                        <div class="download-content">
+                            <p>Export system-wide activity and behavior patterns</p>
+                            <div class="download-buttons">
+                                <button class="btn-download" onclick="downloadSystemActivity('json')">
+                                    📄 JSON Export
+                                </button>
+                                <button class="btn-download" onclick="downloadSystemActivity('csv')">
+                                    📊 CSV Export
+                                </button>
+                                <button class="btn-download" onclick="downloadSystemActivity('txt')">
+                                    📝 Text Export
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI Insights Export -->
+                    <div class="download-card">
+                        <div class="download-header">
+                            <h3>🧠 AI Insights</h3>
+                            <span class="download-icon">🧠</span>
+                        </div>
+                        <div class="download-content">
+                            <p>Export AI-powered behavioral analysis</p>
+                            <div class="download-buttons">
+                                <button class="btn-download" onclick="downloadAIInsights('json')">
+                                    📄 JSON Export
+                                </button>
+                                <button class="btn-download" onclick="downloadAIInsights('pdf')">
+                                    📄 PDF Report
+                                </button>
+                                <button class="btn-download" onclick="downloadAIInsights('html')">
+                                    🌐 HTML Report
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Complete Report Export -->
+                    <div class="download-card featured">
+                        <div class="download-header">
+                            <h3>📋 Complete Report</h3>
+                            <span class="download-icon">⭐</span>
+                        </div>
+                        <div class="download-content">
+                            <p>Export comprehensive monitoring report with all data</p>
+                            <div class="download-buttons">
+                                <button class="btn-download featured" onclick="downloadCompleteReport('pdf')">
+                                    📄 Complete PDF Report
+                                </button>
+                                <button class="btn-download featured" onclick="downloadCompleteReport('html')">
+                                    🌐 Complete HTML Report
+                                </button>
+                                <button class="btn-download featured" onclick="downloadCompleteReport('json')">
+                                    📄 Complete JSON Data
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

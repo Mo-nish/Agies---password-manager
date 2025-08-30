@@ -3769,7 +3769,7 @@ function initializeMonitoringSystem() {
     console.log('✅ Advanced Monitoring System initialized successfully');
 }
 
-// Initialize monitoring system when page loads
+// Initialize monitoring system after page loads
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 Page loaded, initializing monitoring system...');
     initializeMonitoringSystem();
@@ -3783,3 +3783,318 @@ if (document.readyState === 'loading') {
     console.log('🚀 DOM already loaded, initializing monitoring system...');
     initializeMonitoringSystem();
 }
+
+// 📥 DOWNLOAD & EXPORT FUNCTIONS
+function downloadActivityData(format) {
+    console.log(`📥 Downloading activity data in ${format} format...`);
+    
+    const data = {
+        timestamp: new Date().toISOString(),
+        user_id: 'demo-user',
+        activities: window.enterpriseActivityMonitor?.getMonitoringStats() || {},
+        format: format
+    };
+    
+    downloadFile(data, `activity-data-${Date.now()}.${format}`, format);
+}
+
+function downloadURLHistory(format) {
+    console.log(`📥 Downloading URL history in ${format} format...`);
+    
+    const urlHistory = getURLHistory();
+    const data = {
+        timestamp: new Date().toISOString(),
+        user_id: 'demo-user',
+        url_history: urlHistory,
+        total_urls: urlHistory.length,
+        format: format
+    };
+    
+    downloadFile(data, `url-history-${Date.now()}.${format}`, format);
+}
+
+function downloadSecurityReport(format) {
+    console.log(`📥 Downloading security report in ${format} format...`);
+    
+    const securityData = {
+        timestamp: new Date().toISOString(),
+        user_id: 'demo-user',
+        security_score: document.getElementById('security-score-ai')?.textContent || '85/100',
+        risk_level: document.getElementById('risk-level')?.textContent || 'Low',
+        alerts: getSecurityAlerts(),
+        format: format
+    };
+    
+    downloadFile(securityData, `security-report-${Date.now()}.${format}`, format);
+}
+
+function downloadSystemActivity(format) {
+    console.log(`📥 Downloading system activity in ${format} format...`);
+    
+    const systemData = {
+        timestamp: new Date().toISOString(),
+        user_id: 'demo-user',
+        system_activity: {
+            keystrokes: document.getElementById('key-count')?.textContent || '0',
+            mouse_area: document.getElementById('mouse-area')?.textContent || '0px²',
+            window_focus: document.getElementById('window-focus')?.textContent || 'Active',
+            clicks: document.getElementById('click-count')?.textContent || '0'
+        },
+        format: format
+    };
+    
+    downloadFile(systemData, `system-activity-${Date.now()}.${format}`, format);
+}
+
+function downloadAIInsights(format) {
+    console.log(`📥 Downloading AI insights in ${format} format...`);
+    
+    const aiData = {
+        timestamp: new Date().toISOString(),
+        user_id: 'demo-user',
+        ai_insights: {
+            behavior_pattern: document.getElementById('behavior-pattern')?.textContent || 'Analyzing...',
+            security_score: document.getElementById('security-score-ai')?.textContent || '85/100',
+            productivity_score: document.getElementById('productivity-score')?.textContent || '78/100',
+            risk_level: document.getElementById('risk-level')?.textContent || 'Low'
+        },
+        format: format
+    };
+    
+    downloadFile(aiData, `ai-insights-${Date.now()}.${format}`, format);
+}
+
+function downloadCompleteReport(format) {
+    console.log(`📥 Downloading complete report in ${format} format...`);
+    
+    const completeData = {
+        timestamp: new Date().toISOString(),
+        user_id: 'demo-user',
+        report_type: 'complete_monitoring_report',
+        activity_data: window.enterpriseActivityMonitor?.getMonitoringStats() || {},
+        url_history: getURLHistory(),
+        security_data: {
+            security_score: document.getElementById('security-score-ai')?.textContent || '85/100',
+            risk_level: document.getElementById('risk-level')?.textContent || 'Low'
+        },
+        system_data: {
+            keystrokes: document.getElementById('key-count')?.textContent || '0',
+            mouse_area: document.getElementById('mouse-area')?.textContent || '0px²',
+            window_focus: document.getElementById('window-focus')?.textContent || 'Active'
+        },
+        ai_insights: {
+            behavior_pattern: document.getElementById('behavior-pattern')?.textContent || 'Analyzing...',
+            productivity_score: document.getElementById('productivity-score')?.textContent || '78/100'
+        },
+        format: format
+    };
+    
+    downloadFile(completeData, `complete-report-${Date.now()}.${format}`, format);
+}
+
+// 🧮 UTILITY FUNCTIONS
+function downloadFile(data, filename, format) {
+    let content, mimeType;
+    
+    switch (format) {
+        case 'json':
+            content = JSON.stringify(data, null, 2);
+            mimeType = 'application/json';
+            break;
+        case 'csv':
+            content = convertToCSV(data);
+            mimeType = 'text/csv';
+            break;
+        case 'txt':
+            content = convertToText(data);
+            mimeType = 'text/plain';
+            break;
+        case 'pdf':
+            // For PDF, we'll create a simple HTML version that can be printed
+            content = convertToHTML(data);
+            mimeType = 'text/html';
+            filename = filename.replace('.pdf', '.html');
+            break;
+        case 'html':
+            content = convertToHTML(data);
+            mimeType = 'text/html';
+            break;
+        default:
+            content = JSON.stringify(data, null, 2);
+            mimeType = 'application/json';
+    }
+    
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    console.log(`✅ File downloaded: ${filename}`);
+}
+
+function convertToCSV(data) {
+    // Simple CSV conversion
+    if (data.url_history) {
+        let csv = 'URL,Timestamp,Title\n';
+        data.url_history.forEach(item => {
+            csv += `"${item.url}","${item.timestamp}","${item.title}"\n`;
+        });
+        return csv;
+    }
+    
+    // Fallback to JSON string
+    return JSON.stringify(data, null, 2);
+}
+
+function convertToText(data) {
+    let text = `MONITORING REPORT\n`;
+    text += `Generated: ${data.timestamp}\n`;
+    text += `User ID: ${data.user_id}\n\n`;
+    
+    if (data.url_history) {
+        text += `URL HISTORY:\n`;
+        data.url_history.forEach(item => {
+            text += `- ${item.url} (${item.timestamp})\n`;
+        });
+        text += `\n`;
+    }
+    
+    if (data.security_data) {
+        text += `SECURITY DATA:\n`;
+        text += `- Security Score: ${data.security_data.security_score}\n`;
+        text += `- Risk Level: ${data.security_data.risk_level}\n\n`;
+    }
+    
+    return text;
+}
+
+function convertToHTML(data) {
+    let html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Monitoring Report - ${data.timestamp}</title>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            .header { background: #6366f1; color: white; padding: 20px; border-radius: 10px; }
+            .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+            .url-item { padding: 10px; margin: 5px 0; background: #f5f5f5; border-radius: 3px; }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>🚀 Enterprise Monitoring Report</h1>
+            <p>Generated: ${data.timestamp}</p>
+            <p>User ID: ${data.user_id}</p>
+        </div>
+    `;
+    
+    if (data.url_history) {
+        html += `
+        <div class="section">
+            <h2>🌐 URL History</h2>
+            <p>Total URLs: ${data.total_urls}</p>
+        `;
+        data.url_history.forEach(item => {
+            html += `<div class="url-item">${item.url} - ${item.timestamp}</div>`;
+        });
+        html += `</div>`;
+    }
+    
+    if (data.security_data) {
+        html += `
+        <div class="section">
+            <h2>🛡️ Security Data</h2>
+            <p>Security Score: ${data.security_data.security_score}</p>
+            <p>Risk Level: ${data.security_data.risk_level}</p>
+        </div>
+        `;
+    }
+    
+    html += `</body></html>`;
+    return html;
+}
+
+function getURLHistory() {
+    // Get URL history from the monitoring system
+    const urlHistory = [];
+    
+    // Add current page
+    urlHistory.push({
+        url: window.location.href,
+        title: document.title,
+        timestamp: new Date().toISOString(),
+        type: 'current'
+    });
+    
+    // Add some sample URLs for demonstration
+    urlHistory.push({
+        url: 'https://youtube.com',
+        title: 'YouTube',
+        timestamp: new Date(Date.now() - 300000).toISOString(), // 5 minutes ago
+        type: 'visited'
+    });
+    
+    urlHistory.push({
+        url: 'https://gmail.com',
+        title: 'Gmail',
+        timestamp: new Date(Date.now() - 600000).toISOString(), // 10 minutes ago
+        type: 'visited'
+    });
+    
+    return urlHistory;
+}
+
+function getSecurityAlerts() {
+    // Get current security alerts
+    const alerts = [];
+    
+    // Add current security status
+    alerts.push({
+        type: 'info',
+        message: 'System secure - No active threats detected',
+        timestamp: new Date().toISOString()
+    });
+    
+    return alerts;
+}
+
+// Update URL history display
+function updateURLHistory() {
+    const urlHistory = getURLHistory();
+    const urlList = document.getElementById('url-history');
+    const totalUrlsElement = document.getElementById('total-urls');
+    
+    if (urlList && totalUrlsElement) {
+        // Update total URLs count
+        totalUrlsElement.textContent = urlHistory.length;
+        
+        // Clear existing items
+        urlList.innerHTML = '';
+        
+        // Add URL items
+        urlHistory.forEach(item => {
+            const urlItem = document.createElement('div');
+            urlItem.className = 'url-item';
+            
+            const time = new Date(item.timestamp).toLocaleTimeString();
+            urlItem.innerHTML = `
+                <span class="url-text">${item.url}</span>
+                <span class="url-time">${time}</span>
+            `;
+            
+            urlList.appendChild(urlItem);
+        });
+    }
+}
+
+// Update URL history every 30 seconds
+setInterval(updateURLHistory, 30000);
+
+// Initial update
+setTimeout(updateURLHistory, 1000);
