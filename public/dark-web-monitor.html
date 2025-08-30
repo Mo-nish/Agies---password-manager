@@ -324,6 +324,12 @@
             border-radius: 0.75rem;
             padding: 1.5rem;
             border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .setting-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
         }
 
         .setting-title {
@@ -1138,6 +1144,302 @@
         .text-yellow-400 {
             color: #F59E0B;
         }
+
+        /* 🚀 ADVANCED MONITORING SYSTEM STYLES */
+        .monitoring-controls {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .control-panel {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .control-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .btn-primary, .btn-secondary {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(239, 68, 68, 0.8);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(239, 68, 68, 1);
+            transform: translateY(-2px);
+        }
+
+        .monitoring-select {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .monitoring-status {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* Activity Dashboard Styles */
+        .activity-dashboard {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .activity-card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .activity-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .activity-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .activity-header h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+
+        .activity-count {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .activity-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .activity-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .activity-label {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .activity-value {
+            color: #e2e8f0;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* AI Insights Panel Styles */
+        .ai-insights-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .insight-card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .insight-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .insight-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .insight-icon {
+            font-size: 1.2rem;
+        }
+
+        .insight-title {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
+        .insight-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #e2e8f0;
+            text-align: center;
+        }
+
+        /* Activity Feed Styles */
+        .activity-feed {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .feed-container {
+            max-height: 300px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .feed-item {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .feed-time {
+            color: #6366f1;
+            font-size: 0.8rem;
+            font-weight: 600;
+            min-width: 80px;
+        }
+
+        .feed-message {
+            color: #e2e8f0;
+            font-size: 0.9rem;
+        }
+
+        /* Security Alerts Panel Styles */
+        .security-alerts-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .alerts-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .alert-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .alert-item.info {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .alert-item.warning {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: rgba(245, 158, 11, 0.3);
+        }
+
+        .alert-item.danger {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .alert-icon {
+            font-size: 1.2rem;
+        }
+
+        .alert-message {
+            color: #e2e8f0;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .insights-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .control-panel {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1307,8 +1609,193 @@
                 </div>
             </div>
         </div>
+
+        <!-- 🚀 ADVANCED AI-POWERED USER ACTIVITY MONITORING -->
+        <div class="monitoring-section">
+            <h2 class="text-2xl font-bold mb-6">🚀 AI-Powered User Activity Monitor</h2>
+            
+            <!-- Monitoring Control Panel -->
+            <div class="monitoring-controls mb-6">
+                <div class="control-panel">
+                    <div class="control-item">
+                        <button id="start-monitoring" class="btn-primary">
+                            🚀 Start Monitoring
+                        </button>
+                        <button id="stop-monitoring" class="btn-secondary" style="display: none;">
+                            🛑 Stop Monitoring
+                        </button>
+                    </div>
+                    
+                    <div class="control-item">
+                        <select id="monitoring-level" class="monitoring-select">
+                            <option value="basic">Basic Monitoring</option>
+                            <option value="comprehensive" selected>Comprehensive</option>
+                            <option value="enterprise">Enterprise</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-item">
+                        <span class="monitoring-status" id="monitoring-status">🟡 Ready</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Real-Time Activity Dashboard -->
+            <div class="activity-dashboard mb-6">
+                <div class="dashboard-grid">
+                    <!-- Browser Activity -->
+                    <div class="activity-card">
+                        <div class="activity-header">
+                            <h3>🌐 Browser Activity</h3>
+                            <span class="activity-count" id="browser-count">0</span>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-item">
+                                <span class="activity-label">Current URL:</span>
+                                <span class="activity-value" id="current-url">-</span>
+                            </div>
+                            <div class="activity-item">
+                                <span class="activity-label">Time on Page:</span>
+                                <span class="activity-value" id="page-time">0s</span>
+                            </div>
+                            <div class="activity-item">
+                                <span class="activity-label">Clicks:</span>
+                                <span class="activity-value" id="click-count">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- System Activity -->
+                    <div class="activity-card">
+                        <div class="activity-header">
+                            <h3>💻 System Activity</h3>
+                            <span class="activity-count" id="system-count">0</span>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-item">
+                                <span class="activity-label">Keystrokes:</span>
+                                <span class="activity-value" id="key-count">0</span>
+                            </div>
+                            <div class="activity-item">
+                                <span class="activity-label">Mouse Area:</span>
+                                <span class="activity-value" id="mouse-area">0px²</span>
+                            </div>
+                            <div class="activity-item">
+                                <span class="activity-label">Window Focus:</span>
+                                <span class="activity-value" id="window-focus">Active</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security Events -->
+                    <div class="activity-card">
+                        <div class="activity-header">
+                            <h3>🛡️ Security Events</h3>
+                            <span class="activity-count" id="security-count">0</span>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-item">
+                                <span class="activity-label">Auth Attempts:</span>
+                                <span class="activity-value" id="auth-attempts">0</span>
+                            </div>
+                            <div class="activity-item">
+                                <span class="activity-label">File Downloads:</span>
+                                <span class="activity-value" id="file-downloads">0</span>
+                            </div>
+                            <div class="activity-item">
+                                <span class="activity-label">External Links:</span>
+                                <span class="activity-value" id="external-links">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Network Activity -->
+                    <div class="activity-card">
+                        <div class="activity-header">
+                            <h3>🌐 Network Activity</h3>
+                            <span class="activity-count" id="network-count">0</span>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-item">
+                                <span class="activity-label">API Calls:</span>
+                                <span class="activity-value" id="api-calls">0</span>
+                            </div>
+                            <div class="activity-item">
+                                <span class="activity-label">WebSocket:</span>
+                                <span class="activity-value" id="websocket-conn">0</span>
+                            </div>
+                            <div class="activity-item">
+                                <span class="activity-label">Data Transfer:</span>
+                                <span class="activity-value" id="data-transfer">0KB</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Insights Panel -->
+            <div class="ai-insights-panel mb-6">
+                <h3 class="text-xl font-bold mb-4">🧠 AI-Powered Insights</h3>
+                <div class="insights-grid">
+                    <div class="insight-card">
+                        <div class="insight-header">
+                            <span class="insight-icon">🔍</span>
+                            <span class="insight-title">Behavior Pattern</span>
+                        </div>
+                        <div class="insight-value" id="behavior-pattern">Analyzing...</div>
+                    </div>
+                    
+                    <div class="insight-card">
+                        <div class="insight-header">
+                            <span class="insight-icon">🛡️</span>
+                            <span class="insight-title">Security Score</span>
+                        </div>
+                        <div class="insight-value" id="security-score-ai">85/100</div>
+                    </div>
+                    
+                    <div class="insight-card">
+                        <div class="insight-header">
+                            <span class="insight-icon">📈</span>
+                            <span class="insight-title">Productivity Score</span>
+                        </div>
+                        <div class="insight-value" id="productivity-score">78/100</div>
+                    </div>
+                    
+                    <div class="insight-card">
+                        <div class="insight-header">
+                            <span class="insight-icon">⚠️</span>
+                            <span class="insight-title">Risk Level</span>
+                        </div>
+                        <div class="insight-value" id="risk-level">Low</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Activity Feed -->
+            <div class="activity-feed mb-6">
+                <h3 class="text-xl font-bold mb-4">📊 Live Activity Feed</h3>
+                <div class="feed-container" id="activity-feed">
+                    <div class="feed-item">
+                        <span class="feed-time">Just now</span>
+                        <span class="feed-message">Monitoring system initialized</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Alerts -->
+            <div class="security-alerts-panel mb-6">
+                <h3 class="text-xl font-bold mb-4">🚨 Security Alerts</h3>
+                <div class="alerts-container" id="security-alerts-panel">
+                    <div class="alert-item info">
+                        <span class="alert-icon">ℹ️</span>
+                        <span class="alert-message">No active security alerts</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="js/dark-web-monitor.js"></script>
+    <script src="js/activity-monitor.js"></script>
 </body>
 </html>

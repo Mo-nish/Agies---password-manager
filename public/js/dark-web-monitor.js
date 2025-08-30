@@ -3279,3 +3279,254 @@ function toggleCredentialMonitoring(index) {
     
     enterpriseMonitor.updateCredentialDisplay();
 }
+
+// Initialize the page
+init();
+
+// 🚀 ADVANCED MONITORING SYSTEM INTEGRATION
+function initializeMonitoringSystem() {
+    console.log('🚀 Initializing Advanced Monitoring System...');
+    
+    // Get DOM elements
+    const startBtn = document.getElementById('start-monitoring');
+    const stopBtn = document.getElementById('stop-monitoring');
+    const monitoringStatus = document.getElementById('monitoring-status');
+    const monitoringLevel = document.getElementById('monitoring-level');
+    
+    // Activity counters
+    let clickCount = 0;
+    let keyCount = 0;
+    let pageStartTime = Date.now();
+    let isMonitoring = false;
+    
+    // Start monitoring button
+    startBtn.addEventListener('click', async () => {
+        try {
+            const level = monitoringLevel.value;
+            const success = await enterpriseActivityMonitor.startMonitoring(level);
+            
+            if (success) {
+                isMonitoring = true;
+                startBtn.style.display = 'none';
+                stopBtn.style.display = 'block';
+                monitoringStatus.textContent = '🟢 Active';
+                monitoringStatus.style.color = '#10b981';
+                
+                // Start real-time updates
+                startRealTimeUpdates();
+                
+                addActivityFeedItem('Monitoring started successfully', 'success');
+            }
+        } catch (error) {
+            console.error('❌ Failed to start monitoring:', error);
+            addActivityFeedItem('Failed to start monitoring', 'error');
+        }
+    });
+    
+    // Stop monitoring button
+    stopBtn.addEventListener('click', () => {
+        enterpriseActivityMonitor.stopMonitoring();
+        isMonitoring = false;
+        startBtn.style.display = 'block';
+        stopBtn.style.display = 'none';
+        monitoringStatus.textContent = '🟡 Ready';
+        monitoringStatus.style.color = '#f59e0b';
+        
+        addActivityFeedItem('Monitoring stopped', 'info');
+    });
+    
+    // Real-time activity tracking
+    function startRealTimeUpdates() {
+        // Update page time every second
+        setInterval(() => {
+            if (isMonitoring) {
+                const timeSpent = Math.floor((Date.now() - pageStartTime) / 1000);
+                document.getElementById('page-time').textContent = `${timeSpent}s`;
+            }
+        }, 1000);
+        
+        // Update activity counts
+        document.addEventListener('click', () => {
+            if (isMonitoring) {
+                clickCount++;
+                document.getElementById('click-count').textContent = clickCount;
+                updateActivityCount('browser-count');
+            }
+        });
+        
+        document.addEventListener('keydown', () => {
+            if (isMonitoring) {
+                keyCount++;
+                document.getElementById('key-count').textContent = keyCount;
+                updateActivityCount('system-count');
+            }
+        });
+        
+        // Update current URL
+        document.getElementById('current-url').textContent = window.location.href;
+        
+        // Update mouse area (simulated)
+        let mouseArea = 0;
+        document.addEventListener('mousemove', () => {
+            if (isMonitoring) {
+                mouseArea += 100;
+                document.getElementById('mouse-area').textContent = `${mouseArea}px²`;
+            }
+        });
+        
+        // Update window focus
+        document.addEventListener('visibilitychange', () => {
+            if (isMonitoring) {
+                const focus = document.hidden ? 'Inactive' : 'Active';
+                document.getElementById('window-focus').textContent = focus;
+            }
+        });
+        
+        // Simulate network activity
+        setInterval(() => {
+            if (isMonitoring) {
+                const apiCalls = Math.floor(Math.random() * 5) + 1;
+                document.getElementById('api-calls').textContent = apiCalls;
+                updateActivityCount('network-count');
+            }
+        }, 5000);
+        
+        // Simulate security events
+        setInterval(() => {
+            if (isMonitoring) {
+                const authAttempts = Math.floor(Math.random() * 3);
+                document.getElementById('auth-attempts').textContent = authAttempts;
+                updateActivityCount('security-count');
+            }
+        }, 8000);
+    }
+    
+    // Update activity counts
+    function updateActivityCount(elementId) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            const currentCount = parseInt(element.textContent) || 0;
+            element.textContent = currentCount + 1;
+        }
+    }
+    
+    // Add activity feed item
+    function addActivityFeedItem(message, type = 'info') {
+        const feedContainer = document.getElementById('activity-feed');
+        const feedItem = document.createElement('div');
+        feedItem.className = `feed-item ${type}`;
+        
+        const time = new Date().toLocaleTimeString();
+        feedItem.innerHTML = `
+            <span class="feed-time">${time}</span>
+            <span class="feed-message">${message}</span>
+        `;
+        
+        feedContainer.insertBefore(feedItem, feedContainer.firstChild);
+        
+        // Keep only last 10 items
+        const items = feedContainer.querySelectorAll('.feed-item');
+        if (items.length > 10) {
+            items[items.length - 1].remove();
+        }
+    }
+    
+    // Update AI insights
+    function updateAIInsights() {
+        if (!isMonitoring) return;
+        
+        // Simulate AI analysis updates
+        const insights = [
+            { id: 'behavior-pattern', values: ['Normal', 'Active', 'Productive', 'Focused'] },
+            { id: 'security-score-ai', values: ['85/100', '88/100', '92/100', '89/100'] },
+            { id: 'productivity-score', values: ['78/100', '82/100', '85/100', '80/100'] },
+            { id: 'risk-level', values: ['Low', 'Very Low', 'Low', 'Low'] }
+        ];
+        
+        insights.forEach(insight => {
+            const element = document.getElementById(insight.id);
+            if (element) {
+                const randomValue = insight.values[Math.floor(Math.random() * insight.values.length)];
+                element.textContent = randomValue;
+            }
+        });
+    }
+    
+    // Update insights every 10 seconds
+    setInterval(updateAIInsights, 10000);
+    
+    // Simulate security alerts
+    function generateSecurityAlerts() {
+        if (!isMonitoring) return;
+        
+        const alertsContainer = document.getElementById('security-alerts-panel');
+        const alerts = [
+            {
+                type: 'info',
+                message: 'No active security alerts - System secure'
+            },
+            {
+                type: 'warning',
+                message: 'Unusual login pattern detected'
+            },
+            {
+                type: 'danger',
+                message: 'High-risk website access detected'
+            }
+        ];
+        
+        // Randomly show alerts
+        if (Math.random() < 0.3) {
+            const randomAlert = alerts[Math.floor(Math.random() * alerts.length)];
+            const alertItem = document.createElement('div');
+            alertItem.className = `alert-item ${randomAlert.type}`;
+            alertItem.innerHTML = `
+                <span class="alert-icon">${randomAlert.type === 'info' ? 'ℹ️' : randomAlert.type === 'warning' ? '⚠️' : '🚨'}</span>
+                <span class="alert-message">${randomAlert.message}</span>
+            `;
+            
+            alertsContainer.appendChild(alertItem);
+            
+            // Remove after 10 seconds
+            setTimeout(() => {
+                alertItem.remove();
+            }, 10000);
+        }
+    }
+    
+    // Generate alerts every 15 seconds
+    setInterval(generateSecurityAlerts, 15000);
+    
+    // Initialize monitoring stats
+    function initializeMonitoringStats() {
+        // Set initial values
+        document.getElementById('browser-count').textContent = '0';
+        document.getElementById('system-count').textContent = '0';
+        document.getElementById('security-count').textContent = '0';
+        document.getElementById('network-count').textContent = '0';
+        document.getElementById('click-count').textContent = '0';
+        document.getElementById('key-count').textContent = '0';
+        document.getElementById('page-time').textContent = '0s';
+        document.getElementById('mouse-area').textContent = '0px²';
+        document.getElementById('window-focus').textContent = 'Active';
+        document.getElementById('api-calls').textContent = '0';
+        document.getElementById('websocket-conn').textContent = '0';
+        document.getElementById('data-transfer').textContent = '0KB';
+        document.getElementById('auth-attempts').textContent = '0';
+        document.getElementById('file-downloads').textContent = '0';
+        document.getElementById('external-links').textContent = '0';
+    }
+    
+    // Initialize stats
+    initializeMonitoringStats();
+    
+    // Add initial feed item
+    addActivityFeedItem('Advanced monitoring system ready', 'success');
+    
+    console.log('✅ Advanced Monitoring System initialized successfully');
+}
+
+// Initialize monitoring system after page loads
+setTimeout(() => {
+    initializeMonitoringSystem();
+}, 1000);
