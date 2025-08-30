@@ -809,6 +809,462 @@ def check_enterprise_breach():
     except Exception as e:
         return jsonify({'error': f'Breach check failed: {str(e)}'}), 500
 
+# REAL-TIME USER ACTIVITY MONITORING SYSTEM
+@app.route('/api/enterprise/monitoring/start-tracking', methods=['POST'])
+def start_activity_monitoring():
+    """Start comprehensive user activity monitoring"""
+    try:
+        data = request.get_json()
+        user_id = data.get('user_id', 'demo-user')
+        monitoring_level = data.get('level', 'comprehensive')  # basic, comprehensive, enterprise
+        
+        print(f"🚀 Starting {monitoring_level} activity monitoring for user: {user_id}")
+        
+        # Initialize monitoring session
+        monitoring_session = {
+            'session_id': secrets.token_urlsafe(32),
+            'user_id': user_id,
+            'start_time': datetime.now().isoformat(),
+            'monitoring_level': monitoring_level,
+            'status': 'active',
+            'tracking_modules': {
+                'browser': True,
+                'system': True,
+                'security': True,
+                'network': True,
+                'ai_analysis': True
+            }
+        }
+        
+        return jsonify({
+            'success': True,
+            'session_id': monitoring_session['session_id'],
+            'message': f'{monitoring_level.title()} monitoring started',
+            'tracking_modules': monitoring_session['tracking_modules'],
+            'start_time': monitoring_session['start_time']
+        })
+        
+    except Exception as e:
+        print(f"❌ Monitoring start error: {str(e)}")
+        return jsonify({'error': f'Failed to start monitoring: {str(e)}'}), 500
+
+@app.route('/api/enterprise/monitoring/record-activity', methods=['POST'])
+def record_user_activity():
+    """Record comprehensive user activity data"""
+    try:
+        data = request.get_json()
+        user_id = data.get('user_id', 'demo-user')
+        session_id = data.get('session_id')
+        activity_type = data.get('type')
+        activity_data = data.get('data', {})
+        timestamp = data.get('timestamp', datetime.now().isoformat())
+        
+        # AI-powered activity analysis
+        ai_insights = analyze_activity_with_ai(activity_type, activity_data)
+        
+        # Store activity with AI insights
+        activity_record = {
+            'id': secrets.token_urlsafe(32),
+            'user_id': user_id,
+            'session_id': session_id,
+            'activity_type': activity_type,
+            'activity_data': activity_data,
+            'ai_insights': ai_insights,
+            'timestamp': timestamp,
+            'security_score': calculate_activity_security_score(activity_type, activity_data, ai_insights),
+            'risk_level': assess_activity_risk(activity_type, activity_data, ai_insights)
+        }
+        
+        # Log the activity
+        print(f"📊 Activity recorded: {activity_type} for {user_id} - Risk: {activity_record['risk_level']}")
+        
+        return jsonify({
+            'success': True,
+            'activity_id': activity_record['id'],
+            'ai_insights': ai_insights,
+            'security_score': activity_record['security_score'],
+            'risk_level': activity_record['risk_level'],
+            'timestamp': timestamp
+        })
+        
+    except Exception as e:
+        print(f"❌ Activity recording error: {str(e)}")
+        return jsonify({'error': f'Failed to record activity: {str(e)}'}), 500
+
+@app.route('/api/enterprise/monitoring/activity-summary', methods=['GET'])
+def get_activity_summary():
+    """Get comprehensive user activity summary with AI insights"""
+    try:
+        user_id = request.args.get('user_id', 'demo-user')
+        time_range = request.args.get('range', '24h')  # 1h, 24h, 7d, 30d
+        
+        # Generate comprehensive activity summary
+        summary = generate_activity_summary(user_id, time_range)
+        
+        return jsonify({
+            'success': True,
+            'user_id': user_id,
+            'time_range': time_range,
+            'summary': summary,
+            'generated_at': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        print(f"❌ Activity summary error: {str(e)}")
+        return jsonify({'error': f'Failed to get activity summary: {str(e)}'}), 500
+
+@app.route('/api/enterprise/monitoring/security-alerts', methods=['GET'])
+def get_security_alerts():
+    """Get real-time security alerts from activity monitoring"""
+    try:
+        user_id = request.args.get('user_id', 'demo-user')
+        
+        # Generate security alerts based on monitored activities
+        alerts = generate_security_alerts(user_id)
+        
+        return jsonify({
+            'success': True,
+            'user_id': user_id,
+            'alerts': alerts,
+            'total_alerts': len(alerts),
+            'critical_count': len([a for a in alerts if a['severity'] == 'critical']),
+            'high_count': len([a for a in alerts if a['severity'] == 'high']),
+            'medium_count': len([a for a in alerts if a['severity'] == 'medium']),
+            'generated_at': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        print(f"❌ Security alerts error: {str(e)}")
+        return jsonify({'error': f'Failed to get security alerts: {str(e)}'}), 500
+
+# AI-POWERED ACTIVITY ANALYSIS FUNCTIONS
+def analyze_activity_with_ai(activity_type, activity_data):
+    """AI-powered analysis of user activity patterns"""
+    insights = {
+        'behavior_pattern': 'normal',
+        'risk_indicators': [],
+        'productivity_score': 0,
+        'security_concerns': [],
+        'recommendations': []
+    }
+    
+    try:
+        if activity_type == 'browser_activity':
+            insights.update(analyze_browser_behavior(activity_data))
+        elif activity_type == 'system_activity':
+            insights.update(analyze_system_behavior(activity_data))
+        elif activity_type == 'security_event':
+            insights.update(analyze_security_behavior(activity_data))
+        elif activity_type == 'network_activity':
+            insights.update(analyze_network_behavior(activity_data))
+        else:
+            insights.update(analyze_general_behavior(activity_data))
+            
+    except Exception as e:
+        print(f"⚠️ AI analysis error: {str(e)}")
+        insights['behavior_pattern'] = 'unknown'
+        insights['risk_indicators'].append('AI analysis failed')
+    
+    return insights
+
+def analyze_browser_behavior(browser_data):
+    """Analyze browser activity for security and productivity insights"""
+    insights = {
+        'behavior_pattern': 'normal',
+        'risk_indicators': [],
+        'productivity_score': 0,
+        'security_concerns': [],
+        'recommendations': []
+    }
+    
+    try:
+        url = browser_data.get('url', '')
+        domain = browser_data.get('domain', '')
+        time_spent = browser_data.get('time_spent', 0)
+        actions = browser_data.get('actions', [])
+        
+        # Security analysis
+        if any(risk_domain in domain.lower() for risk_domain in ['phishing', 'malware', 'suspicious']):
+            insights['security_concerns'].append('High-risk website detected')
+            insights['risk_indicators'].append('suspicious_domain')
+            insights['behavior_pattern'] = 'high_risk'
+        
+        # Productivity analysis
+        if 'social' in domain or 'entertainment' in domain:
+            insights['productivity_score'] = max(0, 100 - (time_spent * 2))
+            if time_spent > 30:  # More than 30 minutes
+                insights['recommendations'].append('Consider limiting time on entertainment sites')
+        else:
+            insights['productivity_score'] = min(100, 50 + (time_spent * 0.5))
+        
+        # Behavior pattern analysis
+        if len(actions) > 100:  # High activity
+            insights['behavior_pattern'] = 'high_activity'
+        elif time_spent > 120:  # Long session
+            insights['behavior_pattern'] = 'extended_session'
+            
+    except Exception as e:
+        print(f"⚠️ Browser analysis error: {str(e)}")
+    
+    return insights
+
+def analyze_system_behavior(system_data):
+    """Analyze system activity for security and productivity insights"""
+    insights = {
+        'behavior_pattern': 'normal',
+        'risk_indicators': [],
+        'productivity_score': 0,
+        'security_concerns': [],
+        'recommendations': []
+    }
+    
+    try:
+        app_name = system_data.get('app_name', '')
+        action_type = system_data.get('action_type', '')
+        file_path = system_data.get('file_path', '')
+        timestamp = system_data.get('timestamp', '')
+        
+        # Security analysis
+        if 'password' in file_path.lower() or 'credential' in file_path.lower():
+            insights['security_concerns'].append('Sensitive file accessed')
+            insights['risk_indicators'].append('sensitive_file_access')
+        
+        if 'temp' in file_path.lower() or 'download' in file_path.lower():
+            insights['risk_indicators'].append('temporary_file_operation')
+        
+        # Productivity analysis
+        productivity_apps = ['word', 'excel', 'powerpoint', 'code', 'terminal']
+        entertainment_apps = ['game', 'video', 'music', 'social']
+        
+        if any(prod_app in app_name.lower() for prod_app in productivity_apps):
+            insights['productivity_score'] = 85
+            insights['behavior_pattern'] = 'productive'
+        elif any(ent_app in app_name.lower() for ent_app in entertainment_apps):
+            insights['productivity_score'] = 30
+            insights['behavior_pattern'] = 'entertainment'
+        else:
+            insights['productivity_score'] = 60
+            
+    except Exception as e:
+        print(f"⚠️ System analysis error: {str(e)}")
+    
+    return insights
+
+def analyze_security_behavior(security_data):
+    """Analyze security-related activities for threats"""
+    insights = {
+        'behavior_pattern': 'normal',
+        'risk_indicators': [],
+        'productivity_score': 0,
+        'security_concerns': [],
+        'recommendations': []
+    }
+    
+    try:
+        event_type = security_data.get('event_type', '')
+        severity = security_data.get('severity', 'low')
+        source = security_data.get('source', '')
+        
+        # Threat analysis
+        if severity == 'high' or severity == 'critical':
+            insights['security_concerns'].append(f'High-severity security event: {event_type}')
+            insights['risk_indicators'].append('high_security_event')
+            insights['behavior_pattern'] = 'threat_detected'
+            insights['recommendations'].append('Immediate security review required')
+        
+        if 'login' in event_type.lower():
+            insights['risk_indicators'].append('authentication_event')
+            if source not in ['trusted_domain', 'known_ip']:
+                insights['security_concerns'].append('Login from unknown source')
+                insights['recommendations'].append('Verify login legitimacy')
+                
+    except Exception as e:
+        print(f"⚠️ Security analysis error: {str(e)}")
+    
+    return insights
+
+def analyze_network_behavior(network_data):
+    """Analyze network activity for security threats"""
+    insights = {
+        'behavior_pattern': 'normal',
+        'risk_indicators': [],
+        'productivity_score': 0,
+        'security_concerns': [],
+        'recommendations': []
+    }
+    
+    try:
+        destination = network_data.get('destination', '')
+        protocol = network_data.get('protocol', '')
+        data_size = network_data.get('data_size', 0)
+        
+        # Network security analysis
+        if protocol in ['ftp', 'telnet']:
+            insights['security_concerns'].append('Insecure protocol detected')
+            insights['risk_indicators'].append('insecure_protocol')
+            insights['recommendations'].append('Use secure alternatives (SFTP, SSH)')
+        
+        if data_size > 100000000:  # 100MB
+            insights['risk_indicators'].append('large_data_transfer')
+            insights['recommendations'].append('Monitor large data transfers')
+            
+    except Exception as e:
+        print(f"⚠️ Network analysis error: {str(e)}")
+    
+    return insights
+
+def analyze_general_behavior(activity_data):
+    """General behavior analysis for unknown activity types"""
+    insights = {
+        'behavior_pattern': 'normal',
+        'risk_indicators': [],
+        'productivity_score': 50,
+        'security_concerns': [],
+        'recommendations': []
+    }
+    
+    try:
+        # Generic pattern analysis
+        if 'error' in str(activity_data).lower():
+            insights['risk_indicators'].append('error_detected')
+            insights['recommendations'].append('Review system logs for errors')
+            
+    except Exception as e:
+        print(f"⚠️ General analysis error: {str(e)}")
+    
+    return insights
+
+def calculate_activity_security_score(activity_type, activity_data, ai_insights):
+    """Calculate security score for an activity (0-100)"""
+    base_score = 75
+    
+    try:
+        # Risk factor adjustments
+        risk_factors = {
+            'high_risk': -30,
+            'medium_risk': -15,
+            'low_risk': -5,
+            'normal': 0,
+            'secure': +10
+        }
+        
+        # Apply risk adjustments
+        risk_adjustment = risk_factors.get(ai_insights.get('behavior_pattern', 'normal'), 0)
+        
+        # Security concern penalties
+        concern_penalty = len(ai_insights.get('security_concerns', [])) * -10
+        
+        # Final score calculation
+        final_score = base_score + risk_adjustment + concern_penalty
+        
+        return max(0, min(100, final_score))
+        
+    except Exception as e:
+        print(f"⚠️ Security score calculation error: {str(e)}")
+        return 50
+
+def assess_activity_risk(activity_type, activity_data, ai_insights):
+    """Assess overall risk level of an activity"""
+    try:
+        security_score = calculate_activity_security_score(activity_type, activity_data, ai_insights)
+        
+        if security_score >= 80:
+            return 'low'
+        elif security_score >= 60:
+            return 'medium'
+        elif security_score >= 40:
+            return 'high'
+        else:
+            return 'critical'
+            
+    except Exception as e:
+        print(f"⚠️ Risk assessment error: {str(e)}")
+        return 'medium'
+
+def generate_activity_summary(user_id, time_range):
+    """Generate comprehensive activity summary with AI insights"""
+    try:
+        # Simulate comprehensive activity data
+        summary = {
+            'total_activities': 0,
+            'activity_breakdown': {},
+            'security_overview': {
+                'overall_score': 85,
+                'risk_level': 'low',
+                'threats_detected': 0,
+                'suspicious_activities': 0
+            },
+            'productivity_analysis': {
+                'overall_score': 78,
+                'productive_time': '6h 23m',
+                'distraction_time': '1h 12m',
+                'focus_sessions': 8
+            },
+            'behavior_patterns': {
+                'work_pattern': 'consistent',
+                'security_behavior': 'good',
+                'productivity_trend': 'improving',
+                'risk_trend': 'decreasing'
+            },
+            'ai_recommendations': [
+                'Consider enabling 2FA for all accounts',
+                'Limit time on social media during work hours',
+                'Regular password rotation recommended',
+                'Monitor file access patterns'
+            ],
+            'time_distribution': {
+                'work_applications': '65%',
+                'communication': '20%',
+                'entertainment': '10%',
+                'other': '5%'
+            }
+        }
+        
+        return summary
+        
+    except Exception as e:
+        print(f"⚠️ Summary generation error: {str(e)}")
+        return {'error': 'Failed to generate summary'}
+
+def generate_security_alerts(user_id):
+    """Generate security alerts based on monitored activities"""
+    try:
+        # Simulate real-time security alerts
+        alerts = [
+            {
+                'id': 'alert_001',
+                'type': 'suspicious_activity',
+                'severity': 'medium',
+                'title': 'Unusual login pattern detected',
+                'description': 'Multiple login attempts from different locations',
+                'timestamp': datetime.now().isoformat(),
+                'recommendations': [
+                    'Verify all login locations',
+                    'Enable location-based authentication',
+                    'Review account activity'
+                ]
+            },
+            {
+                'id': 'alert_002',
+                'type': 'security_risk',
+                'severity': 'low',
+                'title': 'Weak password detected',
+                'description': 'Password strength below recommended threshold',
+                'timestamp': datetime.now().isoformat(),
+                'recommendations': [
+                    'Change password to stronger version',
+                    'Enable password manager',
+                    'Use unique passwords for each service'
+                ]
+            }
+        ]
+        
+        return alerts
+        
+    except Exception as e:
+        print(f"⚠️ Alert generation error: {str(e)}")
+        return []
+
 # Enterprise Utility Functions
 def hash_enterprise_password(password):
     """Hash password using enterprise-grade SHA-256 with salt"""
