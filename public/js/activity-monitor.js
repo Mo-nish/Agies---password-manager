@@ -981,10 +981,11 @@ class EnterpriseActivityMonitor {
                 category: 'system',
                 priority: 'medium',
                 details: {
-                    storageType: 'localStorage',
-                    keyLength: key.length,
-                    valueLength: value.length,
-                    url: window.location.href
+                    storage_type: 'localStorage',
+                    key_length: key.length,
+                    value_length: value.length,
+                    url: window.location.href,
+                    domain: window.location.hostname
                 }
             };
             
@@ -1008,10 +1009,11 @@ class EnterpriseActivityMonitor {
                 category: 'system',
                 priority: 'medium',
                 details: {
-                    storageType: 'sessionStorage',
-                    keyLength: key.length,
-                    valueLength: value.length,
-                    url: window.location.href
+                    storage_type: 'sessionStorage',
+                    key_length: key.length,
+                    value_length: value.length,
+                    url: window.location.href,
+                    domain: window.location.hostname
                 }
             };
             
@@ -1022,6 +1024,58 @@ class EnterpriseActivityMonitor {
             
             return originalSessionSetItem.call(this, key, value);
         };
+        
+        // Track postMessage communication
+        const originalPostMessage = window.postMessage;
+        window.postMessage = function(message, targetOrigin, transfer) {
+            const postMessageData = {
+                type: 'cross_tab_communication',
+                action: 'postMessage_sent',
+                message: typeof message === 'string' ? message : JSON.stringify(message),
+                target_origin: targetOrigin,
+                timestamp: new Date().toISOString(),
+                category: 'system',
+                priority: 'medium',
+                details: {
+                    communication_method: 'postMessage',
+                    message_type: typeof message,
+                    target_origin: targetOrigin,
+                    url: window.location.href,
+                    domain: window.location.hostname
+                }
+            };
+            
+            if (window.enterpriseActivityMonitor) {
+                window.enterpriseActivityMonitor.recordGeneralActivity(postMessageData);
+                window.enterpriseActivityMonitor.addToComprehensiveData('crossBrowserActivity', postMessageData);
+            }
+            
+            return originalPostMessage.call(this, message, targetOrigin, transfer);
+        };
+        
+        // Track message reception
+        window.addEventListener('message', (event) => {
+            const messageData = {
+                type: 'cross_tab_communication',
+                action: 'postMessage_received',
+                message: typeof event.data === 'string' ? event.data : JSON.stringify(event.data),
+                source_origin: event.origin,
+                source_url: event.source?.location?.href || 'unknown',
+                timestamp: new Date().toISOString(),
+                category: 'system',
+                priority: 'medium',
+                details: {
+                    communication_method: 'postMessage',
+                    message_type: typeof event.data,
+                    source_origin: event.origin,
+                    current_url: window.location.href,
+                    current_domain: window.location.hostname
+                }
+            };
+            
+            this.recordGeneralActivity(messageData);
+            this.addToComprehensiveData('crossBrowserActivity', messageData);
+        });
     }
     
     // 💻 MONITOR SYSTEM APPLICATIONS
@@ -1836,7 +1890,7 @@ class EnterpriseActivityMonitor {
         };
     }
     
-    // 🔍 DETECT OTHER BROWSERS
+    // �� DETECT OTHER BROWSERS
     detectOtherBrowsers() {
         // This is a simplified detection - in reality, you'd need more sophisticated methods
         const browsers = [];
@@ -2735,6 +2789,86 @@ class EnterpriseActivityMonitor {
                 this.recordGeneralActivity(dropData);
                 this.addToComprehensiveData('files', dropData);
             });
+        });
+    }
+    
+    // 🌐 TRACK EXTERNAL WEBSITES
+    trackExternalWebsites() {
+        // Track when user visits external websites
+        let currentUrl = window.location.href;
+        let currentDomain = window.location.hostname;
+        
+        // Monitor URL changes
+        const urlObserver = new MutationObserver(() => {
+            if (window.location.href !== currentUrl) {
+                const newUrl = window.location.href;
+                const newDomain = window.location.hostname;
+                
+                // Check if it's a different domain
+                if (newDomain !== currentDomain) {
+                    const externalSiteData = {
+                        type: 'external_website_visit',
+                        action: 'domain_changed',
+                        from_url: currentUrl,
+                        to_url: newUrl,
+                        from_domain: currentDomain,
+                        to_domain: newDomain,
+                        timestamp: new Date().toISOString(),
+                        category: 'browsing',
+                        priority: 'high',
+                        details: {
+                            navigation_type: 'domain_change',
+                            previous_domain: currentDomain,
+                            new_domain: newDomain,
+                            is_external: newDomain !== currentDomain
+                        }
+                    };
+                    
+                    this.recordGeneralActivity(externalSiteData);
+                    this.addToComprehensiveData('urls', externalSiteData);
+                    
+                    // Update current state
+                    currentUrl = newUrl;
+                    currentDomain = newDomain;
+                }
+            }
+        });
+        
+        urlObserver.observe(document.body, { childList: true, subtree: true });
+        
+        // Track external link clicks
+        document.addEventListener('click', (e) => {
+            if (e.target.href && e.target.href !== window.location.href) {
+                try {
+                    const targetUrl = new URL(e.target.href);
+                    const currentDomain = window.location.hostname;
+                    
+                    if (targetUrl.hostname !== currentDomain) {
+                        const externalLinkData = {
+                            type: 'external_link_click',
+                            action: 'external_link_clicked',
+                            from_url: window.location.href,
+                            to_url: e.target.href,
+                            from_domain: currentDomain,
+                            to_domain: targetUrl.hostname,
+                            link_text: e.target.textContent?.substring(0, 100),
+                            timestamp: new Date().toISOString(),
+                            category: 'browsing',
+                            priority: 'medium',
+                            details: {
+                                link_type: 'external',
+                                target_domain: targetUrl.hostname,
+                                link_element: e.target.tagName
+                            }
+                        };
+                        
+                        this.recordGeneralActivity(externalLinkData);
+                        this.addToComprehensiveData('crossBrowserActivity', externalLinkData);
+                    }
+                } catch (error) {
+                    // Invalid URL, skip
+                }
+            }
         });
     }
 }
