@@ -4272,6 +4272,15 @@ function generateHistoryContent(data) {
         `;
     }
     
+    // Add overflow indicator if data was truncated
+    if (data.overflow) {
+        content += `
+            <div class="overflow-notice">
+                <p>⚠️ ${data.overflow.message}</p>
+            </div>
+        `;
+    }
+    
     // Add data list
     if (data.data && Array.isArray(data.data)) {
         content += `
@@ -4280,7 +4289,7 @@ function generateHistoryContent(data) {
                 <div class="data-list">
         `;
         
-        data.data.slice(0, 50).forEach((item, index) => {
+        data.data.forEach((item, index) => {
             content += `
                 <div class="data-item">
                     <div class="data-header">
@@ -4294,14 +4303,6 @@ function generateHistoryContent(data) {
                 </div>
             `;
         });
-        
-        if (data.data.length > 50) {
-            content += `
-                <div class="data-more">
-                    <p>... and ${data.data.length - 50} more activities</p>
-                </div>
-            `;
-        }
         
         content += `
                 </div>
@@ -4433,20 +4434,25 @@ function formatTime(timestamp) {
 
 // 📥 DOWNLOAD HISTORY DATA
 function downloadHistoryData(title, data) {
-    const filename = `${title.replace(/\s+/g, '-')}-${Date.now()}.json`;
-    const content = JSON.stringify(data, null, 2);
-    
-    const blob = new Blob([content], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    console.log(`✅ History data downloaded: ${filename}`);
+    try {
+        const filename = `${title.replace(/\s+/g, '-')}-${Date.now()}.json`;
+        const content = JSON.stringify(data, null, 2);
+        
+        const blob = new Blob([content], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        console.log(`✅ History data downloaded: ${filename}`);
+    } catch (error) {
+        console.error('❌ Failed to download history data:', error);
+        alert('Failed to download data. Please try again.');
+    }
 }
 
 // 🌐 SHOW ALL URLS
@@ -4458,17 +4464,65 @@ function showAllURLs() {
         return;
     }
     
-    const comprehensiveData = window.enterpriseActivityMonitor.getComprehensiveMonitoringData();
-    const urlData = {
-        title: 'Complete URL History',
-        data: comprehensiveData.urls || [],
-        summary: {
-            totalUrls: comprehensiveData.urls?.length || 0,
-            uniqueDomains: getUniqueDomains(comprehensiveData.urls || []),
-            totalTime: calculateTotalTime(comprehensiveData.urls || []),
-            timeRange: getTimeRange(comprehensiveData.urls || [])
-        }
-    };
+    try {
+        const comprehensiveData = window.enterpriseActivityMonitor.getComprehensiveMonitoringData();
+        const urlData = {
+            title: 'Complete URL History',
+            data: comprehensiveData.urls || [],
+            summary: {
+                totalUrls: comprehensiveData.urls?.length || 0,
+                uniqueDomains: getUniqueDomains(comprehensiveData.urls || []),
+                totalTime: calculateTotalTime(comprehensiveData.urls || []),
+                timeRange: getTimeRange(comprehensiveData.urls || [])
+            }
+        };
+        
+        showHistoryModal('Complete URL History', urlData);
+    } catch (error) {
+        console.error('❌ Failed to show all URLs:', error);
+        showErrorModal('Failed to load URL data', error.message);
+    }
+}
+
+// 🚨 SHOW ERROR MODAL
+function showErrorModal(title, message) {
+    const errorHTML = `
+        <div id="error-modal" class="history-modal">
+            <div class="history-modal-content">
+                <div class="history-modal-header">
+                    <h2>❌ ${title}</h2>
+                    <button class="close-modal" onclick="closeErrorModal()">&times;</button>
+                </div>
+                
+                <div class="history-modal-body">
+                    <div class="error-content">
+                        <p>An error occurred while loading the data:</p>
+                        <p><strong>${message}</strong></p>
+                        <p>Please try again or contact support if the problem persists.</p>
+                    </div>
+                </div>
+                
+                <div class="history-modal-footer">
+                    <button class="btn-close" onclick="closeErrorModal()">Close</button>
+                </div>
+            </div>
+        </div>
+    `;
     
-    showHistoryModal('Complete URL History', urlData);
+    document.body.insertAdjacentHTML('beforeend', errorHTML);
+    
+    setTimeout(() => {
+        document.getElementById('error-modal').classList.add('show');
+    }, 10);
+}
+
+// 🚪 CLOSE ERROR MODAL
+function closeErrorModal() {
+    const modal = document.getElementById('error-modal');
+    if (modal) {
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modal.remove();
+        }, 300);
+    }
 }

@@ -663,20 +663,25 @@ class EnterpriseActivityMonitor {
     
     // 📊 COMPREHENSIVE DATA COLLECTION
     startComprehensiveDataCollection() {
-        // Collect data every 2 seconds for real-time updates
+        // Collect data every 10 seconds to prevent overflow
         setInterval(() => {
             this.collectComprehensiveData();
-        }, 2000);
+        }, 10000);
         
-        // Store data every 15 seconds
+        // Store data every 60 seconds
         setInterval(() => {
             this.storeComprehensiveData();
-        }, 15000);
+        }, 60000);
         
-        // Update UI every second
+        // Update UI every 5 seconds
         setInterval(() => {
             this.updateMonitoringUI();
-        }, 1000);
+        }, 5000);
+        
+        // Clean up old data every 5 minutes
+        setInterval(() => {
+            this.cleanupOldData();
+        }, 300000);
     }
     
     // 🔍 COLLECT COMPREHENSIVE DATA
@@ -1408,37 +1413,149 @@ class EnterpriseActivityMonitor {
     
     // 💾 STORE COMPREHENSIVE DATA
     storeComprehensiveData() {
-        // Store data in localStorage for persistence
         try {
-            localStorage.setItem('enterpriseMonitoringData', JSON.stringify(this.comprehensiveData));
+            // Limit data size to prevent overflow
+            const limitedData = this.limitDataSize(this.comprehensiveData);
+            
+            // Validate data before storing
+            if (!this.validateData(limitedData)) {
+                console.warn('⚠️ Data validation failed, skipping storage');
+                return;
+            }
+            
+            // Store data in localStorage for persistence
+            localStorage.setItem('enterpriseMonitoringData', JSON.stringify(limitedData));
             console.log('💾 Comprehensive data stored successfully');
+            
+            // Send data to backend if available
+            this.sendComprehensiveDataToBackend(limitedData);
+            
         } catch (error) {
             console.error('❌ Failed to store comprehensive data:', error);
+            
+            // Try to store minimal data if full storage fails
+            this.storeMinimalData();
         }
+    }
+    
+    // 📏 LIMIT DATA SIZE
+    limitDataSize(data) {
+        const limitedData = {};
         
-        // Send data to backend if available
-        this.sendComprehensiveDataToBackend();
+        Object.keys(data).forEach(key => {
+            if (Array.isArray(data[key])) {
+                // Limit arrays to last 100 items
+                limitedData[key] = data[key].slice(-100);
+            } else if (typeof data[key] === 'object' && data[key] !== null) {
+                // Limit object properties
+                limitedData[key] = this.limitObjectSize(data[key]);
+            } else {
+                limitedData[key] = data[key];
+            }
+        });
+        
+        return limitedData;
+    }
+    
+    // 🔒 LIMIT OBJECT SIZE
+    limitObjectSize(obj) {
+        const limited = {};
+        const keys = Object.keys(obj);
+        
+        // Only keep first 50 properties to prevent overflow
+        keys.slice(0, 50).forEach(key => {
+            if (typeof obj[key] === 'string' && obj[key].length > 1000) {
+                // Truncate long strings
+                limited[key] = obj[key].substring(0, 1000) + '...';
+            } else if (Array.isArray(obj[key]) && obj[key].length > 50) {
+                // Limit array size
+                limited[key] = obj[key].slice(-50);
+            } else {
+                limited[key] = obj[key];
+            }
+        });
+        
+        return limited;
+    }
+    
+    // ✅ VALIDATE DATA
+    validateData(data) {
+        try {
+            // Check if data is too large
+            const dataSize = JSON.stringify(data).length;
+            if (dataSize > 1000000) { // 1MB limit
+                console.warn(`⚠️ Data too large (${dataSize} bytes), truncating...`);
+                return false;
+            }
+            
+            // Check for circular references
+            const seen = new WeakSet();
+            const hasCircular = (obj) => {
+                if (obj !== null && typeof obj === 'object') {
+                    if (seen.has(obj)) return true;
+                    seen.add(obj);
+                    for (let key in obj) {
+                        if (obj.hasOwnProperty(key) && hasCircular(obj[key])) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            };
+            
+            if (hasCircular(data)) {
+                console.warn('⚠️ Circular reference detected in data');
+                return false;
+            }
+            
+            return true;
+        } catch (error) {
+            console.error('❌ Data validation error:', error);
+            return false;
+        }
+    }
+    
+    // 💾 STORE MINIMAL DATA
+    storeMinimalData() {
+        try {
+            const minimalData = {
+                startTime: this.comprehensiveData.startTime,
+                totalActivities: this.comprehensiveData.realTimeActivities?.length || 0,
+                lastUpdate: new Date().toISOString()
+            };
+            
+            localStorage.setItem('enterpriseMonitoringDataMinimal', JSON.stringify(minimalData));
+            console.log('💾 Minimal data stored successfully');
+        } catch (error) {
+            console.error('❌ Failed to store minimal data:', error);
+        }
     }
     
     // 📤 SEND DATA TO BACKEND
-    async sendComprehensiveDataToBackend() {
+    async sendComprehensiveDataToBackend(data) {
         try {
+            // Limit data size for backend
+            const backendData = {
+                user_id: 'demo-user',
+                session_id: this.monitoringSession?.session_id,
+                comprehensive_data: this.limitDataSize(data),
+                timestamp: new Date().toISOString(),
+                data_size: JSON.stringify(data).length
+            };
+            
             const response = await fetch('/api/enterprise/monitoring/record-activity', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-User-ID': 'demo-user'
                 },
-                body: JSON.stringify({
-                    user_id: 'demo-user',
-                    session_id: this.monitoringSession?.session_id,
-                    comprehensive_data: this.comprehensiveData,
-                    timestamp: new Date().toISOString()
-                })
+                body: JSON.stringify(backendData)
             });
             
             if (response.ok) {
                 console.log('📤 Comprehensive data sent to backend');
+            } else {
+                console.log('⚠️ Failed to send data to backend:', response.status);
             }
         } catch (error) {
             console.log('⚠️ Backend not available, data stored locally');
@@ -1459,15 +1576,71 @@ class EnterpriseActivityMonitor {
         // Add unique ID
         data.id = this.generateUniqueId();
         
-        this.comprehensiveData[category].push(data);
+        // Limit data size before adding
+        const limitedData = this.limitSingleDataItem(data);
         
-        // Keep only last 1000 items per category
-        if (this.comprehensiveData[category].length > 1000) {
-            this.comprehensiveData[category] = this.comprehensiveData[category].slice(-1000);
+        this.comprehensiveData[category].push(limitedData);
+        
+        // Keep only last 100 items per category to prevent overflow
+        if (this.comprehensiveData[category].length > 100) {
+            this.comprehensiveData[category] = this.comprehensiveData[category].slice(-100);
         }
         
         // Update real-time activities
-        this.addToRealTimeActivities(data);
+        this.addToRealTimeActivities(limitedData);
+        
+        // Clean up old data periodically
+        this.cleanupOldData();
+    }
+    
+    // 🧹 LIMIT SINGLE DATA ITEM
+    limitSingleDataItem(data) {
+        const limited = {};
+        
+        Object.keys(data).forEach(key => {
+            const value = data[key];
+            
+            if (typeof value === 'string') {
+                // Limit string length to 500 characters
+                limited[key] = value.length > 500 ? value.substring(0, 500) + '...' : value;
+            } else if (Array.isArray(value)) {
+                // Limit array to first 20 items
+                limited[key] = value.slice(0, 20);
+            } else if (typeof value === 'object' && value !== null) {
+                // Limit object properties
+                const objKeys = Object.keys(value);
+                limited[key] = {};
+                objKeys.slice(0, 20).forEach(objKey => {
+                    if (typeof value[objKey] === 'string' && value[objKey].length > 200) {
+                        limited[key][objKey] = value[objKey].substring(0, 200) + '...';
+                    } else {
+                        limited[key][objKey] = value[objKey];
+                    }
+                });
+            } else {
+                limited[key] = value;
+            }
+        });
+        
+        return limited;
+    }
+    
+    // 🧹 CLEANUP OLD DATA
+    cleanupOldData() {
+        const now = Date.now();
+        const maxAge = 24 * 60 * 60 * 1000; // 24 hours
+        
+        Object.keys(this.comprehensiveData).forEach(category => {
+            if (Array.isArray(this.comprehensiveData[category])) {
+                this.comprehensiveData[category] = this.comprehensiveData[category].filter(item => {
+                    if (item.timestamp) {
+                        const itemTime = new Date(item.timestamp).getTime();
+                        return (now - itemTime) < maxAge;
+                    }
+                    return true;
+                });
+            }
+        });
     }
     
     // 🆔 GENERATE UNIQUE ID
@@ -1486,9 +1659,9 @@ class EnterpriseActivityMonitor {
         
         this.comprehensiveData.realTimeActivities.unshift(activity);
         
-        // Keep only last 500 real-time activities
-        if (this.comprehensiveData.realTimeActivities.length > 500) {
-            this.comprehensiveData.realTimeActivities = this.comprehensiveData.realTimeActivities.slice(0, 500);
+        // Keep only last 100 real-time activities to prevent overflow
+        if (this.comprehensiveData.realTimeActivities.length > 100) {
+            this.comprehensiveData.realTimeActivities = this.comprehensiveData.realTimeActivities.slice(0, 100);
         }
     }
     
