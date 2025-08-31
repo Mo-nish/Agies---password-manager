@@ -1581,11 +1581,15 @@ class EnterpriseActivityMonitor {
         const uniqueDomains = new Set();
         const diverseUrls = [];
         
+        console.log('🔍 Getting diverse URL history from', allUrls.length, 'total URLs');
+        
         // First, prioritize external applications (not maze-password-manager)
         const externalUrls = allUrls.filter(url => {
             const domain = url.domain || url.url?.split('/')[2] || 'unknown';
             return domain !== 'maze-password-manager.onrender.com';
         });
+        
+        console.log('🌐 Found', externalUrls.length, 'external URLs');
         
         // Add unique external domains first
         for (let i = externalUrls.length - 1; i >= 0; i--) {
@@ -1595,6 +1599,7 @@ class EnterpriseActivityMonitor {
             if (!uniqueDomains.has(domain)) {
                 uniqueDomains.add(domain);
                 diverseUrls.push(url);
+                console.log('✅ Added external domain:', domain);
                 
                 if (diverseUrls.length >= 8) break; // Reserve space for current app
             }
@@ -1605,6 +1610,8 @@ class EnterpriseActivityMonitor {
             const domain = url.domain || url.url?.split('/')[2] || 'unknown';
             return domain === 'maze-password-manager.onrender.com';
         });
+        
+        console.log('🏠 Found', currentAppUrls.length, 'current app URLs');
         
         // Add only 2-3 current app URLs to show variety
         const currentAppToShow = currentAppUrls.slice(-3);
@@ -1618,6 +1625,9 @@ class EnterpriseActivityMonitor {
                 if (diverseUrls.length >= 15) break;
             }
         }
+        
+        console.log('🎯 Final diverse URLs count:', diverseUrls.length);
+        console.log('🌐 Unique domains in display:', [...new Set(diverseUrls.map(url => url.domain))]);
         
         return diverseUrls.slice(0, 15);
     }
@@ -1784,6 +1794,63 @@ class EnterpriseActivityMonitor {
         return limited;
     }
     
+    // 🧹 CLEAN CIRCULAR REFERENCES
+    cleanCircularReferences(data, maxDepth = 3, currentDepth = 0) {
+        if (currentDepth >= maxDepth) {
+            return '[Max Depth Reached]';
+        }
+        
+        if (data === null || typeof data !== 'object') {
+            return data;
+        }
+        
+        // Handle arrays
+        if (Array.isArray(data)) {
+            return data.map((item, index) => {
+                try {
+                    return this.cleanCircularReferences(item, maxDepth, currentDepth + 1);
+                } catch (error) {
+                    return `[Array Item ${index} Error]`;
+                }
+            });
+        }
+        
+        // Handle objects
+        const cleaned = {};
+        const seen = new WeakSet();
+        
+        for (let key in data) {
+            if (data.hasOwnProperty(key)) {
+                try {
+                    // Skip problematic keys that might cause circular references
+                    if (key === 'parent' || key === 'owner' || key === 'window' || key === 'document') {
+                        cleaned[key] = '[Circular Reference]';
+                        continue;
+                    }
+                    
+                    const value = data[key];
+                    
+                    // Check if this value has been seen before
+                    if (value && typeof value === 'object' && seen.has(value)) {
+                        cleaned[key] = '[Circular Reference]';
+                        continue;
+                    }
+                    
+                    // Mark this value as seen
+                    if (value && typeof value === 'object') {
+                        seen.add(value);
+                    }
+                    
+                    cleaned[key] = this.cleanCircularReferences(value, maxDepth, currentDepth + 1);
+                } catch (error) {
+                    cleaned[key] = `[Property ${key} Error]`;
+                }
+            }
+        }
+        
+        return cleaned;
+    }
+    
     // ✅ VALIDATE DATA
     validateData(data) {
         try {
@@ -1806,6 +1873,11 @@ class EnterpriseActivityMonitor {
                     
                     for (let key in obj) {
                         if (obj.hasOwnProperty(key)) {
+                            // Skip problematic keys
+                            if (key === 'parent' || key === 'owner' || key === 'window' || key === 'document') {
+                                continue;
+                            }
+                            
                             const newPath = path ? `${path}.${key}` : key;
                             if (hasCircular(obj[key], newPath)) {
                                 return true;
@@ -1833,40 +1905,6 @@ class EnterpriseActivityMonitor {
             console.error('❌ Data validation error:', error);
             return false;
         }
-    }
-    
-    // 🧹 CLEAN CIRCULAR REFERENCES
-    cleanCircularReferences(data, maxDepth = 3, currentDepth = 0) {
-        if (currentDepth >= maxDepth) {
-            return '[Max Depth Reached]';
-        }
-        
-        if (data === null || typeof data !== 'object') {
-            return data;
-        }
-        
-        if (Array.isArray(data)) {
-            return data.map((item, index) => {
-                try {
-                    return this.cleanCircularReferences(item, maxDepth, currentDepth + 1);
-                } catch (error) {
-                    return `[Array Item ${index} Error]`;
-                }
-            });
-        }
-        
-        const cleaned = {};
-        for (let key in data) {
-            if (data.hasOwnProperty(key)) {
-                try {
-                    cleaned[key] = this.cleanCircularReferences(data[key], maxDepth, currentDepth + 1);
-                } catch (error) {
-                    cleaned[key] = `[Property ${key} Error]`;
-                }
-            }
-        }
-        
-        return cleaned;
     }
     
     // 💾 STORE MINIMAL DATA
@@ -3174,6 +3212,8 @@ class EnterpriseActivityMonitor {
     
     // 🧪 SIMULATE CROSS-APPLICATION VISITS (FOR TESTING)
     simulateCrossApplicationVisits() {
+        console.log('🧪 Starting cross-application simulation...');
+        
         const testApplications = [
             {
                 url: 'https://gmail.com',
@@ -3247,6 +3287,13 @@ class EnterpriseActivityMonitor {
             }
         ];
         
+        // Clear existing test data first
+        if (this.comprehensiveData.urls) {
+            this.comprehensiveData.urls = this.comprehensiveData.urls.filter(url => 
+                !url.details?.is_simulated
+            );
+        }
+        
         // Add test applications to comprehensive data
         testApplications.forEach((app, index) => {
             const testData = {
@@ -3267,12 +3314,30 @@ class EnterpriseActivityMonitor {
                 }
             };
             
-            this.addToComprehensiveData('urls', testData);
-            this.addToComprehensiveData('applications', testData);
+            // Add to URLs array directly
+            if (!this.comprehensiveData.urls) {
+                this.comprehensiveData.urls = [];
+            }
+            this.comprehensiveData.urls.push(testData);
+            
+            // Also add to applications array
+            if (!this.comprehensiveData.applications) {
+                this.comprehensiveData.applications = [];
+            }
+            this.comprehensiveData.applications.push(testData);
+            
+            console.log(`🧪 Added test app: ${app.app_type} (${app.domain})`);
         });
         
-        console.log('🧪 Added 10 test applications for demonstration');
-        this.updateURLHistory(); // Update the display immediately
+        // Force update the display
+        this.updateURLHistory();
+        
+        console.log(`🧪 Successfully added ${testApplications.length} test applications`);
+        console.log(`🧪 Total URLs now: ${this.comprehensiveData.urls.length}`);
+        
+        // Show the data in console for debugging
+        const uniqueDomains = [...new Set(this.comprehensiveData.urls.map(url => url.domain))];
+        console.log('🧪 Unique domains:', uniqueDomains);
     }
 }
 
