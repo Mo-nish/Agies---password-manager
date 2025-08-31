@@ -4448,3 +4448,27 @@ function downloadHistoryData(title, data) {
     
     console.log(`✅ History data downloaded: ${filename}`);
 }
+
+// 🌐 SHOW ALL URLS
+function showAllURLs() {
+    console.log('🌐 Showing all URLs...');
+    
+    if (!window.enterpriseActivityMonitor) {
+        alert('⚠️ Monitoring system not available. Please start monitoring first.');
+        return;
+    }
+    
+    const comprehensiveData = window.enterpriseActivityMonitor.getComprehensiveMonitoringData();
+    const urlData = {
+        title: 'Complete URL History',
+        data: comprehensiveData.urls || [],
+        summary: {
+            totalUrls: comprehensiveData.urls?.length || 0,
+            uniqueDomains: getUniqueDomains(comprehensiveData.urls || []),
+            totalTime: calculateTotalTime(comprehensiveData.urls || []),
+            timeRange: getTimeRange(comprehensiveData.urls || [])
+        }
+    };
+    
+    showHistoryModal('Complete URL History', urlData);
+}

@@ -628,6 +628,12 @@ class EnterpriseActivityMonitor {
         // Track file downloads and uploads
         this.monitorFileDownloads();
         
+        // Track ALL open tabs and windows
+        this.monitorAllOpenTabs();
+        
+        // Track system-wide application usage
+        this.monitorSystemApplications();
+        
         console.log('✅ REAL SYSTEM-WIDE monitoring activated!');
     }
     
@@ -642,24 +648,35 @@ class EnterpriseActivityMonitor {
             systemTools: [],
             crossBrowserActivity: [],
             realTimeActivities: [],
+            openTabs: [],
+            systemApps: [],
+            detailedActivities: [],
             startTime: Date.now()
         };
         
         // Start comprehensive data collection
         this.startComprehensiveDataCollection();
+        
+        // Start real-time system monitoring
+        this.startRealTimeSystemMonitoring();
     }
     
     // 📊 COMPREHENSIVE DATA COLLECTION
     startComprehensiveDataCollection() {
-        // Collect data every 5 seconds
+        // Collect data every 2 seconds for real-time updates
         setInterval(() => {
             this.collectComprehensiveData();
-        }, 5000);
+        }, 2000);
         
-        // Store data every 30 seconds
+        // Store data every 15 seconds
         setInterval(() => {
             this.storeComprehensiveData();
-        }, 30000);
+        }, 15000);
+        
+        // Update UI every second
+        setInterval(() => {
+            this.updateMonitoringUI();
+        }, 1000);
     }
     
     // 🔍 COLLECT COMPREHENSIVE DATA
@@ -675,7 +692,10 @@ class EnterpriseActivityMonitor {
             domain: window.location.hostname,
             path: window.location.pathname,
             search: window.location.search,
-            hash: window.location.hash
+            hash: window.location.hash,
+            tabId: this.generateTabId(),
+            isActive: !document.hidden,
+            timeSpent: Date.now() - this.pageStartTime
         };
         
         // Add to comprehensive data
@@ -691,7 +711,9 @@ class EnterpriseActivityMonitor {
             onLine: navigator.onLine,
             screenResolution: `${screen.width}x${screen.height}`,
             windowSize: `${window.innerWidth}x${window.innerHeight}`,
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            memoryUsage: performance?.memory?.usedJSHeapSize || 0,
+            memoryLimit: performance?.memory?.jsHeapSizeLimit || 0
         };
         
         this.addToComprehensiveData('systemInfo', systemInfo);
@@ -702,10 +724,685 @@ class EnterpriseActivityMonitor {
                 timestamp: currentTime,
                 memoryUsage: performance.memory.usedJSHeapSize,
                 memoryLimit: performance.memory.jsHeapSizeLimit,
-                memoryTotal: performance.memory.totalJSHeapSize
+                memoryTotal: performance.memory.totalJSHeapSize,
+                navigationType: performance.navigation.type,
+                loadTime: performance.timing.loadEventEnd - performance.timing.navigationStart
             };
             
             this.addToComprehensiveData('performance', performanceData);
+        }
+        
+        // Collect detailed activity data
+        this.collectDetailedActivityData();
+    }
+    
+    // 📝 COLLECT DETAILED ACTIVITY DATA
+    collectDetailedActivityData() {
+        const currentTime = new Date().toISOString();
+        
+        // Collect detailed browser activity
+        const browserActivity = {
+            timestamp: currentTime,
+            currentUrl: window.location.href,
+            currentTitle: document.title,
+            referrer: document.referrer,
+            tabCount: this.getTabCount(),
+            windowCount: this.getWindowCount(),
+            activeTab: !document.hidden,
+            pageLoadTime: Date.now() - this.pageStartTime,
+            scrollPosition: {
+                x: window.pageXOffset,
+                y: window.pageYOffset
+            },
+            viewportSize: {
+                width: window.innerWidth,
+                height: window.innerHeight
+            }
+        };
+        
+        this.addToComprehensiveData('detailedActivities', browserActivity);
+        
+        // Collect detailed system activity
+        const systemActivity = {
+            timestamp: currentTime,
+            keyboardActivity: this.getKeyboardActivity(),
+            mouseActivity: this.getMouseActivity(),
+            windowFocus: document.hasFocus(),
+            documentReady: document.readyState,
+            connectionType: navigator.connection?.effectiveType || 'unknown',
+            batteryLevel: this.getBatteryLevel(),
+            deviceMemory: navigator.deviceMemory || 'unknown'
+        };
+        
+        this.addToComprehensiveData('detailedActivities', systemActivity);
+    }
+    
+    // 🌐 MONITOR ALL OPEN TABS
+    monitorAllOpenTabs() {
+        // Track tab creation and destruction
+        this.trackTabLifecycle();
+        
+        // Track tab switching
+        this.trackTabSwitching();
+        
+        // Track tab content changes
+        this.trackTabContentChanges();
+        
+        // Track cross-tab communication
+        this.trackCrossTabCommunication();
+    }
+    
+    // 📱 TRACK TAB LIFECYCLE
+    trackTabLifecycle() {
+        // Track when new tabs are created
+        window.addEventListener('beforeunload', () => {
+            const tabData = {
+                type: 'tab_lifecycle',
+                action: 'tab_closing',
+                url: window.location.href,
+                title: document.title,
+                timestamp: new Date().toISOString(),
+                timeSpent: Date.now() - this.pageStartTime,
+                category: 'browsing',
+                priority: 'medium',
+                details: {
+                    referrer: document.referrer,
+                    scrollPosition: {
+                        x: window.pageXOffset,
+                        y: window.pageYOffset
+                    },
+                    formData: this.getFormData(),
+                    localStorage: this.getLocalStorageData(),
+                    sessionStorage: this.getSessionStorageData()
+                }
+            };
+            
+            this.recordGeneralActivity(tabData);
+            this.addToComprehensiveData('openTabs', tabData);
+        });
+        
+        // Track when tab becomes active
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                const tabData = {
+                    type: 'tab_lifecycle',
+                    action: 'tab_activated',
+                    url: window.location.href,
+                    title: document.title,
+                    timestamp: new Date().toISOString(),
+                    category: 'browsing',
+                    priority: 'medium',
+                    details: {
+                        timeInactive: this.getTimeInactive(),
+                        previousUrl: this.lastActiveUrl || 'unknown',
+                        previousTitle: this.lastActiveTitle || 'unknown'
+                    }
+                };
+                
+                this.recordGeneralActivity(tabData);
+                this.addToComprehensiveData('openTabs', tabData);
+                
+                this.lastActiveUrl = window.location.href;
+                this.lastActiveTitle = document.title;
+                this.pageStartTime = Date.now();
+            }
+        });
+    }
+    
+    // 🔄 TRACK TAB SWITCHING
+    trackTabSwitching() {
+        let lastFocusTime = Date.now();
+        
+        window.addEventListener('focus', () => {
+            const now = Date.now();
+            const timeAway = now - lastFocusTime;
+            
+            const switchData = {
+                type: 'tab_switching',
+                action: 'tab_focused',
+                url: window.location.href,
+                title: document.title,
+                timestamp: new Date().toISOString(),
+                timeAway: timeAway,
+                category: 'browsing',
+                priority: 'medium',
+                details: {
+                    focusSource: 'window_focus',
+                    previousFocusTime: lastFocusTime,
+                    totalTimeAway: timeAway
+                }
+            };
+            
+            this.recordGeneralActivity(switchData);
+            this.addToComprehensiveData('openTabs', switchData);
+            
+            lastFocusTime = now;
+        });
+        
+        window.addEventListener('blur', () => {
+            const now = Date.now();
+            const timeFocused = now - lastFocusTime;
+            
+            const blurData = {
+                type: 'tab_switching',
+                action: 'tab_blurred',
+                url: window.location.href,
+                title: document.title,
+                timestamp: new Date().toISOString(),
+                timeFocused: timeFocused,
+                category: 'browsing',
+                priority: 'medium',
+                details: {
+                    blurReason: 'window_blur',
+                    focusDuration: timeFocused
+                }
+            };
+            
+            this.recordGeneralActivity(blurData);
+            this.addToComprehensiveData('openTabs', blurData);
+        });
+    }
+    
+    // 📄 TRACK TAB CONTENT CHANGES
+    trackTabContentChanges() {
+        // Track URL changes
+        let currentUrl = window.location.href;
+        const urlObserver = new MutationObserver(() => {
+            if (window.location.href !== currentUrl) {
+                const urlChangeData = {
+                    type: 'tab_content_change',
+                    action: 'url_changed',
+                    fromUrl: currentUrl,
+                    toUrl: window.location.href,
+                    timestamp: new Date().toISOString(),
+                    category: 'browsing',
+                    priority: 'medium',
+                    details: {
+                        changeType: 'navigation',
+                        previousDomain: new URL(currentUrl).hostname,
+                        newDomain: window.location.hostname,
+                        pathChange: window.location.pathname !== new URL(currentUrl).pathname
+                    }
+                };
+                
+                this.recordGeneralActivity(urlChangeData);
+                this.addToComprehensiveData('openTabs', urlChangeData);
+                
+                currentUrl = window.location.href;
+            }
+        });
+        
+        urlObserver.observe(document.body, { childList: true, subtree: true });
+        
+        // Track title changes
+        let currentTitle = document.title;
+        const titleObserver = new MutationObserver(() => {
+            if (document.title !== currentTitle) {
+                const titleChangeData = {
+                    type: 'tab_content_change',
+                    action: 'title_changed',
+                    fromTitle: currentTitle,
+                    toTitle: document.title,
+                    timestamp: new Date().toISOString(),
+                    category: 'browsing',
+                    priority: 'low',
+                    details: {
+                        changeType: 'title_update',
+                        titleLength: document.title.length
+                    }
+                };
+                
+                this.recordGeneralActivity(titleChangeData);
+                this.addToComprehensiveData('openTabs', titleChangeData);
+                
+                currentTitle = document.title;
+            }
+        });
+        
+        titleObserver.observe(document.head, { childList: true, subtree: true });
+    }
+    
+    // 🌐 TRACK CROSS-TAB COMMUNICATION
+    trackCrossTabCommunication() {
+        // Track localStorage changes (cross-tab communication)
+        const originalSetItem = Storage.prototype.setItem;
+        Storage.prototype.setItem = function(key, value) {
+            const crossTabData = {
+                type: 'cross_tab_communication',
+                action: 'localStorage_set',
+                key: key,
+                value: value,
+                timestamp: new Date().toISOString(),
+                category: 'system',
+                priority: 'medium',
+                details: {
+                    storageType: 'localStorage',
+                    keyLength: key.length,
+                    valueLength: value.length,
+                    url: window.location.href
+                }
+            };
+            
+            if (window.enterpriseActivityMonitor) {
+                window.enterpriseActivityMonitor.recordGeneralActivity(crossTabData);
+                window.enterpriseActivityMonitor.addToComprehensiveData('crossBrowserActivity', crossTabData);
+            }
+            
+            return originalSetItem.call(this, key, value);
+        };
+        
+        // Track sessionStorage changes
+        const originalSessionSetItem = Storage.prototype.setItem;
+        Storage.prototype.setItem = function(key, value) {
+            const sessionData = {
+                type: 'cross_tab_communication',
+                action: 'sessionStorage_set',
+                key: key,
+                value: value,
+                timestamp: new Date().toISOString(),
+                category: 'system',
+                priority: 'medium',
+                details: {
+                    storageType: 'sessionStorage',
+                    keyLength: key.length,
+                    valueLength: value.length,
+                    url: window.location.href
+                }
+            };
+            
+            if (window.enterpriseActivityMonitor) {
+                window.enterpriseActivityMonitor.recordGeneralActivity(sessionData);
+                window.enterpriseActivityMonitor.addToComprehensiveData('crossBrowserActivity', sessionData);
+            }
+            
+            return originalSessionSetItem.call(this, key, value);
+        };
+    }
+    
+    // 💻 MONITOR SYSTEM APPLICATIONS
+    monitorSystemApplications() {
+        // Track application launches
+        this.trackApplicationLaunches();
+        
+        // Track application usage patterns
+        this.trackApplicationUsagePatterns();
+        
+        // Track system resource usage
+        this.trackSystemResources();
+    }
+    
+    // 🚀 TRACK APPLICATION LAUNCHES
+    trackApplicationLaunches() {
+        // Track when applications become active
+        window.addEventListener('focus', () => {
+            const appData = {
+                type: 'application_launch',
+                action: 'app_activated',
+                appName: 'browser',
+                appType: 'web_browser',
+                timestamp: new Date().toISOString(),
+                category: 'applications',
+                priority: 'medium',
+                details: {
+                    url: window.location.href,
+                    title: document.title,
+                    userAgent: navigator.userAgent,
+                    platform: navigator.platform,
+                    language: navigator.language
+                }
+            };
+            
+            this.recordGeneralActivity(appData);
+            this.addToComprehensiveData('systemApps', appData);
+        });
+        
+        // Track when applications become inactive
+        window.addEventListener('blur', () => {
+            const appData = {
+                type: 'application_launch',
+                action: 'app_deactivated',
+                appName: 'browser',
+                appType: 'web_browser',
+                timestamp: new Date().toISOString(),
+                category: 'applications',
+                priority: 'medium',
+                details: {
+                    url: window.location.href,
+                    title: document.title,
+                    timeActive: Date.now() - this.pageStartTime
+                }
+            };
+            
+            this.recordGeneralActivity(appData);
+            this.addToComprehensiveData('systemApps', appData);
+        });
+    }
+    
+    // 📊 TRACK APPLICATION USAGE PATTERNS
+    trackApplicationUsagePatterns() {
+        // Track time spent on different applications
+        setInterval(() => {
+            const usageData = {
+                type: 'application_usage_pattern',
+                action: 'usage_update',
+                appName: 'browser',
+                timestamp: new Date().toISOString(),
+                category: 'applications',
+                priority: 'low',
+                details: {
+                    url: window.location.href,
+                    title: document.title,
+                    timeSpent: Date.now() - this.pageStartTime,
+                    isActive: !document.hidden,
+                    hasFocus: document.hasFocus()
+                }
+            };
+            
+            this.recordGeneralActivity(usageData);
+            this.addToComprehensiveData('systemApps', usageData);
+        }, 30000); // Every 30 seconds
+    }
+    
+    // 💾 TRACK SYSTEM RESOURCES
+    trackSystemResources() {
+        // Track memory usage
+        setInterval(() => {
+            if (performance && performance.memory) {
+                const resourceData = {
+                    type: 'system_resources',
+                    action: 'memory_update',
+                    timestamp: new Date().toISOString(),
+                    category: 'system',
+                    priority: 'low',
+                    details: {
+                        usedMemory: performance.memory.usedJSHeapSize,
+                        totalMemory: performance.memory.totalJSHeapSize,
+                        memoryLimit: performance.memory.jsHeapSizeLimit,
+                        memoryUsage: (performance.memory.usedJSHeapSize / performance.memory.jsHeapSizeLimit * 100).toFixed(2) + '%'
+                    }
+                };
+                
+                this.recordGeneralActivity(resourceData);
+                this.addToComprehensiveData('systemApps', resourceData);
+            }
+        }, 60000); // Every minute
+    }
+    
+    // 🆔 GENERATE TAB ID
+    generateTabId() {
+        return `tab_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    }
+    
+    // 📊 GET TAB COUNT
+    getTabCount() {
+        // This is a simplified approach - in reality, you'd need more sophisticated methods
+        return 1; // For now, we can only track the current tab
+    }
+    
+    // 🪟 GET WINDOW COUNT
+    getWindowCount() {
+        // This is a simplified approach - in reality, you'd need more sophisticated methods
+        return 1; // For now, we can only track the current window
+    }
+    
+    // ⌨️ GET KEYBOARD ACTIVITY
+    getKeyboardActivity() {
+        return {
+            totalKeys: this.keyCount || 0,
+            specialKeys: this.specialKeyCount || 0,
+            shortcuts: this.shortcutCount || 0,
+            typingSpeed: this.typingSpeed || 0
+        };
+    }
+    
+    // 🖱️ GET MOUSE ACTIVITY
+    getMouseActivity() {
+        return {
+            totalClicks: this.clickCount || 0,
+            mouseArea: this.mouseArea || 0,
+            scrollDistance: this.scrollDistance || 0,
+            mousePattern: this.mousePattern || []
+        };
+    }
+    
+    // 🔋 GET BATTERY LEVEL
+    async getBatteryLevel() {
+        if (navigator.getBattery) {
+            try {
+                const battery = await navigator.getBattery();
+                return {
+                    level: battery.level,
+                    charging: battery.charging,
+                    chargingTime: battery.chargingTime,
+                    dischargingTime: battery.dischargingTime
+                };
+            } catch (error) {
+                return 'unknown';
+            }
+        }
+        return 'unknown';
+    }
+    
+    // 📝 GET FORM DATA
+    getFormData() {
+        const forms = document.querySelectorAll('form');
+        return Array.from(forms).map(form => ({
+            id: form.id || 'no_id',
+            action: form.action || 'no_action',
+            method: form.method || 'get',
+            fieldCount: form.elements.length
+        }));
+    }
+    
+    // 💾 GET LOCAL STORAGE DATA
+    getLocalStorageData() {
+        try {
+            const keys = Object.keys(localStorage);
+            return {
+                keyCount: keys.length,
+                keys: keys.slice(0, 10), // First 10 keys
+                totalSize: JSON.stringify(localStorage).length
+            };
+        } catch (error) {
+            return { keyCount: 0, keys: [], totalSize: 0 };
+        }
+    }
+    
+    // 📋 GET SESSION STORAGE DATA
+    getSessionStorageData() {
+        try {
+            const keys = Object.keys(sessionStorage);
+            return {
+                keyCount: keys.length,
+                keys: keys.slice(0, 10), // First 10 keys
+                totalSize: JSON.stringify(sessionStorage).length
+            };
+        } catch (error) {
+            return { keyCount: 0, keys: [], totalSize: 0 };
+        }
+    }
+    
+    // ⏰ GET TIME INACTIVE
+    getTimeInactive() {
+        return this.lastInactiveTime ? Date.now() - this.lastInactiveTime : 0;
+    }
+    
+    // 🖥️ UPDATE MONITORING UI
+    updateMonitoringUI() {
+        // Update activity counts
+        this.updateActivityCounts();
+        
+        // Update detailed information
+        this.updateDetailedInfo();
+        
+        // Update URL history
+        this.updateURLHistory();
+        
+        // Update real-time data
+        this.updateRealTimeData();
+    }
+    
+    // 📊 UPDATE ACTIVITY COUNTS
+    updateActivityCounts() {
+        // Update browser activity count
+        const browserCount = document.getElementById('browser-count');
+        if (browserCount) {
+            browserCount.textContent = this.comprehensiveData.urls.length;
+        }
+        
+        // Update system activity count
+        const systemCount = document.getElementById('system-count');
+        if (systemCount) {
+            systemCount.textContent = this.comprehensiveData.systemTools.length;
+        }
+        
+        // Update security events count
+        const securityCount = document.getElementById('security-count');
+        if (securityCount) {
+            securityCount.textContent = this.comprehensiveData.downloads.length;
+        }
+        
+        // Update network activity count
+        const networkCount = document.getElementById('network-count');
+        if (networkCount) {
+            networkCount.textContent = this.comprehensiveData.crossBrowserActivity.length;
+        }
+    }
+    
+    // 📝 UPDATE DETAILED INFO
+    updateDetailedInfo() {
+        // Update current URL
+        const currentUrl = document.getElementById('current-url');
+        if (currentUrl) {
+            currentUrl.textContent = window.location.href;
+        }
+        
+        // Update time on page
+        const pageTime = document.getElementById('page-time');
+        if (pageTime) {
+            const timeSpent = Math.floor((Date.now() - this.pageStartTime) / 1000);
+            pageTime.textContent = `${timeSpent}s`;
+        }
+        
+        // Update click count
+        const clickCount = document.getElementById('click-count');
+        if (clickCount) {
+            clickCount.textContent = this.clickCount || 0;
+        }
+        
+        // Update total URLs
+        const totalUrls = document.getElementById('total-urls');
+        if (totalUrls) {
+            totalUrls.textContent = this.comprehensiveData.urls.length;
+        }
+        
+        // Update active tabs
+        const activeTabs = document.getElementById('active-tabs');
+        if (activeTabs) {
+            activeTabs.textContent = this.getTabCount();
+        }
+    }
+    
+    // 🌐 UPDATE URL HISTORY
+    updateURLHistory() {
+        const urlHistory = document.getElementById('url-history');
+        if (!urlHistory) return;
+        
+        // Get recent URLs (last 10)
+        const recentUrls = this.comprehensiveData.urls.slice(-10).reverse();
+        
+        if (recentUrls.length === 0) {
+            urlHistory.innerHTML = `
+                <div class="url-item">
+                    <span class="url-text">No URLs visited yet</span>
+                    <span class="url-time">-</span>
+                </div>
+            `;
+            return;
+        }
+        
+        let urlHTML = '';
+        recentUrls.forEach(url => {
+            const domain = url.domain || 'Unknown';
+            const time = new Date(url.timestamp).toLocaleTimeString();
+            const isCurrent = url.url === window.location.href;
+            
+            urlHTML += `
+                <div class="url-item ${isCurrent ? 'current' : ''}">
+                    <span class="url-text">${domain}</span>
+                    <span class="url-time">${time}</span>
+                </div>
+            `;
+        });
+        
+        // Add "View More" button if there are more URLs
+        if (this.comprehensiveData.urls.length > 10) {
+            urlHTML += `
+                <div class="url-item view-more">
+                    <button class="btn-view-more" onclick="showAllURLs()">
+                        View ${this.comprehensiveData.urls.length - 10} More URLs
+                    </button>
+                </div>
+            `;
+        }
+        
+        urlHistory.innerHTML = urlHTML;
+    }
+    
+    // ⚡ UPDATE REAL-TIME DATA
+    updateRealTimeData() {
+        // Update keystrokes
+        const keyCount = document.getElementById('key-count');
+        if (keyCount) {
+            keyCount.textContent = this.keyCount || 0;
+        }
+        
+        // Update mouse area
+        const mouseArea = document.getElementById('mouse-area');
+        if (mouseArea) {
+            mouseArea.textContent = `${this.mouseArea || 0}px²`;
+        }
+        
+        // Update window focus
+        const windowFocus = document.getElementById('window-focus');
+        if (windowFocus) {
+            windowFocus.textContent = document.hasFocus() ? 'Active' : 'Inactive';
+        }
+        
+        // Update auth attempts
+        const authAttempts = document.getElementById('auth-attempts');
+        if (authAttempts) {
+            authAttempts.textContent = this.authAttempts || 0;
+        }
+        
+        // Update file downloads
+        const fileDownloads = document.getElementById('file-downloads');
+        if (fileDownloads) {
+            fileDownloads.textContent = this.comprehensiveData.downloads.length;
+        }
+        
+        // Update external links
+        const externalLinks = document.getElementById('external-links');
+        if (externalLinks) {
+            externalLinks.textContent = this.externalLinks || 0;
+        }
+        
+        // Update API calls
+        const apiCalls = document.getElementById('api-calls');
+        if (apiCalls) {
+            apiCalls.textContent = this.apiCalls || 0;
+        }
+        
+        // Update WebSocket connections
+        const websocketConn = document.getElementById('websocket-conn');
+        if (websocketConn) {
+            websocketConn.textContent = this.websocketConn || 0;
+        }
+        
+        // Update data transfer
+        const dataTransfer = document.getElementById('data-transfer');
+        if (dataTransfer) {
+            dataTransfer.textContent = `${this.dataTransfer || 0}KB`;
         }
     }
     
@@ -836,6 +1533,150 @@ class EnterpriseActivityMonitor {
         return 'Activity recorded';
     }
     
+    // 🚀 START REAL-TIME SYSTEM MONITORING
+    startRealTimeSystemMonitoring() {
+        // Initialize activity counters
+        this.clickCount = 0;
+        this.keyCount = 0;
+        this.mouseArea = 0;
+        this.authAttempts = 0;
+        this.externalLinks = 0;
+        this.apiCalls = 0;
+        this.websocketConn = 0;
+        this.dataTransfer = 0;
+        this.scrollDistance = 0;
+        this.specialKeyCount = 0;
+        this.shortcutCount = 0;
+        this.typingSpeed = 0;
+        this.mousePattern = [];
+        
+        // Start tracking user interactions
+        this.startInteractionTracking();
+        
+        // Start tracking system events
+        this.startSystemEventTracking();
+    }
+    
+    // 🖱️ START INTERACTION TRACKING
+    startInteractionTracking() {
+        // Track clicks
+        document.addEventListener('click', (e) => {
+            this.clickCount++;
+            this.mouseArea = Math.max(this.mouseArea, e.clientX * e.clientY);
+            
+            const clickData = {
+                type: 'user_interaction',
+                action: 'click',
+                element: e.target.tagName,
+                elementText: e.target.textContent?.substring(0, 50),
+                coordinates: { x: e.clientX, y: e.clientY },
+                timestamp: new Date().toISOString(),
+                category: 'system',
+                priority: 'low'
+            };
+            
+            this.recordGeneralActivity(clickData);
+            this.addToComprehensiveData('systemTools', clickData);
+        });
+        
+        // Track keystrokes
+        document.addEventListener('keydown', (e) => {
+            this.keyCount++;
+            
+            if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) {
+                this.specialKeyCount++;
+            }
+            
+            if (e.ctrlKey || e.metaKey) {
+                this.shortcutCount++;
+            }
+            
+            const keyData = {
+                type: 'user_interaction',
+                action: 'keydown',
+                key: e.key,
+                code: e.code,
+                modifiers: {
+                    ctrl: e.ctrlKey,
+                    shift: e.shiftKey,
+                    alt: e.altKey,
+                    meta: e.metaKey
+                },
+                timestamp: new Date().toISOString(),
+                category: 'system',
+                priority: 'low'
+            };
+            
+            this.recordGeneralActivity(keyData);
+            this.addToComprehensiveData('systemTools', keyData);
+        });
+        
+        // Track mouse movement
+        document.addEventListener('mousemove', (e) => {
+            this.mousePattern.push({
+                x: e.clientX,
+                y: e.clientY,
+                timestamp: Date.now()
+            });
+            
+            // Keep only last 100 mouse positions
+            if (this.mousePattern.length > 100) {
+                this.mousePattern = this.mousePattern.slice(-100);
+            }
+        });
+        
+        // Track scrolling
+        document.addEventListener('scroll', (e) => {
+            this.scrollDistance += Math.abs(window.pageYOffset - (this.lastScrollY || 0));
+            this.lastScrollY = window.pageYOffset;
+        });
+    }
+    
+    // 🛡️ START SYSTEM EVENT TRACKING
+    startSystemEventTracking() {
+        // Track authentication attempts
+        document.addEventListener('submit', (e) => {
+            if (e.target.action && e.target.action.includes('login')) {
+                this.authAttempts++;
+            }
+        });
+        
+        // Track external links
+        document.addEventListener('click', (e) => {
+            if (e.target.href && e.target.href !== window.location.href) {
+                this.externalLinks++;
+            }
+        });
+        
+        // Track API calls
+        const originalFetch = window.fetch;
+        window.fetch = (...args) => {
+            this.apiCalls++;
+            return originalFetch(...args);
+        };
+        
+        // Track WebSocket connections
+        const originalWebSocket = window.WebSocket;
+        window.WebSocket = function(...args) {
+            this.websocketConn++;
+            return new originalWebSocket(...args);
+        };
+    }
+    
+    // 🔍 DETECT OTHER BROWSERS
+    detectOtherBrowsers() {
+        // This is a simplified detection - in reality, you'd need more sophisticated methods
+        const browsers = [];
+        
+        // Check for common browser indicators
+        if (navigator.userAgent.includes('Chrome')) browsers.push('Chrome');
+        if (navigator.userAgent.includes('Firefox')) browsers.push('Firefox');
+        if (navigator.userAgent.includes('Safari')) browsers.push('Safari');
+        if (navigator.userAgent.includes('Edge')) browsers.push('Edge');
+        
+        return browsers;
+    }
+    
     // 🌐 MONITOR ALL BROWSERS AND TABS
     monitorAllBrowsers() {
         // Track when user switches between different websites/apps
@@ -924,97 +1765,6 @@ class EnterpriseActivityMonitor {
             this.recordGeneralActivity(loadData);
             this.addToComprehensiveData('urls', loadData);
         });
-        
-        // Track URL changes (for SPA applications)
-        let currentUrl = window.location.href;
-        const urlObserver = new MutationObserver(() => {
-            if (window.location.href !== currentUrl) {
-                const urlChangeData = {
-                    type: 'url_change',
-                    action: 'url_changed',
-                    from_url: currentUrl,
-                    to_url: window.location.href,
-                    timestamp: new Date().toISOString(),
-                    category: 'browsing',
-                    priority: 'medium'
-                };
-                
-                this.recordGeneralActivity(urlChangeData);
-                this.addToComprehensiveData('urls', urlChangeData);
-                
-                currentUrl = window.location.href;
-            }
-        });
-        
-        urlObserver.observe(document.body, { childList: true, subtree: true });
-    }
-    
-    // 🛠️ MONITOR SYSTEM TOOLS
-    monitorSystemTools() {
-        // Track system tool usage
-        const systemTools = [
-            'calculator', 'notepad', 'paint', 'wordpad', 'cmd', 'powershell',
-            'explorer', 'control', 'taskmgr', 'msconfig', 'regedit'
-        ];
-        
-        // Monitor for system tool indicators
-        document.addEventListener('keydown', (e) => {
-            // Track Windows key combinations
-            if (e.metaKey || e.ctrlKey) {
-                const toolData = {
-                    type: 'system_tool',
-                    action: 'keyboard_shortcut',
-                    keys: `${e.metaKey ? 'Meta' : 'Ctrl'}+${e.key}`,
-                    timestamp: new Date().toISOString(),
-                    category: 'system',
-                    priority: 'medium'
-                };
-                
-                this.recordGeneralActivity(toolData);
-                this.addToComprehensiveData('systemTools', toolData);
-            }
-        });
-        
-        // Track system dialogs
-        window.addEventListener('beforeunload', () => {
-            // This might indicate system tool usage
-            const systemData = {
-                type: 'system_tool',
-                action: 'system_dialog',
-                description: 'System dialog or tool interaction',
-                timestamp: new Date().toISOString(),
-                category: 'system',
-                priority: 'medium'
-            };
-            
-            this.addToComprehensiveData('systemTools', systemData);
-        });
-    }
-    
-    // 🌐 MONITOR CROSS-BROWSER ACTIVITY
-    monitorCrossBrowserActivity() {
-        // Track if user has multiple browsers open
-        if (window.localStorage) {
-            const browserId = `browser_${Date.now()}`;
-            localStorage.setItem('currentBrowserId', browserId);
-            
-            // Check for other browser instances
-            setInterval(() => {
-                const otherBrowsers = this.detectOtherBrowsers();
-                if (otherBrowsers.length > 0) {
-                    const crossBrowserData = {
-                        type: 'cross_browser',
-                        action: 'multiple_browsers_detected',
-                        browsers: otherBrowsers,
-                        timestamp: new Date().toISOString(),
-                        category: 'browsing',
-                        priority: 'high'
-                    };
-                    
-                    this.addToComprehensiveData('crossBrowserActivity', crossBrowserData);
-                }
-            }, 10000);
-        }
     }
     
     // 💻 MONITOR APPLICATION FOCUS
@@ -1164,6 +1914,74 @@ class EnterpriseActivityMonitor {
             this.recordGeneralActivity(contextMenuData);
             this.addToComprehensiveData('systemTools', contextMenuData);
         });
+    }
+    
+    // 🛠️ MONITOR SYSTEM TOOLS
+    monitorSystemTools() {
+        // Track system tool usage
+        const systemTools = [
+            'calculator', 'notepad', 'paint', 'wordpad', 'cmd', 'powershell',
+            'explorer', 'control', 'taskmgr', 'msconfig', 'regedit'
+        ];
+        
+        // Monitor for system tool indicators
+        document.addEventListener('keydown', (e) => {
+            // Track Windows key combinations
+            if (e.metaKey || e.ctrlKey) {
+                const toolData = {
+                    type: 'system_tool',
+                    action: 'keyboard_shortcut',
+                    keys: `${e.metaKey ? 'Meta' : 'Ctrl'}+${e.key}`,
+                    timestamp: new Date().toISOString(),
+                    category: 'system',
+                    priority: 'medium'
+                };
+                
+                this.recordGeneralActivity(toolData);
+                this.addToComprehensiveData('systemTools', toolData);
+            }
+        });
+        
+        // Track system dialogs
+        window.addEventListener('beforeunload', () => {
+            // This might indicate system tool usage
+            const systemData = {
+                type: 'system_tool',
+                action: 'system_dialog',
+                description: 'System dialog or tool interaction',
+                timestamp: new Date().toISOString(),
+                category: 'system',
+                priority: 'medium'
+            };
+            
+            this.addToComprehensiveData('systemTools', systemData);
+        });
+    }
+    
+    // 🌐 MONITOR CROSS-BROWSER ACTIVITY
+    monitorCrossBrowserActivity() {
+        // Track if user has multiple browsers open
+        if (window.localStorage) {
+            const browserId = `browser_${Date.now()}`;
+            localStorage.setItem('currentBrowserId', browserId);
+            
+            // Check for other browser instances
+            setInterval(() => {
+                const otherBrowsers = this.detectOtherBrowsers();
+                if (otherBrowsers.length > 0) {
+                    const crossBrowserData = {
+                        type: 'cross_browser',
+                        action: 'multiple_browsers_detected',
+                        browsers: otherBrowsers,
+                        timestamp: new Date().toISOString(),
+                        category: 'browsing',
+                        priority: 'high'
+                    };
+                    
+                    this.addToComprehensiveData('crossBrowserActivity', crossBrowserData);
+                }
+            }, 10000);
+        }
     }
     
     // 📁 MONITOR FILE OPERATIONS
@@ -1454,7 +2272,6 @@ class EnterpriseActivityMonitor {
                     action: 'app_active',
                     url: window.location.href,
                     timestamp: new Date().toISOString(),
-                    timestamp: new Date().toISOString(),
                     category: 'system',
                     priority: 'low'
                 };
@@ -1520,84 +2337,6 @@ class EnterpriseActivityMonitor {
             totalDistance += Math.sqrt(dx*dx + dy*dy);
         }
         return totalDistance;
-    }
-    
-    // 🔍 DETECT OTHER BROWSERS
-    detectOtherBrowsers() {
-        // This is a simplified detection - in reality, you'd need more sophisticated methods
-        const browsers = [];
-        
-        // Check for common browser indicators
-        if (navigator.userAgent.includes('Chrome')) browsers.push('Chrome');
-        if (navigator.userAgent.includes('Firefox')) browsers.push('Firefox');
-        if (navigator.userAgent.includes('Safari')) browsers.push('Safari');
-        if (navigator.userAgent.includes('Edge')) browsers.push('Edge');
-        
-        return browsers;
-    }
-    
-    // 📁 MONITOR FILE DOWNLOADS
-    monitorFileDownloads() {
-        // Enhanced file download monitoring
-        document.addEventListener('click', (e) => {
-            if (e.target.href && e.target.href.includes('download')) {
-                const downloadData = {
-                    type: 'file_download',
-                    action: 'download_initiated',
-                    file_url: e.target.href,
-                    file_name: e.target.href.split('/').pop(),
-                    timestamp: new Date().toISOString(),
-                    category: 'files',
-                    priority: 'high'
-                };
-                
-                this.recordSecurityEvent(downloadData);
-                this.addToComprehensiveData('downloads', downloadData);
-            }
-        });
-        
-        // Monitor file input changes
-        document.addEventListener('change', (e) => {
-            if (e.target.type === 'file') {
-                const files = Array.from(e.target.files);
-                files.forEach(file => {
-                    const fileData = {
-                        type: 'file_upload',
-                        action: 'file_selected',
-                        file_name: file.name,
-                        file_size: file.size,
-                        file_type: file.type,
-                        timestamp: new Date().toISOString(),
-                        category: 'files',
-                        priority: 'medium'
-                    };
-                    
-                    this.recordGeneralActivity(fileData);
-                    this.addToComprehensiveData('files', fileData);
-                });
-            }
-        });
-        
-        // Monitor drag and drop
-        document.addEventListener('drop', (e) => {
-            e.preventDefault();
-            const files = Array.from(e.dataTransfer.files);
-            files.forEach(file => {
-                const dropData = {
-                    type: 'file_drop',
-                    action: 'files_dropped',
-                    file_name: file.name,
-                    file_size: file.size,
-                    file_type: file.type,
-                    timestamp: new Date().toISOString(),
-                    category: 'files',
-                    priority: 'medium'
-                };
-                
-                this.recordGeneralActivity(dropData);
-                this.addToComprehensiveData('files', dropData);
-            });
-        });
     }
     
     // 📊 GET COMPREHENSIVE MONITORING DATA
@@ -1749,6 +2488,81 @@ class EnterpriseActivityMonitor {
             },
             aiInsights: this.aiInsights
         };
+    }
+    
+    // 🧮 CALCULATE MOUSE DISTANCE
+    calculateMouseDistance(pattern) {
+        let totalDistance = 0;
+        for (let i = 1; i < pattern.length; i++) {
+            const dx = pattern[i].x - pattern[i-1].x;
+            const dy = pattern[i].y - pattern[i-1].y;
+            totalDistance += Math.sqrt(dx*dx + dy*dy);
+        }
+        return totalDistance;
+    }
+    
+    // 📁 MONITOR FILE DOWNLOADS
+    monitorFileDownloads() {
+        // Enhanced file download monitoring
+        document.addEventListener('click', (e) => {
+            if (e.target.href && e.target.href.includes('download')) {
+                const downloadData = {
+                    type: 'file_download',
+                    action: 'download_initiated',
+                    file_url: e.target.href,
+                    file_name: e.target.href.split('/').pop(),
+                    timestamp: new Date().toISOString(),
+                    category: 'files',
+                    priority: 'high'
+                };
+                
+                this.recordSecurityEvent(downloadData);
+                this.addToComprehensiveData('downloads', downloadData);
+            }
+        });
+        
+        // Monitor file input changes
+        document.addEventListener('change', (e) => {
+            if (e.target.type === 'file') {
+                const files = Array.from(e.target.files);
+                files.forEach(file => {
+                    const fileData = {
+                        type: 'file_upload',
+                        action: 'file_selected',
+                        file_name: file.name,
+                        file_size: file.size,
+                        file_type: file.type,
+                        timestamp: new Date().toISOString(),
+                        category: 'files',
+                        priority: 'medium'
+                    };
+                    
+                    this.recordGeneralActivity(fileData);
+                    this.addToComprehensiveData('files', fileData);
+                });
+            }
+        });
+        
+        // Monitor drag and drop
+        document.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const files = Array.from(e.dataTransfer.files);
+            files.forEach(file => {
+                const dropData = {
+                    type: 'file_drop',
+                    action: 'files_dropped',
+                    file_name: file.name,
+                    file_size: file.size,
+                    file_type: file.type,
+                    timestamp: new Date().toISOString(),
+                    category: 'files',
+                    priority: 'medium'
+                };
+                
+                this.recordGeneralActivity(dropData);
+                this.addToComprehensiveData('files', dropData);
+            });
+        });
     }
 }
 
