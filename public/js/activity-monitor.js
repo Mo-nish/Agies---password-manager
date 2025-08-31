@@ -663,25 +663,179 @@ class EnterpriseActivityMonitor {
     
     // 📊 COMPREHENSIVE DATA COLLECTION
     startComprehensiveDataCollection() {
-        // Collect data every 10 seconds to prevent overflow
+        // Collect data every 5 seconds for better real-time updates
         setInterval(() => {
             this.collectComprehensiveData();
-        }, 10000);
-        
-        // Store data every 60 seconds
-        setInterval(() => {
-            this.storeComprehensiveData();
-        }, 60000);
-        
-        // Update UI every 5 seconds
-        setInterval(() => {
-            this.updateMonitoringUI();
         }, 5000);
         
-        // Clean up old data every 5 minutes
+        // Store data every 30 seconds
+        setInterval(() => {
+            this.storeComprehensiveData();
+        }, 30000);
+        
+        // Update UI every 3 seconds
+        setInterval(() => {
+            this.updateMonitoringUI();
+        }, 3000);
+        
+        // Clean up old data every 3 minutes
         setInterval(() => {
             this.cleanupOldData();
-        }, 300000);
+        }, 180000);
+        
+        // Enhanced application detection every 10 seconds
+        setInterval(() => {
+            this.detectCurrentApplication();
+        }, 10000);
+    }
+    
+    // 🔍 DETECT CURRENT APPLICATION
+    detectCurrentApplication() {
+        const currentUrl = window.location.href;
+        const currentDomain = window.location.hostname;
+        const currentTitle = document.title;
+        
+        // Enhanced application detection
+        const appData = {
+            type: 'application_detection',
+            action: 'current_app_identified',
+            url: currentUrl,
+            title: currentTitle,
+            domain: currentDomain,
+            timestamp: new Date().toISOString(),
+            category: this.categorizeApplication(currentDomain),
+            priority: 'medium',
+            details: {
+                app_type: this.getApplicationType(currentDomain),
+                page_type: this.getPageType(currentUrl),
+                is_work_related: this.isWorkRelated(currentDomain),
+                time_spent: Date.now() - this.pageStartTime
+            }
+        };
+        
+        this.recordGeneralActivity(appData);
+        this.addToComprehensiveData('applications', appData);
+        
+        // Also add to URLs for better tracking
+        const urlData = {
+            type: 'url_tracking',
+            action: 'current_url_tracked',
+            url: currentUrl,
+            title: currentTitle,
+            domain: currentDomain,
+            timestamp: new Date().toISOString(),
+            category: 'browsing',
+            priority: 'medium',
+            details: {
+                app_category: this.categorizeApplication(currentDomain),
+                page_type: this.getPageType(currentUrl),
+                is_external: currentDomain !== 'maze-password-manager.onrender.com'
+            }
+        };
+        
+        this.addToComprehensiveData('urls', urlData);
+    }
+    
+    // 🏷️ CATEGORIZE APPLICATION
+    categorizeApplication(domain) {
+        if (domain.includes('gmail.com') || domain.includes('mail.google.com')) return 'email';
+        if (domain.includes('youtube.com')) return 'entertainment';
+        if (domain.includes('chatgpt.com')) return 'ai_services';
+        if (domain.includes('github.com')) return 'development';
+        if (domain.includes('stackoverflow.com')) return 'development';
+        if (domain.includes('facebook.com')) return 'social_media';
+        if (domain.includes('twitter.com') || domain.includes('x.com')) return 'social_media';
+        if (domain.includes('linkedin.com')) return 'social_media';
+        if (domain.includes('amazon.com')) return 'shopping';
+        if (domain.includes('maps.google.com')) return 'services';
+        if (domain.includes('docs.google.com')) return 'productivity';
+        if (domain.includes('sheets.google.com')) return 'productivity';
+        if (domain.includes('slides.google.com')) return 'productivity';
+        if (domain.includes('trello.com')) return 'productivity';
+        if (domain.includes('asana.com')) return 'productivity';
+        if (domain.includes('atlassian.net')) return 'productivity';
+        if (domain.includes('zoom.us')) return 'communication';
+        if (domain.includes('meet.google.com')) return 'communication';
+        if (domain.includes('teams.microsoft.com')) return 'communication';
+        if (domain.includes('web.whatsapp.com')) return 'communication';
+        if (domain.includes('web.telegram.org')) return 'communication';
+        if (domain.includes('discord.com')) return 'communication';
+        if (domain.includes('netflix.com')) return 'entertainment';
+        if (domain.includes('open.spotify.com')) return 'entertainment';
+        if (domain.includes('maze-password-manager.onrender.com')) return 'work_tools';
+        if (domain.includes('invensis.net')) return 'work_tools';
+        if (domain.includes('hrms')) return 'work_tools';
+        if (domain.includes('employee')) return 'work_tools';
+        if (domain.includes('attendance')) return 'work_tools';
+        
+        return 'other';
+    }
+    
+    // 🆔 GET APPLICATION TYPE
+    getApplicationType(domain) {
+        if (domain.includes('gmail.com') || domain.includes('mail.google.com')) return 'Gmail';
+        if (domain.includes('youtube.com')) return 'YouTube';
+        if (domain.includes('chatgpt.com')) return 'ChatGPT';
+        if (domain.includes('github.com')) return 'GitHub';
+        if (domain.includes('stackoverflow.com')) return 'Stack Overflow';
+        if (domain.includes('facebook.com')) return 'Facebook';
+        if (domain.includes('twitter.com') || domain.includes('x.com')) return 'Twitter/X';
+        if (domain.includes('linkedin.com')) return 'LinkedIn';
+        if (domain.includes('amazon.com')) return 'Amazon';
+        if (domain.includes('maps.google.com')) return 'Google Maps';
+        if (domain.includes('docs.google.com')) return 'Google Docs';
+        if (domain.includes('sheets.google.com')) return 'Google Sheets';
+        if (domain.includes('slides.google.com')) return 'Google Slides';
+        if (domain.includes('trello.com')) return 'Trello';
+        if (domain.includes('asana.com')) return 'Asana';
+        if (domain.includes('atlassian.net')) return 'Jira/Atlassian';
+        if (domain.includes('zoom.us')) return 'Zoom';
+        if (domain.includes('meet.google.com')) return 'Google Meet';
+        if (domain.includes('teams.microsoft.com')) return 'Microsoft Teams';
+        if (domain.includes('web.whatsapp.com')) return 'WhatsApp Web';
+        if (domain.includes('web.telegram.org')) return 'Telegram Web';
+        if (domain.includes('discord.com')) return 'Discord';
+        if (domain.includes('netflix.com')) return 'Netflix';
+        if (domain.includes('open.spotify.com')) return 'Spotify';
+        if (domain.includes('maze-password-manager.onrender.com')) return 'Maya Vault';
+        if (domain.includes('invensis.net')) return 'Invensis HRMS';
+        if (domain.includes('hrms')) return 'HR Management System';
+        if (domain.includes('employee')) return 'Employee Portal';
+        if (domain.includes('attendance')) return 'Attendance System';
+        
+        return 'Unknown Application';
+    }
+    
+    // 📄 GET PAGE TYPE
+    getPageType(url) {
+        if (url.includes('inbox') || url.includes('mail')) return 'email_inbox';
+        if (url.includes('compose') || url.includes('write')) return 'email_compose';
+        if (url.includes('watch')) return 'video_watching';
+        if (url.includes('search')) return 'search_page';
+        if (url.includes('dashboard')) return 'dashboard';
+        if (url.includes('profile')) return 'profile';
+        if (url.includes('settings')) return 'settings';
+        if (url.includes('login') || url.includes('signin')) return 'authentication';
+        if (url.includes('register') || url.includes('signup')) return 'registration';
+        if (url.includes('attendance')) return 'attendance';
+        if (url.includes('employee')) return 'employee_management';
+        if (url.includes('hrms')) return 'hr_management';
+        
+        return 'general_page';
+    }
+    
+    // 💼 IS WORK RELATED
+    isWorkRelated(domain) {
+        const workDomains = [
+            'gmail.com', 'mail.google.com', 'outlook.com', 'office.com',
+            'github.com', 'stackoverflow.com', 'docs.google.com',
+            'sheets.google.com', 'slides.google.com', 'trello.com',
+            'asana.com', 'atlassian.net', 'zoom.us', 'meet.google.com',
+            'teams.microsoft.com', 'invensis.net', 'hrms', 'employee',
+            'attendance', 'maze-password-manager.onrender.com'
+        ];
+        
+        return workDomains.some(workDomain => domain.includes(workDomain));
     }
     
     // 🔍 COLLECT COMPREHENSIVE DATA
@@ -1367,8 +1521,8 @@ class EnterpriseActivityMonitor {
         const urlHistory = document.getElementById('url-history');
         if (!urlHistory) return;
         
-        // Get recent URLs (last 10)
-        const recentUrls = this.comprehensiveData.urls.slice(-10).reverse();
+        // Get recent URLs (last 15) with better filtering
+        const recentUrls = this.getDiverseURLHistory();
         
         if (recentUrls.length === 0) {
             urlHistory.innerHTML = `
@@ -1385,27 +1539,109 @@ class EnterpriseActivityMonitor {
             const domain = url.domain || 'Unknown';
             const time = new Date(url.timestamp).toLocaleTimeString();
             const isCurrent = url.url === window.location.href;
+            const appType = this.getApplicationType(domain);
+            const category = this.categorizeApplication(domain);
+            
+            // Add category icon and color coding
+            const categoryIcon = this.getCategoryIcon(category);
+            const categoryColor = this.getCategoryColor(category);
             
             urlHTML += `
-                <div class="url-item ${isCurrent ? 'current' : ''}">
-                    <span class="url-text">${domain}</span>
-                    <span class="url-time">${time}</span>
+                <div class="url-item ${isCurrent ? 'current' : ''}" style="border-left: 3px solid ${categoryColor}">
+                    <div class="url-header">
+                        <span class="category-icon">${categoryIcon}</span>
+                        <span class="url-text">${appType}</span>
+                        <span class="url-time">${time}</span>
+                    </div>
+                    <div class="url-details">
+                        <span class="url-domain">${domain}</span>
+                        <span class="url-category">${category.replace('_', ' ')}</span>
+                    </div>
                 </div>
             `;
         });
         
         // Add "View More" button if there are more URLs
-        if (this.comprehensiveData.urls.length > 10) {
+        if (this.comprehensiveData.urls.length > 15) {
             urlHTML += `
                 <div class="url-item view-more">
                     <button class="btn-view-more" onclick="showAllURLs()">
-                        View ${this.comprehensiveData.urls.length - 10} More URLs
+                        View ${this.comprehensiveData.urls.length - 15} More URLs
                     </button>
                 </div>
             `;
         }
         
         urlHistory.innerHTML = urlHTML;
+    }
+    
+    // 🌈 GET DIVERSE URL HISTORY
+    getDiverseURLHistory() {
+        const allUrls = this.comprehensiveData.urls || [];
+        const uniqueDomains = new Set();
+        const diverseUrls = [];
+        
+        // First, add unique domains to ensure variety
+        for (let i = allUrls.length - 1; i >= 0; i--) {
+            const url = allUrls[i];
+            const domain = url.domain || url.url?.split('/')[2] || 'unknown';
+            
+            if (!uniqueDomains.has(domain)) {
+                uniqueDomains.add(domain);
+                diverseUrls.push(url);
+                
+                if (diverseUrls.length >= 10) break;
+            }
+        }
+        
+        // Then add more recent URLs to fill up to 15
+        for (let i = allUrls.length - 1; i >= 0; i--) {
+            const url = allUrls[i];
+            if (!diverseUrls.some(existing => existing.url === url.url)) {
+                diverseUrls.push(url);
+                if (diverseUrls.length >= 15) break;
+            }
+        }
+        
+        return diverseUrls.slice(0, 15);
+    }
+    
+    // 🎨 GET CATEGORY ICON
+    getCategoryIcon(category) {
+        const icons = {
+            'email': '📧',
+            'entertainment': '🎬',
+            'ai_services': '🤖',
+            'development': '💻',
+            'social_media': '📱',
+            'shopping': '🛒',
+            'services': '🔧',
+            'productivity': '📊',
+            'communication': '💬',
+            'work_tools': '🛠️',
+            'other': '🌐'
+        };
+        
+        return icons[category] || '🌐';
+    }
+    
+    // 🎨 GET CATEGORY COLOR
+    getCategoryColor(category) {
+        const colors = {
+            'email': '#4285f4',
+            'entertainment': '#ff0000',
+            'ai_services': '#00bcd4',
+            'development': '#673ab7',
+            'social_media': '#1877f2',
+            'shopping': '#ff9800',
+            'services': '#4caf50',
+            'productivity': '#2196f3',
+            'communication': '#9c27b0',
+            'work_tools': '#607d8b',
+            'other': '#757575'
+        };
+        
+        return colors[category] || '#757575';
     }
     
     // ⚡ UPDATE REAL-TIME DATA
@@ -1542,15 +1778,22 @@ class EnterpriseActivityMonitor {
                 return false;
             }
             
-            // Check for circular references
+            // Check for circular references with better handling
             const seen = new WeakSet();
-            const hasCircular = (obj) => {
+            const hasCircular = (obj, path = '') => {
                 if (obj !== null && typeof obj === 'object') {
-                    if (seen.has(obj)) return true;
+                    if (seen.has(obj)) {
+                        console.warn(`⚠️ Circular reference detected at path: ${path}`);
+                        return true;
+                    }
                     seen.add(obj);
+                    
                     for (let key in obj) {
-                        if (obj.hasOwnProperty(key) && hasCircular(obj[key])) {
-                            return true;
+                        if (obj.hasOwnProperty(key)) {
+                            const newPath = path ? `${path}.${key}` : key;
+                            if (hasCircular(obj[key], newPath)) {
+                                return true;
+                            }
                         }
                     }
                 }
@@ -1558,7 +1801,14 @@ class EnterpriseActivityMonitor {
             };
             
             if (hasCircular(data)) {
-                console.warn('⚠️ Circular reference detected in data');
+                console.warn('⚠️ Circular reference detected in data, cleaning...');
+                // Try to clean the data instead of rejecting it
+                const cleanedData = this.cleanCircularReferences(data);
+                if (cleanedData) {
+                    // Replace the original data with cleaned version
+                    Object.assign(data, cleanedData);
+                    return true;
+                }
                 return false;
             }
             
@@ -1567,6 +1817,40 @@ class EnterpriseActivityMonitor {
             console.error('❌ Data validation error:', error);
             return false;
         }
+    }
+    
+    // 🧹 CLEAN CIRCULAR REFERENCES
+    cleanCircularReferences(data, maxDepth = 3, currentDepth = 0) {
+        if (currentDepth >= maxDepth) {
+            return '[Max Depth Reached]';
+        }
+        
+        if (data === null || typeof data !== 'object') {
+            return data;
+        }
+        
+        if (Array.isArray(data)) {
+            return data.map((item, index) => {
+                try {
+                    return this.cleanCircularReferences(item, maxDepth, currentDepth + 1);
+                } catch (error) {
+                    return `[Array Item ${index} Error]`;
+                }
+            });
+        }
+        
+        const cleaned = {};
+        for (let key in data) {
+            if (data.hasOwnProperty(key)) {
+                try {
+                    cleaned[key] = this.cleanCircularReferences(data[key], maxDepth, currentDepth + 1);
+                } catch (error) {
+                    cleaned[key] = `[Property ${key} Error]`;
+                }
+            }
+        }
+        
+        return cleaned;
     }
     
     // 💾 STORE MINIMAL DATA
