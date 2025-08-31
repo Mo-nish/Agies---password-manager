@@ -1581,20 +1581,36 @@ class EnterpriseActivityMonitor {
         const uniqueDomains = new Set();
         const diverseUrls = [];
         
-        // First, add unique domains to ensure variety
-        for (let i = allUrls.length - 1; i >= 0; i--) {
-            const url = allUrls[i];
+        // First, prioritize external applications (not maze-password-manager)
+        const externalUrls = allUrls.filter(url => {
+            const domain = url.domain || url.url?.split('/')[2] || 'unknown';
+            return domain !== 'maze-password-manager.onrender.com';
+        });
+        
+        // Add unique external domains first
+        for (let i = externalUrls.length - 1; i >= 0; i--) {
+            const url = externalUrls[i];
             const domain = url.domain || url.url?.split('/')[2] || 'unknown';
             
             if (!uniqueDomains.has(domain)) {
                 uniqueDomains.add(domain);
                 diverseUrls.push(url);
                 
-                if (diverseUrls.length >= 10) break;
+                if (diverseUrls.length >= 8) break; // Reserve space for current app
             }
         }
         
-        // Then add more recent URLs to fill up to 15
+        // Then add current application URLs (but limit them)
+        const currentAppUrls = allUrls.filter(url => {
+            const domain = url.domain || url.url?.split('/')[2] || 'unknown';
+            return domain === 'maze-password-manager.onrender.com';
+        });
+        
+        // Add only 2-3 current app URLs to show variety
+        const currentAppToShow = currentAppUrls.slice(-3);
+        diverseUrls.push(...currentAppToShow);
+        
+        // Fill remaining slots with more diverse URLs
         for (let i = allUrls.length - 1; i >= 0; i--) {
             const url = allUrls[i];
             if (!diverseUrls.some(existing => existing.url === url.url)) {
@@ -3154,6 +3170,109 @@ class EnterpriseActivityMonitor {
                 }
             }
         });
+    }
+    
+    // 🧪 SIMULATE CROSS-APPLICATION VISITS (FOR TESTING)
+    simulateCrossApplicationVisits() {
+        const testApplications = [
+            {
+                url: 'https://gmail.com',
+                title: 'Gmail - Inbox',
+                domain: 'gmail.com',
+                category: 'email',
+                app_type: 'Gmail'
+            },
+            {
+                url: 'https://youtube.com',
+                title: 'YouTube - Home',
+                domain: 'youtube.com',
+                category: 'entertainment',
+                app_type: 'YouTube'
+            },
+            {
+                url: 'https://chatgpt.com',
+                title: 'ChatGPT - AI Assistant',
+                domain: 'chatgpt.com',
+                category: 'ai_services',
+                app_type: 'ChatGPT'
+            },
+            {
+                url: 'https://github.com',
+                title: 'GitHub - Code Repository',
+                domain: 'github.com',
+                category: 'development',
+                app_type: 'GitHub'
+            },
+            {
+                url: 'https://facebook.com',
+                title: 'Facebook - Social Network',
+                domain: 'facebook.com',
+                category: 'social_media',
+                app_type: 'Facebook'
+            },
+            {
+                url: 'https://amazon.com',
+                title: 'Amazon - Online Shopping',
+                domain: 'amazon.com',
+                category: 'shopping',
+                app_type: 'Amazon'
+            },
+            {
+                url: 'https://docs.google.com',
+                title: 'Google Docs - Document Editor',
+                domain: 'docs.google.com',
+                category: 'productivity',
+                app_type: 'Google Docs'
+            },
+            {
+                url: 'https://trello.com',
+                title: 'Trello - Project Management',
+                domain: 'trello.com',
+                category: 'productivity',
+                app_type: 'Trello'
+            },
+            {
+                url: 'https://zoom.us',
+                title: 'Zoom - Video Conferencing',
+                domain: 'zoom.us',
+                category: 'communication',
+                app_type: 'Zoom'
+            },
+            {
+                url: 'https://netflix.com',
+                title: 'Netflix - Streaming Service',
+                domain: 'netflix.com',
+                category: 'entertainment',
+                app_type: 'Netflix'
+            }
+        ];
+        
+        // Add test applications to comprehensive data
+        testApplications.forEach((app, index) => {
+            const testData = {
+                type: 'test_application',
+                action: 'simulated_visit',
+                url: app.url,
+                title: app.title,
+                domain: app.domain,
+                timestamp: new Date(Date.now() - (index * 60000)).toISOString(), // Spread out over time
+                category: 'browsing',
+                priority: 'medium',
+                details: {
+                    app_type: app.app_type,
+                    page_type: this.getPageType(app.url),
+                    is_external: true,
+                    is_simulated: true,
+                    category: app.category
+                }
+            };
+            
+            this.addToComprehensiveData('urls', testData);
+            this.addToComprehensiveData('applications', testData);
+        });
+        
+        console.log('🧪 Added 10 test applications for demonstration');
+        this.updateURLHistory(); // Update the display immediately
     }
 }
 

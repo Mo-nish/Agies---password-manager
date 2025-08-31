@@ -1211,7 +1211,7 @@
 
         .btn-history:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+            box-shadow: 0 6px 20px rgba(165, 94, 234, 0.4);
         }
 
         .btn-view-history {
@@ -1843,6 +1843,161 @@
                 grid-column: span 1; /* Revert to single column for smaller screens */
             }
         }
+
+        .btn-start {
+            background: linear-gradient(135deg, #00ff88, #00cc6a);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 255, 136, 0.3);
+        }
+        
+        .btn-start:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 255, 136, 0.4);
+        }
+        
+        .btn-stop {
+            background: linear-gradient(135deg, #ff4757, #ff3742);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3);
+        }
+        
+        .btn-stop:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4);
+        }
+        
+        .btn-test {
+            background: linear-gradient(135deg, #ffa502, #ff9500);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 165, 2, 0.3);
+        }
+        
+        .btn-test:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 165, 2, 0.4);
+        }
+        
+        .btn-history {
+            background: linear-gradient(135deg, #a55eea, #8854d0);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(165, 94, 234, 0.3);
+        }
+        
+        .btn-history:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(165, 94, 234, 0.4);
+        }
+        
+        /* 🔔 NOTIFICATION SYSTEM */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #1a1a2e;
+            border: 1px solid #16213e;
+            border-radius: 12px;
+            padding: 16px;
+            min-width: 300px;
+            max-width: 400px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            z-index: 10000;
+            animation: slideInRight 0.3s ease-out;
+        }
+        
+        .notification-success {
+            border-left: 4px solid #00ff88;
+        }
+        
+        .notification-error {
+            border-left: 4px solid #ff4757;
+        }
+        
+        .notification-warning {
+            border-left: 4px solid #ffa502;
+        }
+        
+        .notification-info {
+            border-left: 4px solid #3742fa;
+        }
+        
+        .notification-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .notification-icon {
+            font-size: 18px;
+            margin-right: 8px;
+        }
+        
+        .notification-title {
+            font-weight: 600;
+            color: #ffffff;
+            flex-grow: 1;
+        }
+        
+        .notification-close {
+            background: none;
+            border: none;
+            color: #666;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+        
+        .notification-close:hover {
+            background: #333;
+            color: #fff;
+        }
+        
+        .notification-message {
+            color: #ccc;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 <body>
@@ -2021,11 +2176,17 @@
             <div class="monitoring-controls mb-6">
                 <div class="control-panel">
                     <div class="control-item">
-                        <button id="start-monitoring" class="btn-primary">
+                        <button id="start-monitoring" class="btn-start" onclick="startMonitoring()">
                             🚀 Start Monitoring
                         </button>
-                        <button id="stop-monitoring" class="btn-secondary" style="display: none;">
-                            🛑 Stop Monitoring
+                        <button id="stop-monitoring" class="btn-stop" onclick="stopMonitoring()" style="display: none;">
+                            ⏹️ Stop Monitoring
+                        </button>
+                        <button id="test-apps" class="btn-test" onclick="testCrossApplications()">
+                            🧪 Test Cross-Apps
+                        </button>
+                        <button class="btn-history" onclick="showCompleteHistory()">
+                            📋 View All History
                         </button>
                     </div>
                     
