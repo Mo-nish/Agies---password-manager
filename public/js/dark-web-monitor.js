@@ -4527,59 +4527,8 @@ function closeErrorModal() {
     }
 }
 
-// 🚀 MONITORING CONTROL FUNCTIONS
-function startMonitoring() {
-    if (window.activityMonitor) {
-        window.activityMonitor.startMonitoring();
-        
-        // Update UI
-        document.getElementById('start-monitoring').style.display = 'none';
-        document.getElementById('stop-monitoring').style.display = 'inline-block';
-        
-        // Show success message
-        showNotification('🚀 Monitoring Started!', 'System is now tracking all your activities across applications.', 'success');
-        
-        console.log('✅ Monitoring started successfully');
-    } else {
-        showNotification('❌ Error', 'Activity monitor not initialized. Please refresh the page.', 'error');
-    }
-}
-
-function stopMonitoring() {
-    if (window.activityMonitor) {
-        window.activityMonitor.stopMonitoring();
-        
-        // Update UI
-        document.getElementById('start-monitoring').style.display = 'inline-block';
-        document.getElementById('stop-monitoring').style.display = 'none';
-        
-        // Show success message
-        showNotification('⏹️ Monitoring Stopped', 'System has stopped tracking activities.', 'info');
-        
-        console.log('⏹️ Monitoring stopped');
-    }
-}
-
-function testCrossApplications() {
-    if (window.activityMonitor) {
-        // Simulate cross-application visits
-        window.activityMonitor.simulateCrossApplicationVisits();
-        
-        // Show success message
-        showNotification('🧪 Test Data Added!', 'Added 10 test applications (Gmail, YouTube, ChatGPT, etc.) to demonstrate cross-application monitoring.', 'success');
-        
-        // Update the display
-        setTimeout(() => {
-            if (window.activityMonitor.updateURLHistory) {
-                window.activityMonitor.updateURLHistory();
-            }
-        }, 500);
-        
-        console.log('🧪 Cross-application test data added');
-    } else {
-        showNotification('❌ Error', 'Activity monitor not initialized. Please refresh the page.', 'error');
-    }
-}
+// 🚀 MONITORING CONTROL FUNCTIONS - REMOVED DUPLICATES
+// Functions are defined later in the file with enhanced functionality
 
 // 🔔 NOTIFICATION SYSTEM
 function showNotification(title, message, type = 'info') {
@@ -4611,4 +4560,127 @@ function showNotification(title, message, type = 'info') {
             notification.remove();
         }
     }, 5000);
+}
+
+// 🚀 INITIALIZE ACTIVITY MONITORING SYSTEM
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Initializing AI-Powered Activity Monitoring System...');
+    
+    // Initialize the activity monitor
+    if (typeof EnterpriseActivityMonitor !== 'undefined') {
+        window.activityMonitor = new EnterpriseActivityMonitor();
+        
+        // Start the monitoring system
+        try {
+            window.activityMonitor.init();
+            console.log('✅ Activity monitor initialized successfully');
+            
+            // Update UI to show monitoring is ready
+            updateMonitoringStatus('ready');
+            
+            // Show success notification
+            showNotification('✅ System Ready!', 'AI-Powered Activity Monitor is now initialized and ready to use.', 'success');
+            
+        } catch (error) {
+            console.error('❌ Failed to initialize activity monitor:', error);
+            showNotification('❌ Initialization Error', 'Failed to start monitoring system. Please refresh the page.', 'error');
+            updateMonitoringStatus('error');
+        }
+    } else {
+        console.error('❌ EnterpriseActivityMonitor class not found');
+        showNotification('❌ System Error', 'Monitoring system not available. Please refresh the page.', 'error');
+        updateMonitoringStatus('error');
+    }
+});
+
+// 🔄 UPDATE MONITORING STATUS
+function updateMonitoringStatus(status) {
+    const statusElement = document.querySelector('.monitoring-status');
+    if (statusElement) {
+        statusElement.className = `monitoring-status status-${status}`;
+        
+        const statusText = status === 'ready' ? '✅ Ready' : 
+                          status === 'monitoring' ? '🔄 Monitoring' : 
+                          status === 'error' ? '❌ Error' : '⏸️ Stopped';
+        
+        statusElement.innerHTML = `
+            <span class="status-indicator"></span>
+            <span class="status-text">${statusText}</span>
+        `;
+    }
+}
+
+// 🚀 MONITORING CONTROL FUNCTIONS - UPDATED VERSIONS
+function startMonitoring() {
+    if (window.activityMonitor) {
+        try {
+            window.activityMonitor.startMonitoring();
+            
+            // Update UI
+            document.getElementById('start-monitoring').style.display = 'none';
+            document.getElementById('stop-monitoring').style.display = 'inline-block';
+            
+            // Update status
+            updateMonitoringStatus('monitoring');
+            
+            // Show success message
+            showNotification('🚀 Monitoring Started!', 'System is now tracking all your activities across applications.', 'success');
+            
+            console.log('✅ Monitoring started successfully');
+        } catch (error) {
+            console.error('❌ Failed to start monitoring:', error);
+            showNotification('❌ Start Error', 'Failed to start monitoring. Please try again.', 'error');
+        }
+    } else {
+        showNotification('❌ Error', 'Activity monitor not initialized. Please refresh the page.', 'error');
+    }
+}
+
+function stopMonitoring() {
+    if (window.activityMonitor) {
+        try {
+            window.activityMonitor.stopMonitoring();
+            
+            // Update UI
+            document.getElementById('start-monitoring').style.display = 'inline-block';
+            document.getElementById('stop-monitoring').style.display = 'none';
+            
+            // Update status
+            updateMonitoringStatus('stopped');
+            
+            // Show success message
+            showNotification('⏹️ Monitoring Stopped', 'System has stopped tracking activities.', 'info');
+            
+            console.log('⏹️ Monitoring stopped');
+        } catch (error) {
+            console.error('❌ Failed to stop monitoring:', error);
+            showNotification('❌ Stop Error', 'Failed to stop monitoring. Please try again.', 'error');
+        }
+    }
+}
+
+function testCrossApplications() {
+    if (window.activityMonitor) {
+        try {
+            // Simulate cross-application visits
+            window.activityMonitor.simulateCrossApplicationVisits();
+            
+            // Show success message
+            showNotification('🧪 Test Cross-Apps!', 'Added 10 test applications (Gmail, YouTube, ChatGPT, etc.) to demonstrate cross-application monitoring.', 'success');
+            
+            // Update the display
+            setTimeout(() => {
+                if (window.activityMonitor.updateURLHistory) {
+                    window.activityMonitor.updateURLHistory();
+                }
+            }, 500);
+            
+            console.log('🧪 Cross-application test data added');
+        } catch (error) {
+            console.error('❌ Failed to add test data:', error);
+            showNotification('❌ Test Error', 'Failed to add test applications. Please try again.', 'error');
+        }
+    } else {
+        showNotification('❌ Error', 'Activity monitor not initialized. Please refresh the page.', 'error');
+    }
 }

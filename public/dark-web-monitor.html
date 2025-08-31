@@ -1998,6 +1998,110 @@
                 opacity: 1;
             }
         }
+        
+        /* 🔄 MONITORING STATUS INDICATORS */
+        .monitoring-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .status-ready {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            color: #00ff88;
+        }
+        
+        .status-monitoring {
+            background: rgba(74, 144, 226, 0.1);
+            border: 1px solid rgba(74, 144, 226, 0.3);
+            color: #4a90e2;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-stopped {
+            background: rgba(255, 165, 2, 0.1);
+            border: 1px solid rgba(255, 165, 2, 0.3);
+            color: #ffa502;
+        }
+        
+        .status-error {
+            background: rgba(255, 71, 87, 0.1);
+            border: 1px solid rgba(255, 71, 87, 0.3);
+            color: #ff4757;
+        }
+        
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+        
+        .status-monitoring .status-indicator {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+        
+        /* 🎛️ MONITORING CONTROLS LAYOUT */
+        .monitoring-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .control-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .status-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .status-description {
+            color: #ccc;
+            font-size: 14px;
+            font-style: italic;
+        }
+        
+        /* 📱 RESPONSIVE DESIGN */
+        @media (max-width: 768px) {
+            .control-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .control-row button {
+                width: 100%;
+            }
+            
+            .status-row {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
     </style>
 </head>
 <body>
@@ -2053,11 +2157,27 @@
             <h2 class="text-2xl font-bold mb-6">🔍 Monitoring Controls</h2>
             
             <div class="monitoring-controls">
-                <button id="start-real-scan" class="btn btn-primary">🚀 Start Enterprise Scan</button>
-                <button id="stop-scan" class="btn btn-secondary">🛑 Stop Scan</button>
-                <button class="btn btn-secondary" onclick="startScan()">📧 Start Scan</button>
-                <button class="btn btn-secondary" onclick="emergencyLockdown()">🚨 Emergency Lockdown</button>
-                <button class="btn btn-success" onclick="toggleAutoRotation()">🔄 Toggle Auto-Rotation</button>
+                <div class="control-row">
+                    <button id="start-monitoring" class="btn-start" onclick="startMonitoring()">
+                        🚀 Start Monitoring
+                    </button>
+                    <button id="stop-monitoring" class="btn-stop" onclick="stopMonitoring()" style="display: none;">
+                        ⏹️ Stop Monitoring
+                    </button>
+                    <button id="test-apps" class="btn-test" onclick="testCrossApplications()">
+                        🧪 Test Cross-Apps
+                    </button>
+                    <button class="btn-history" onclick="showCompleteHistory()">
+                        📋 View All History
+                    </button>
+                </div>
+                <div class="status-row">
+                    <div class="monitoring-status status-ready">
+                        <span class="status-indicator"></span>
+                        <span class="status-text">✅ Ready</span>
+                    </div>
+                    <span class="status-description">AI-Powered Activity Monitor is ready to track your applications</span>
+                </div>
             </div>
             
             <!-- Enterprise Monitoring Status -->
