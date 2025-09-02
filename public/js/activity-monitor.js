@@ -2266,7 +2266,12 @@ class EnterpriseActivityMonitor {
                     timestamp: new Date().toISOString(),
                     duration_on_page: Date.now() - this.pageStartTime,
                     category: 'browsing',
-                    priority: 'medium'
+                    priority: 'medium',
+                    details: {
+                        app_type: this.getApplicationType(lastActiveUrl.split('/')[2] || 'unknown'),
+                        page_type: this.getPageType(lastActiveUrl),
+                        is_external: !lastActiveUrl.includes('maze-password-manager.onrender.com')
+                    }
                 };
                 
                 this.recordGeneralActivity(switchData);
@@ -2281,7 +2286,12 @@ class EnterpriseActivityMonitor {
                     to_title: document.title,
                     timestamp: new Date().toISOString(),
                     category: 'browsing',
-                    priority: 'medium'
+                    priority: 'medium',
+                    details: {
+                        app_type: this.getApplicationType(window.location.hostname),
+                        page_type: this.getPageType(window.location.href),
+                        is_external: !window.location.href.includes('maze-password-manager.onrender.com')
+                    }
                 };
                 
                 this.recordGeneralActivity(returnData);
@@ -2307,7 +2317,12 @@ class EnterpriseActivityMonitor {
                 time_spent: timeSpent,
                 timestamp: new Date().toISOString(),
                 category: 'browsing',
-                priority: 'medium'
+                priority: 'medium',
+                details: {
+                    app_type: this.getApplicationType(window.location.hostname),
+                    page_type: this.getPageType(window.location.href),
+                    is_external: !window.location.href.includes('maze-password-manager.onrender.com')
+                }
             };
             
             this.recordGeneralActivity(navigationData);
@@ -2324,11 +2339,122 @@ class EnterpriseActivityMonitor {
                 title: document.title,
                 timestamp: new Date().toISOString(),
                 category: 'browsing',
-                priority: 'medium'
+                priority: 'medium',
+                details: {
+                    app_type: this.getApplicationType(window.location.hostname),
+                    page_type: this.getPageType(window.location.href),
+                    is_external: !window.location.href.includes('maze-password-manager.onrender.com')
+                }
             };
             
             this.recordGeneralActivity(loadData);
             this.addToComprehensiveData('urls', loadData);
+        });
+        
+        // Track URL changes (for single-page applications)
+        let currentUrl = window.location.href;
+        setInterval(() => {
+            if (window.location.href !== currentUrl) {
+                const urlChangeData = {
+                    type: 'url_change',
+                    action: 'url_updated',
+                    from_url: currentUrl,
+                    to_url: window.location.href,
+                    from_title: document.title,
+                    to_title: document.title,
+                    timestamp: new Date().toISOString(),
+                    category: 'browsing',
+                    priority: 'medium',
+                    details: {
+                        from_app: this.getApplicationType(currentUrl.split('/')[2] || 'unknown'),
+                        to_app: this.getApplicationType(window.location.hostname),
+                        from_page: this.getPageType(currentUrl),
+                        to_page: this.getPageType(window.location.href),
+                        is_external: !window.location.href.includes('maze-password-manager.onrender.com')
+                    }
+                };
+                
+                this.recordGeneralActivity(urlChangeData);
+                this.addToComprehensiveData('urls', urlChangeData);
+                
+                currentUrl = window.location.href;
+                console.log('🔄 URL changed to:', window.location.hostname);
+            }
+        }, 2000); // Check every 2 seconds
+        
+        // Track external link clicks
+        document.addEventListener('click', (event) => {
+            const link = event.target.closest('a');
+            if (link && link.href) {
+                try {
+                    const linkUrl = new URL(link.href);
+                    const currentDomain = window.location.hostname;
+                    
+                    // Track external link clicks
+                    if (linkUrl.hostname !== currentDomain) {
+                        const externalData = {
+                            type: 'external_link',
+                            action: 'link_clicked',
+                            url: link.href,
+                            title: link.textContent || link.title || 'External Link',
+                            domain: linkUrl.hostname,
+                            timestamp: new Date().toISOString(),
+                            category: 'navigation',
+                            priority: 'medium',
+                            details: {
+                                app_type: this.getApplicationType(linkUrl.hostname),
+                                page_type: this.getPageType(linkUrl.href),
+                                is_external: true,
+                                link_text: link.textContent?.substring(0, 50) || 'Unknown',
+                                target: link.target || '_self'
+                            }
+                        };
+                        
+                        this.recordGeneralActivity(externalData);
+                        this.addToComprehensiveData('external_links', externalData);
+                        
+                        console.log(`🔗 External link clicked: ${linkUrl.hostname}`);
+                    }
+                } catch (error) {
+                    // Invalid URL, ignore
+                }
+            }
+        });
+        
+        // Track form submissions (might indicate navigation to other sites)
+        document.addEventListener('submit', (event) => {
+            const form = event.target;
+            if (form.action) {
+                try {
+                    const formUrl = new URL(form.action);
+                    const currentDomain = window.location.hostname;
+                    
+                    if (formUrl.hostname !== currentDomain) {
+                        const formData = {
+                            type: 'form_submission',
+                            action: 'form_submitted',
+                            url: form.action,
+                            domain: formUrl.hostname,
+                            timestamp: new Date().toISOString(),
+                            category: 'navigation',
+                            priority: 'medium',
+                            details: {
+                                app_type: this.getApplicationType(formUrl.hostname),
+                                page_type: this.getPageType(formUrl.href),
+                                is_external: true,
+                                form_method: form.method || 'GET'
+                            }
+                        };
+                        
+                        this.recordGeneralActivity(formData);
+                        this.addToComprehensiveData('form_submissions', formData);
+                        
+                        console.log(`📝 Form submitted to: ${formUrl.hostname}`);
+                    }
+                } catch (error) {
+                    // Invalid URL, ignore
+                }
+            }
         });
     }
     
@@ -3338,6 +3464,69 @@ class EnterpriseActivityMonitor {
         // Show the data in console for debugging
         const uniqueDomains = [...new Set(this.comprehensiveData.urls.map(url => url.domain))];
         console.log('🧪 Unique domains:', uniqueDomains);
+    }
+    
+    // 🚀 SIMULATE REAL-TIME CROSS-APPLICATION VISITS
+    simulateRealTimeVisits() {
+        console.log('🚀 Starting real-time cross-application simulation...');
+        
+        const realTimeApps = [
+            { domain: 'gmail.com', app: 'Gmail', category: 'email' },
+            { domain: 'youtube.com', app: 'YouTube', category: 'entertainment' },
+            { domain: 'chatgpt.com', app: 'ChatGPT', category: 'ai_services' },
+            { domain: 'github.com', app: 'GitHub', category: 'development' },
+            { domain: 'facebook.com', app: 'Facebook', category: 'social_media' },
+            { domain: 'amazon.com', app: 'Amazon', category: 'shopping' },
+            { domain: 'docs.google.com', app: 'Google Docs', category: 'productivity' },
+            { domain: 'trello.com', app: 'Trello', category: 'productivity' },
+            { domain: 'zoom.us', app: 'Zoom', category: 'communication' },
+            { domain: 'netflix.com', app: 'Netflix', category: 'entertainment' }
+        ];
+        
+        // Simulate visits every 10 seconds
+        let appIndex = 0;
+        const interval = setInterval(() => {
+            const app = realTimeApps[appIndex % realTimeApps.length];
+            
+            const visitData = {
+                type: 'real_time_visit',
+                action: 'simulated_navigation',
+                url: `https://${app.domain}`,
+                title: `${app.app} - ${app.category}`,
+                domain: app.domain,
+                timestamp: new Date().toISOString(),
+                category: 'browsing',
+                priority: 'medium',
+                details: {
+                    app_type: app.app,
+                    page_type: this.getPageType(`https://${app.domain}`),
+                    is_external: true,
+                    is_real_time_simulated: true,
+                    category: app.category
+                }
+            };
+            
+            // Add to URLs array
+            if (!this.comprehensiveData.urls) {
+                this.comprehensiveData.urls = [];
+            }
+            this.comprehensiveData.urls.push(visitData);
+            
+            // Update display
+            this.updateURLHistory();
+            
+            console.log(`🚀 Simulated visit to: ${app.app} (${app.domain})`);
+            
+            appIndex++;
+            
+            // Stop after 20 visits (2 minutes)
+            if (appIndex >= 20) {
+                clearInterval(interval);
+                console.log('🚀 Real-time simulation completed');
+            }
+        }, 10000); // Every 10 seconds
+        
+        console.log('🚀 Real-time simulation started - will add visits every 10 seconds');
     }
 }
 

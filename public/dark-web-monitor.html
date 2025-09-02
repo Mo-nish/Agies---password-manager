@@ -1895,6 +1895,23 @@
             box-shadow: 0 6px 20px rgba(255, 165, 2, 0.4);
         }
         
+        .btn-realtime {
+            background: linear-gradient(135deg, #00bcd4, #0097a7);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 188, 212, 0.3);
+        }
+        
+        .btn-realtime:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 188, 212, 0.4);
+        }
+        
         .btn-history {
             background: linear-gradient(135deg, #a55eea, #8854d0);
             color: white;
@@ -2304,6 +2321,9 @@
                         </button>
                         <button id="test-apps" class="btn-test" onclick="testCrossApplications()">
                             🧪 Test Cross-Apps
+                        </button>
+                        <button id="real-time-test" class="btn-realtime" onclick="startRealTimeSimulation()">
+                            🚀 Real-Time Test
                         </button>
                         <button class="btn-history" onclick="showCompleteHistory()">
                             📋 View All History

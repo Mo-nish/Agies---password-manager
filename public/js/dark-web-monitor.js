@@ -4684,3 +4684,37 @@ function testCrossApplications() {
         showNotification('❌ Error', 'Activity monitor not initialized. Please refresh the page.', 'error');
     }
 }
+
+function startRealTimeSimulation() {
+    if (window.activityMonitor) {
+        try {
+            // Start real-time cross-application simulation
+            window.activityMonitor.simulateRealTimeVisits();
+            
+            // Show success message
+            showNotification('🚀 Real-Time Test Started!', 'Simulating real-time visits to different applications every 10 seconds. Watch the URL history update!', 'success');
+            
+            // Disable the button to prevent multiple simulations
+            const button = document.getElementById('real-time-test');
+            if (button) {
+                button.disabled = true;
+                button.textContent = '🔄 Running...';
+                button.style.opacity = '0.7';
+                
+                // Re-enable after 3 minutes
+                setTimeout(() => {
+                    button.disabled = false;
+                    button.textContent = '🚀 Real-Time Test';
+                    button.style.opacity = '1';
+                }, 180000); // 3 minutes
+            }
+            
+            console.log('🚀 Real-time simulation started');
+        } catch (error) {
+            console.error('❌ Failed to start real-time simulation:', error);
+            showNotification('❌ Real-Time Error', 'Failed to start real-time simulation. Please try again.', 'error');
+        }
+    } else {
+        showNotification('❌ Error', 'Activity monitor not initialized. Please refresh the page.', 'error');
+    }
+}
